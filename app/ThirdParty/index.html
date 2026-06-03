@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vertigo - RNA-Protein Interaction Prediction</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+
+:root{
+    --primary:#4f46e5;
+    --primary-dark:#4338ca;
+    --accent:#06b6d4;
+    --bg:#f8fafc;
+    --card:#ffffff;
+    --text:#0f172a;
+    --muted:#64748b;
+    --border:#e2e8f0;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:'Inter',sans-serif;
+    background:var(--bg);
+    color:var(--text);
+}
+
+.container{
+    width:min(1200px,90%);
+    margin:auto;
+}
+
+/* ================= NAVBAR ================= */
+
+nav{
+    background:white;
+    border-bottom:1px solid var(--border);
+    position:sticky;
+    top:0;
+    z-index:100;
+}
+
+.nav-content{
+    height:75px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.logo{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.logo img{
+    width:42px;
+    height:42px;
+    border-radius:8px;
+    object-fit:cover;
+}
+
+.logo span{
+    font-size:1.4rem;
+    font-weight:800;
+    letter-spacing:-0.5px;
+}
+
+.nav-links{
+    display:flex;
+    gap:32px;
+}
+
+.nav-links a{
+    text-decoration:none;
+    color:var(--muted);
+    font-weight:500;
+    transition:.2s;
+}
+
+.nav-links a:hover{
+    color:var(--primary);
+}
+
+/* ================= HERO ================= */
+
+.hero{
+    padding:80px 0 50px;
+    text-align:center;
+}
+
+.hero h1{
+    font-size:3rem;
+    font-weight:800;
+    letter-spacing:-1px;
+    margin-bottom:16px;
+}
+
+.hero p{
+    color:var(--muted);
+    font-size:1.15rem;
+    max-width:700px;
+    margin:auto;
+    line-height:1.8;
+}
+
+/* ================= PROJECT CARD ================= */
+
+.project-card{
+    background:var(--card);
+    border-radius:24px;
+    padding:40px;
+    box-shadow:0 10px 30px rgba(15,23,42,0.06);
+    margin-bottom:80px;
+}
+
+.project-card h2{
+    margin-bottom:10px;
+    font-size:1.8rem;
+}
+
+.project-card p{
+    color:var(--muted);
+    margin-bottom:30px;
+}
+
+/* ================= DROP ZONES ================= */
+
+.upload-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+    gap:24px;
+}
+
+.dropzone{
+    border:2px dashed #cbd5e1;
+    border-radius:18px;
+    padding:35px 20px;
+    text-align:center;
+    background:#fafcff;
+    transition:.25s;
+    cursor:pointer;
+}
+
+.dropzone:hover{
+    border-color:var(--primary);
+    background:#f5f7ff;
+}
+
+.dropzone.dragover{
+    border-color:var(--primary);
+    background:#eef2ff;
+}
+
+.dropzone h3{
+    margin-bottom:10px;
+    font-size:1.1rem;
+}
+
+.dropzone p{
+    margin-bottom:15px;
+    font-size:.92rem;
+}
+
+.dropzone button{
+    background:var(--primary);
+    color:white;
+    border:none;
+    border-radius:10px;
+    padding:10px 18px;
+    font-weight:600;
+    cursor:pointer;
+}
+
+.dropzone button:hover{
+    background:var(--primary-dark);
+}
+
+.file-list{
+    margin-top:15px;
+    text-align:left;
+    font-size:.9rem;
+    color:var(--muted);
+}
+
+.file-list div{
+    margin-bottom:4px;
+}
+
+/* ================= SUBMIT ================= */
+
+.submit-area{
+    margin-top:40px;
+    text-align:center;
+}
+
+.submit-btn{
+    background:linear-gradient(
+        135deg,
+        var(--primary),
+        var(--accent)
+    );
+
+    color:white;
+    border:none;
+    padding:16px 40px;
+    border-radius:14px;
+    font-size:1rem;
+    font-weight:700;
+    cursor:pointer;
+    transition:.3s;
+}
+
+.submit-btn:hover{
+    transform:translateY(-2px);
+}
+
+footer{
+    text-align:center;
+    color:var(--muted);
+    padding:40px 0;
+}
+
+
+.upload-actions{
+    margin-top:12px;
+}
+
+.clear-btn{
+
+    background:#ef4444;
+    color:white;
+
+    border:none;
+    border-radius:8px;
+
+    padding:8px 14px;
+
+    cursor:pointer;
+    font-size:0.85rem;
+    font-weight:600;
+}
+
+.clear-btn:hover{
+    background:#dc2626;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- ================= NAVBAR ================= -->
+
+<nav>
+    <div class="container nav-content">
+
+        <div class="logo">
+            <!-- Placeholder logo -->
+            <img src="https://via.placeholder.com/200x200.png?text=V" alt="Vertigo Logo">
+            <span>Vertigo</span>
+        </div>
+
+        <div class="nav-links">
+            <a href="#">Home</a>
+            <a href="#">About</a>
+            <a href="#">Documentation</a>
+        </div>
+
+    </div>
+</nav>
+
+<!-- ================= HERO ================= -->
+
+<section class="hero container">
+
+    <h1>Vertigo</h1>
+
+    <p>
+        A platform for RNA-protein interaction analysis using sequence
+        information and HMM profile representations.
+    </p>
+
+</section>
+
+<!-- ================= PROJECT ================= -->
+
+<section class="container">
+
+<div class="project-card">
+
+    <h2>Run a New Project</h2>
+
+    <p>
+        Upload one or more FASTA files for proteins, RNA sequences,
+        and HMM profiles.
+    </p>
+
+    <form id="uploadForm" enctype="multipart/form-data">
+
+        <div class="upload-grid">
+
+            <!-- Protein -->
+
+            <div class="dropzone" data-input="proteinInput">
+                <h3>Protein FASTA Files</h3>
+                <p>Drag & drop files or click below</p>
+
+                <button type="button">
+                    Select Files
+                </button>
+
+                <input
+                    type="file"
+                    id="proteinInput"
+                    multiple
+                    hidden
+                >
+
+                <div class="file-list" id="proteinList"></div>
+
+                <div class="upload-actions">
+
+    <button
+        type="button"
+        class="clear-btn">
+        Clear
+    </button>
+
+</div>
+            </div>
+
+            <!-- RNA -->
+
+            <div class="dropzone" data-input="rnaInput">
+                <h3>RNA FASTA Files</h3>
+                <p>Drag & drop files or click below</p>
+
+                <button type="button">
+                    Select Files
+                </button>
+
+                <input
+                    type="file"
+                    id="rnaInput"
+                    multiple
+                    hidden
+                >
+
+                <div class="file-list" id="rnaList"></div>
+            </div>
+
+            <!-- HMM -->
+
+            <div class="dropzone" data-input="hmmInput">
+                <h3>HMM Profiles</h3>
+                <p>Drag & drop files or click below</p>
+
+                <button type="button">
+                    Select Files
+                </button>
+
+                <input
+                    type="file"
+                    id="hmmInput"
+                    multiple
+                    hidden
+                >
+
+                <div class="file-list" id="hmmList"></div>
+            </div>
+
+        </div>
+
+        <div class="submit-area">
+            <button type="submit" class="submit-btn">
+                Launch Project
+            </button>
+        </div>
+
+    </form>
+
+</div>
+
+</section>
+
+<footer>
+    © 2026 Vertigo Project
+</footer>
+
+<script>
+
+const dropzones = document.querySelectorAll(".dropzone");
+
+dropzones.forEach(zone => {
+
+    const input =
+        document.getElementById(
+            zone.dataset.input
+        );
+
+    const button =
+        zone.querySelector("button");
+
+    const fileList =
+        zone.querySelector(".file-list");
+
+    button.addEventListener(
+        "click",
+        () => input.click()
+    );
+
+    input.addEventListener(
+        "change",
+        () => updateList(input, fileList)
+    );
+
+    zone.addEventListener("dragover", e => {
+        e.preventDefault();
+        zone.classList.add("dragover");
+    });
+
+    zone.addEventListener("dragleave", () => {
+        zone.classList.remove("dragover");
+    });
+
+    zone.addEventListener("drop", e => {
+
+        e.preventDefault();
+
+        zone.classList.remove("dragover");
+
+        input.files = e.dataTransfer.files;
+
+        updateList(input, fileList);
+
+    });
+
+});
+
+function updateList(input, container){
+
+    container.innerHTML = "";
+
+    const files = [...input.files];
+
+    if(files.length === 0){
+
+        container.innerHTML =
+            "<em>No files selected</em>";
+
+        return;
+    }
+
+    const maxVisible = 10;
+
+    files
+        .slice(0, maxVisible)
+        .forEach(file => {
+
+            const item =
+                document.createElement("div");
+
+            item.textContent = file.name;
+
+            container.appendChild(item);
+
+        });
+
+    if(files.length > maxVisible){
+
+        const more =
+            document.createElement("div");
+
+        more.style.fontWeight = "600";
+
+        more.style.marginTop = "8px";
+
+        more.textContent =
+            `+ ${files.length - maxVisible} additional files`;
+
+        container.appendChild(more);
+    }
+
+    const total =
+        document.createElement("div");
+
+    total.style.marginTop = "10px";
+    total.style.fontWeight = "700";
+
+    total.textContent =
+        `Total: ${files.length} file(s)`;
+
+    container.appendChild(total);
+
+}
+
+const clearButtons =
+    document.querySelectorAll(".clear-btn");
+
+clearButtons.forEach(btn => {
+
+    btn.addEventListener("click", function(){
+
+        const zone =
+            btn.closest(".dropzone");
+
+        const input =
+            document.getElementById(
+                zone.dataset.input
+            );
+
+        const fileList =
+            zone.querySelector(".file-list");
+
+        input.value = "";
+
+        fileList.innerHTML =
+            "<em>No files selected</em>";
+
+    });
+
+});
+
+document
+.getElementById("uploadForm")
+.addEventListener("submit", async function(e){
+
+    e.preventDefault();
+
+    const formData = new FormData();
+
+    const proteinFiles =
+        document.getElementById("proteinInput").files;
+
+    const rnaFiles =
+        document.getElementById("rnaInput").files;
+
+    const hmmFiles =
+        document.getElementById("hmmInput").files;
+
+    for(const f of proteinFiles)
+        formData.append("protein[]", f);
+
+    for(const f of rnaFiles)
+        formData.append("rna[]", f);
+
+    for(const f of hmmFiles)
+        formData.append("hmm[]", f);
+
+    try{
+
+        await fetch("/upload", {
+            method:"POST",
+            body:formData
+        });
+
+        window.location.href =
+            "project.html";
+
+    }
+    catch(error){
+
+        alert(
+            "Upload failed. Please try again."
+        );
+
+        console.error(error);
+
+    }
+
+});
+
+</script>
+
+</body>
+</html>

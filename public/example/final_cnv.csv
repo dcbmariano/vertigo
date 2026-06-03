@@ -1,0 +1,21 @@
+,patient_id,1_haplotype,1_enzymatic_activity,1_allele,1_score,2_haplotype,2_enzymatic_activity,2_allele,2_score,total_score,phenotype,2
+0,1,CCCCAGTCCGGG,Normal,*1,1.0,CCTCAGTCCGGC,Decreased,*10,0.25,1.25,gNM,2
+1,10,GCCCAGTCTGGC,Normal,*2,1.0,-,No function,*5,0,1.0,gIM,1
+2,11,GTCCAGTCTGGC,Normal,*35,1.0,GTCCAGTCTGGC,Normal,*35xN,1.0,3,gUM,3
+3,12,CCCCAGTCCGGG,Normal,*1,1.0,CCCCCGTCCGGG,No function,*6,0.0,1.0,gIM,2
+4,13,CCCCAGTCTAGC,Decreased,*41,0.25,CCCCAGTCTAGC,Decreased,*41,0.25,0.5,gIM,2
+5,14,CCCCAGTCCGGG,Normal,*1,1.0,CCCCAGACCGGG,No function,*3,0.0,1.0,gIM,2
+6,15,GCCCAGTCTGGC,Normal,*2,1.0,GCCCAGTCTGGC,Normal,*2,1.0,2.0,gNM,2
+7,16,CCTCAGTCCGGC,Decreased,*10,0.25,GCCCAGTCTGGC,Normal,*2,1.0,1.25,gNM,2
+8,17,CCCCAGTCCGGG,Normal,*1,1.0,GTCCAGTCTGGC,Normal,*35,1.0,2.0,gNM,2
+9,18,GCCCAGTCTGGC,Normal,*2,1.0,-,No function,*5,0,1.0,gIM,1
+10,19,CCTCAATCCGGC,No function,*4,0.0,CCTCAATCCGGC,No function,*4,0.0,0.0,gPM,2
+11,2,CCCCAGTCCGGG,Normal,*1,1.0,GCCCAGTCTGGC,Normal,*2,1.0,2.0,gNM,2
+12,20,CCCCCGTCCGGG,No function,*6,0.0,CCTCAATCCGGC,No function,*4,0.0,0.0,gPM,2
+13,3,CCCCAGTCCGGG,Normal,*1,1.0,CCTCAATCCGGC,No function,*4,0.0,1.0,gIM,2
+14,4,CCCTAGTCTGGC,Decreased,*17,0.5,GCCCAGTCTGGC,Normal,*2,1.0,1.5,gNM,2
+15,5,CCCTAGTCTGGC,Decreased,*17,0.5,CCCTAGTCTGGC,Decreased,*17,0.5,1.0,gIM,2
+16,6,CCCCAGTCTAGC,Decreased,*41,0.25,CCTCAATCCGGC,No function,*4,0.0,0.25,gIM,2
+17,7,CCCCCGTCCGGG,No function,*6,0.0,GCCCAGTCTGGC,Normal,*2,1.0,1.0,gIM,2
+18,8,CCCCAGTCCGGG,Normal,*1,1.0,CCCCAGTCCGGG,Normal,*1,1.0,2.0,gNM,2
+19,9,CCCTAGTCTGGC,Decreased,*17,0.5,GTCCAGTCTGGC,Normal,*35,1.0,1.5,gNM,2

@@ -1,0 +1,236 @@
+>tr|A0A640KJQ9|A0A640KJQ9_LEITA
+1        10        20        30        40        50        60        70        80        90        100       110       120       130       140       150       160       170       180       190       200       
+MRPLFFIISHRISLPTRLVLSFFLHHGSIRLCAALAALEPPIQHAPQVYSTLANASPAPAALATSLILQCPFAVMLRRTSASLFRRTPVRLSGGELYHPPKLEDIPPSSATKGFFGAYNGGLAMARLIDIKWMMNRSVELGREYYISAPTLYLFLWMFCWKGFVIMRYGDGKPPRHVDWNTEEAGYLPQGFEQTKVTKAI
+-------------------------------------------------------------------------------------------------+pp + e++ p+s+ kgf+g y---------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------yppte.eelvpvsgekgfygdy---------------------------------------------------------------------------------
+                                                                                                 1                   21
+                                                                                                 FF<-              ->FF
+----------------------------------------------------------------------------------------------------------------------------arl++++w+m++sv++grey+i+aptlyl+lwmf w g++i ry++gkpp--------------------------
+----------------------------------------------------------------------------------------------------------------------------arllslqwlmkysvsigreyriaaptlylylwmflwmgytinryacgkpp--------------------------
+                                                                                                                            7                                               56
+                                                                                                                            E7<-                                          ->E7
+fragments chains: FF,E7
+########################################################################################################################################################################################################
+
+>tr|A0A640KFS7|A0A640KFS7_LEITA
+1        10        20        30        40        50        60        70        80        90        100       110       120       130       140       150       160       170       180       190       200       210       220       230       240       250       
+MLRFCPLAHAHPISVMTTRTMAVTAALQLQPRRAYVTGARSTARERRYYTQPLRAPQYGTSTIVGRQKSDADASATGLAEAASPMTEEIVTALHHKMDAAHPPSTSRCRTAYESLKMKIVATGRRPVRYNDAGVPVEGSVLLLPWREQLRLCTAILVALYITKTFFDVVRFELLYYGVWKVGYRHDGSLMKRLLYYASTAMLAAGLFLSFNLNFFLSACVVGRREIALHLLCNVFAYVMPRRCLQLLVHRVVC
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------ll+y  w--------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------llwyalw--------------------------------------------------------------------------
+                                                                                                                                                                            15   21
+                                                                                                                                                                            F1<-->F1
+fragments chains: F1
+#############################################################################################################################################################################################################################################################
+
+>tr|A0A640KHR7|A0A640KHR7_LEITA
+1        10        20        30        40        50        60        70        80        90        100       110       120       130       140       
+MVFFSTYRSKRIVAPGFLKGPVMASRAFFDYYFQRAWCGCVQWVIPGEVRLWACGVPVIYFIHRYHNDHSLEPDFVEKAMIQRWGGSLEEVRKLSPQDQLRIRAFTDLEKLYSAYGPKDTIVQPPGDLLPGKDYYHKIGTAGAHH
+--f s yrs riv+ g+lk pvmasraf+dyy+   w g+v wvipg vrlwa+g+pviyfihry n+  l p+fv+kamiqrwg------------------------------------------------------------
+--fksiyrsnrivsdgwlkapvmasrafydyyhnwpwvgsvhwvipgdvrlwasgipviyfihryyneknllpefvskamiqrwg------------------------------------------------------------
+  2                                                                                84
+  Es<-                                                                           ->Es
+--------------------------------------------------------------------------------------sl evr+l+pq+qlrira++dl+kl++ +gp ++iv+ppg llpgkdyy+---------
+--------------------------------------------------------------------------------------sldevrqltpqsqlrirayedltklrgdfgpqsvivrppgvllpgkdyyk---------
+                                                                                      2                                               51
+                                                                                      Ei<-                                          ->Ei
+fragments chains: Es,Ei
+#################################################################################################################################################
+
+>tr|A0A640KG00|A0A640KG00_LEITA
+1        10        20        30        40        50        60        70        80        90        100       110       120       130       140       
+MPYSVNRSSFFPPFSDSGVLLIILTNTRIADNKETRRLKATSMPSERDPVLEVAETSDFWSNPVDHFRPNLKFLSVYVEHQYVVDKWLHVKENWLKPWYLPWWTPMYQAMTWYSQRNRNLMLVENHLNYRPYRYRRNDEDRENPY
+--------------------------------------------------------------p+d+fr+nlkf++v+v++ yv++ wlhvke wlkpw+lpwwtp+y+++++ys+rn+n++l+ n+l+yrp+ryrrn++d+++p+
+--------------------------------------------------------------pidrfrvnlkfitvwvtfkyvtemwlhvkeqwlkpwwlpwwtplymsqvyysnrnknilltnnwlqyrpwryrrneidkdhpf
+                                                              2                                                                                84
+                                                              Eq<-                                                                           ->Eq
+fragments chains: Eq
+#################################################################################################################################################
+
+>tr|A0A640KSG2|A0A640KSG2_LEITA
+1        10        20        30        40        50        60        70        80        90        100       
+MMFRRVAAKSTMAAAAPLLSSTRAYNMFLFKDPVRRPQLSPEERAKVKINYAEWPEEFRDYDPDDPYKNSPEIIEGLSSWNLFLWGVECAFIYQFYEVVFPKSI
+-----------------------------+++pv+rp+lspeera+v+iny++---------------------------------------------------
+-----------------------------krepvfrprlspeeranveinysk---------------------------------------------------
+                             5                     28
+                             Ek<-                ->Ek
+-----------------------------------------------------+pe ++++++ dpy+n p ii+ gl+sw+lf+wgv+ afiy fyevv+p++
+-----------------------------------------------------ypesykefnsldpyhnepsiiddgldswqlfmwgvseafiyffyevvhprg
+                                                     1                                                51
+                                                     El<-                                           ->El
+fragments chains: Ek,El
+########################################################################################################
+
+>tr|A0A640KIY5|A0A640KIY5_LEITA
+1        10        20        30        40        50        60        70        80        90        
+MFRGANMSRAAPASAATWMQRRAASLQSEKPCASLADKIVRGPPKSVYYTHPRYVMSRDKMLHTIWVDIGIFQTCAYALFPFFSAAYFFKA
+-----------------------------------------------------------------w+d gi+  +a+ lfpffs a-----
+-----------------------------------------------------------------widlgiyyimawvlfpffska-----
+                                                                 1                  21
+                                                                 Eg<-             ->Eg
+fragments chains: Eg
+###########################################################################################
+
+>tr|A0A640KHE9|A0A640KHE9_LEITA
+1        10        20        30        40        50        60        70        80        90        100       110       120       130       140       
+MADTEKTCARAVPTWYIYPPIPSRLSFSSFGNTYVHAHTAYRDTVTAAMSVSSSAAKVAPKTLNQFRNFSYIVVAWLGFNKGFREKAANDAEWIAHQQRVRQQNVERHQAASAMMEAKQSAEAEATIPAIVPEGLHEVYKDIEKAVH
+------------------------------------------------------------kt++++rnfsyivva lgf++g rekaa +a+wia q+r+r+q + +r+qa------------------------------------
+------------------------------------------------------------ktidflrnfsyivvaslgfmngrrekaavsakwiayqnrirnqllakrrqa------------------------------------
+                                                            2                                                52
+                                                            Fy<-                                           ->Fy
+------------------------------------------------------------k++n fr+f y+v+awlgf+kgf++ka+ +aewi+++++ r++--------------------------------------------
+------------------------------------------------------------ksinffrtfaylviawlgfkkgfktkasvaaewigwrkksree--------------------------------------------
+                                                            4                                        46
+                                                            Fz<-                                   ->Fz
+fragments chains: Fy,Fz
+###################################################################################################################################################
+
+>tr|A0A640KHW7|A0A640KHW7_LEITA
+1        10        20        30        40        50        60        70        80        90        100       110       120       130       140       150       
+MMRKTSMCAIAATRRSLVGNGPTFHTAGDNNNTSEIQNAFPINERGIRSSSPFPEPNTAIYDSYMPWTYFQPIDVKVDKMPAPEAKYYQHHTKKPWDVSTTDLIEIQSRKKYVQGVGYFLMMIYLYFLMPKEKSYSGTTGSDGFYVMLPKNQPEKF
+-----------------vg gp f+ +g+nnn+se+ +a+p+n+rgirs spfp pn+++y+sy pw y++p+ +k    ++p+++yy++h+k pw+vst dl+ei+sr+ yvqgvgyfl +iylyfl+p++ sy gt gs gf++ lp+n p k-
+-----------------vgigpgfyisgsnnneselrqayplnprgirstspfpcpnislyesykpwiyhhpntaksklredpdpryykyhvkqpwtvstndlleilsrqnyvqgvgyflrliylyfllpmsrsytgtggstgfwtnlpqnrphk-
+                 1                                                                                                                                      138
+                 FH<-                                                                                                                                  ->FH
+fragments chains: FH
+############################################################################################################################################################
+
+>tr|A0A640K7R8|A0A640K7R8_LEITA
+1        10        20        30        40        50        60        70        80        90        100       
+MVYTRWKCDRIPVLQLKLFTQEYNIMALVGLLSMVFLFKHASYCSEETERKNGWWAGYPYWRDPIARRNEIRYKQLINSNDVDITDPKWTGCSKEQLERLRAIV
+--ytrwk+ ripvlqlklf+q++ni alvgll++v+lfk+a +++ee+erk++w--------------------------------------------------
+--ytrwkttripvlqlklfvqqfniqalvglltqvylfkyavfdteeierkqdw--------------------------------------------------
+  1                                                 52
+  a<-                                              ->a
+-------------------------------------------------------ag+py +dpi +r+++ry+qli s +vd++d kwtg  +ke+-------
+-------------------------------------------------------agwpyhddpidkrlsnryqqliqsievdveddkwtgsggker-------
+                                                       1                                       42
+                                                       FP<-                                  ->FP
+fragments chains: a,FP
+########################################################################################################
+
+>tr|A0A640KNR8|A0A640KNR8_LEITA
+1        10        20        30        40        50        60        70        80        90        100       
+MPATVKRPLWSLLLPQTYTSRIHTLAFHAPSILFMIAVCAIISKQSYYRSSLADEDPKTYDRIDRRAYVALPDGRMALVYPIIDTQTSFTRTVISFLDAVNPFP
+-------------------------------ilf+i+++ai s-------------------------------------------------------------
+-------------------------------ilflisikails-------------------------------------------------------------
+                               4         15
+                               S<-      ->S
+fragments chains: S
+########################################################################################################
+
+>tr|A0A640KES0|A0A640KES0_LEITA
+1        10        20        30        40        50        60        70        80        90        
+MSQPLAFHDVSTDAIRQMQASEALQKHLENAQLAHRVCVAKALKADEPPVEKCALTWGEVVMRYNQWSEYRPAFHDSDAQKRYSKYWTKKRQAADDSRA
+------+ d++ + ir+++a eal+++lenaqla+r  +ak + a++ppv++calt+gev +r+nqws++rp++-------------------------
+------hldtteedirnerateallrylenaqlafreelakcqnagdppvdqcaltygevlerfnqwstfrppy-------------------------
+      2                                                                 69
+      GT<-                                                            ->GT
+------------------------------------------------------------------------------aqkryskywt+k+qaa ----
+------------------------------------------------------------------------------aqkryskywtekyqaae----
+                                                                              8              24
+                                                                              Fi<-         ->Fi
+fragments chains: GT,Fi
+###################################################################################################
+
+>tr|A0A640KQ33|A0A640KQ33_LEITA
+1        10        20        30        40        50        60        70        80        90        100       110       120       130       140       
+MIAARSFLLPQSRLGCCHAALFSRAAANMRVSSRLSTASAATSHAHSGALTLSKRQYMGSTVITNFTTHCTQIGACTSLSTILYSPIGTSMMIMLAYNVIVICSKHVNYSLEITAKDYVQDQQLLTIMRYGILSCILLGMEVMFIEI
+----------------------------------------------------------------------------------------++++i+lay--------------------------------------------------
+----------------------------------------------------------------------------------------vacfiqlay--------------------------------------------------
+                                                                                        1       9
+                                                                                        P<-   ->P
+fragments chains: P
+###################################################################################################################################################
+
+>tr|A0A640KWP2|A0A640KWP2_LEITA
+1        10        20        30        40        50        60        70        80        90        100       110       120       130       140       150       160       170       180       190       200       210       220       230       240       250       260       270       
+MFGGRKVCGTFTLRVWERLSCVPVPRCWRFLESREGSCPFTRSAYIDGLVLSLLLCVHFSAIHRPPPPVPFTALASTNAEPSFLSGVHFFFAFLYALTLTAPVAEQRSGSSLHPQIEVGTEIEKHGGGERTQAAIMFRRSSSVMRRAVSAFLKEPGEAKTFQETLAACKAENRDFASMLSSDFLLLQSKLFKYRIARLGEETRYVIKHPFGCFPSMDMALFHLVVLPLVFFAAMCIGRGSSRPLVQPPAARAEAATEAAANANAPAAEQTESK
+-------------------------------------------------------------------------------------------a+ly----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------ahly----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+                                                                                           16 19
+                                                                                           Ep<-->Ep
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+alf+++vlplv+faa+ i+rg----------------------------------
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------qalfyiivlplvyfaaqsiarg----------------------------------
+                                                                                                                                                                                                                         2                   23
+                                                                                                                                                                                                                         FS<-              ->FS
+fragments chains: Ep,FS
+#################################################################################################################################################################################################################################################################################
+
+>tr|A0A640K7V4|A0A640K7V4_LEITA
+1        10        20        30        40        50        60        70        80        90        100       110       120       130       140       150       160       170       180       190       200       210       220       230       240       250       260       270       280       290       300       310       320       330       340       350       360       370       380       390       400       410       420       430       440       450       460       470       480       490       500       510       520       530       540       550       560       570       580       590       600       610       620       630       640       650       660       670       
+MYDQNSMLTLQASTADTTVQWGTAPMCYFCRHIRLSATRRIQQDEVIFMERPAILMPFWPLLPPRSASASTAVTAPRSSSNTDTVGSDMLSVRTTPTPSCCAHCGQQRLLNHVNCPGGCHTVYCSERCRQLALRLYHVVECGGVPPDTNKAGIPESGDDIGARVRRTVAVLQDVFSDWNSYLHHLAHWDTPSTRFTAQHTTFSSAMTPGVSPVSPSPISEASGHDVSQQQVPSDSSGKTHGQGKQSRAPPPILAVTAMRVVARLEAMLLSLALPLELLPQMQNHPAWAAERHAGIRSVARTLRQRGLMVPTSTTPATPGVNLYCTHADPHRLLLLEVLLQQLSVPFFADFNYRASPTVWEGLRRIPCEVTRSSRKAVVTTGHAKSVASPVDDSGLNIFRSLPLPYAPSPISPKAQQKRNCFVELTPAQLEEMLCNVHSMVRRVYRVVAKELVGVPSIPLFGAEAEEDNSLDWGLPGRWNCVELLGFLSSTRAFQQISDFALTSWAVVYPSDISNTVAVPLVVMSPWSCLTVDLRPILGNVPGGAIHSRFMLEHEQRRCMLAYCAAAAGCRGGDDIGGGSGNEDSFLSVHSASSPAAVLTGDGDDSARAGSLHDDLSLQLLEEAARRNCSNLHISLVYTPSTDPAVLAVAKKNITVGDVLWWESLNCREYLSALL
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------mrvvarl+a------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------mrvvarlla------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+                                                                                                                                                                                                                                                                 4      12
+                                                                                                                                                                                                                                                                 Z<-   ->Z
+fragments chains: Z
+##################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################################
+
+>tr|A0A640K890|A0A640K890_LEITA
+1        10        20        30        40        50        60        70        80        90        100       110       120       130       140       150       160       170       
+MSRLVRALAKPFTVPVALCTKQVAAMDEPLKRHIDAYEARGEDVTIAVWREYVDGQRALLPYRWAKFRNEVTYLTSGQIALTDLAFADLLLFVRFLTKCLFIFIVAVMAGRRSVFPSLEPTSPFVEEIVKNWQPNRLRRVAGAEYMARDQAAAAAAAAADVAVSDKAETSRIS
+---------------v+l  +++aa++ plk h + y a rg++v+ a+w++yv  qrallp+rwakfrn vt+l++g ----------------------------------------------------------------------------------------------
+---------------vslyerrsaarktplkhhlteyaaergssvpnaiwklyveaqrallpfrwakfrnsvtwllagd----------------------------------------------------------------------------------------------
+               5                                                             68
+               FO<-                                                        ->FO
+----------------------------------------------------------------------------------+l fa+lllfv +lt+clfif+vavma++rs fp l+pt+p++e++vk + p++lr+va+a y++rdq+a ++a+----------------
+----------------------------------------------------------------------------------alsfaelllfvyyltqclfiflvavmaasrsifpplsptdphtedvvkkynplqlrhvadakyldrdqeaeeeae----------------
+                                                                                  4                                                                        78
+                                                                                  Er<-                                                                   ->Er
+fragments chains: FO,Er
+#############################################################################################################################################################################
+
+>tr|A0A640KX21|A0A640KX21_LEITA
+1        10        20        30        40        50        60        70        80        90        100       110       120       130       140       150       160       170       180       190       200       210       220       230       240       250       260       270       280       290       300       310       320       330       340       350       360       370       380       390       400       
+MVSFDSVPPDRAVITAVPASVFRYVQTVAPSALYVFALVVYVMSMIFASHVHSRIIHAILMVVMLCVLMASLLKRIAPFVFIEVGHYRYERVSMTITRLLPVTYESCIAVQTLAVVAVGHPLCLYIFTHYTANGNLYAFAMFGLAGSLAGPLFSLCVGILICVGLLGALFAMVHLPDKGYEKLHIHIPEDRVRTWIQLSSWFPLTLLLMVLFCVVRLLPCDGAHESYTATSPPYTCGSGAHWFGSIFAWLLIALSFASLDVSIGFLRLLGDKDVLYYALDARLDGLFCELLVWVLKATVAATVVLAPVTVYAITAALFLGLFAFASHRHTATSEVLEEIIRWAMSVVMVTCAVSCLVSLGSISALAQGLLILLGWLLSVGYGVVLYHRRFGWELFGNGSGITADLIVV
+------------------------------------------------------------------+l+a ll r---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------ilfayll.r---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+                                                                  2       9
+                                                                  Ej<- ->Ej
+fragments chains: Ej
+########################################################################################################################################################################################################################################################################################################################################################################################################################
+
+>tr|A0A640KRB4|A0A640KRB4_LEITA
+1        10        20        30        40        50        60        70        80        90        100       110       120       130       140       150       160       170       180       190       200       210       220       230       240       250       260       270       280       290       300       310       320       330       340       350       
+MERIPPVVRRMVAAEQNCGFIHLFTSFVNTSGTPLLIEAKAFSTAALGDAADDTAQAYHFVYDVMRSRNGRILFKKSYAERFVQSLTLAAPAYAFPSELQSLVQSRVQAYIESPGVYLDGATEKNVKLLSWIPAAAASSKQAEVFPIPVIVMLVKSSYPPESMYHEGAKLGLLFNAHRINPNAKVAQMGLRDRANAYLVENGVYEVLLVHDAADAYLVPEGSRSNYLLQKSDGTWWCSVEEDILVGITLKTAYQVVQACGLGSVQHAKLTLKDILESKSLYILGTSPTILPVRSLLLYRDMETRTYYEEAVGSICATAITVQQVSDDKAELLFSVNVELAAALRAQYFAEAASS
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------y+ee+--------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------yfeee--------------------------------------------
+                                                                                                                                                                                                                                                                                                                 5   9
+                                                                                                                                                                                                                                                                                                                 E6<-->E6
+fragments chains: E6
+##################################################################################################################################################################################################################################################################################################################################################################
+
+>tr|A0A640KSU1|A0A640KSU1_LEITA
+1        10        20        30        40        50        60        70        80        90        100       110       120       
+MMRRVCSNTVRRNGGSMTKLIESKAVVQPSLVEARRHLEPMSVWYLSSWTCVWWYSFFFWLPVLWADMIVPSFVYNKLPVIHFIQEKRAEQKLRRVLDETYTQWSTELEAAHITDAISRTF
+----------------------------------------msvwylsswt +wwysf+fwlpvl+admivp++v+nklpvih+iq+k + qklrrv+------------------------
+----------------------------------------msvwylsswtsiwwysfyfwlpvlyadmivptyvwnklpvihyiqdkqsiqklrrvf------------------------
+                                        5                                                      61
+                                        F9<-                                                 ->F9
+fragments chains: F9
+#########################################################################################################################
+
+>tr|A0A640KJ33|A0A640KJ33_LEITA
+1        10        20        30        40        50        60        70        80        90        100       110       120       130       140       150       160       170       180       190       200       
+MLSLHHVQQYAFPSSKGLLSSSQSSVHIPRVSFGQMKVELTMQYLDEWMLRWRKFQTESDWQIEKNRQWWRKANIVTAGAVMGGLVMYTAGNATIRRQFGAPHFFDIGVDGKLKEAICDTMTSRWRYTPQGYGRVMLVGLPTFFVFAISEHIQERRRLRAYVRQNTVFGEQARRLVQNGKIEEYLAVDIKASLPQNQTQLYA
+------------------------------------+ve+tm+yldewmlrwr f te d+qi +n+qwwrkan+ + a av g+lv ytagnatirrqfg+p+ff  g v+ kl  ai +++ts++---------------------------------------------------------------------------
+------------------------------------rvemtmmyldewmlrwryfmteedyqiirnyqwwrkanlvi.aaavfgalvqytagnatirrqfgsprffnagavsakleqaiyevltshn---------------------------------------------------------------------------
+                                    3                                                                                        92
+                                    E4<-                                                                                   ->E4
+---------------------------------------------------------------------------------------------------------------------------------qgygrvmlvglp+ffvfais++iqe+rrlray rqn+vfg+qarrlv+ng+ie+y+avdika lp +------
+---------------------------------------------------------------------------------------------------------------------------------qgygrvmlvglpvffvfaisswiqekrrlrayirqnsvfglqarrlvkngeietyfavdikavlpeh------
+                                                                                                                                 3                                                                69
+                                                                                                                                 Y<-                                                             ->Y
+fragments chains: E4,Y
+##########################################################################################################################################################################################################
+
+>tr|A0A640KLU7|A0A640KLU7_LEITA
+1        10        20        30        40        50        60        70        80        90        100       110       120       130       140       150       160       170       180       190       200       210       220       230       240       250       260       270       280       290       300       310       320       330       340       350       360       370       380       390       
+MQGTWSVLKKNCLNFVPGLALFASQSRDAFATWMKIYNRGYKYGPQEFSDQAEAYTPDYWKRGHSQEKNMWVDMKLSEEVSQKELAQLMHYKQDLWRMGHGLGLSLFLGGYALIPAFFCLSSDTFAPSCFCKTEEEKKAWREAQDMYRYRSAPSYIMDTKWHFDFHAYPWNATQERAWDDLFEKNNVRRDPKVLRPAAEMYDGFLKFYQIRRKSLRHLARSMNLPTFPLLSRTCASTRVKDYWNLAWNEDYMVITQKLHHQMSDEDLHDYAWRRFLAPYDKNLSRDEIMTRVNDYHEFLGPKFVEEGKAPNMIILTNYVLGYYNDPAYLVEDISALDGNDFEYMAHYGKDAFLRRLEFENGPLRDQVEAHTQKLIADRAAAAAAEATATAPQVTAQAS
+--g+w+vl++n+l+fvpglalf+ q+rdafa+w kiy r+yk+gp+efsd+aeay+p yw rg+sqeknmwv  kls+evs kelaql+h++q+lwr+g+glglslflggy+lipaff l  +tfap  fc+t+ee+kawr+a+ myr+rsapsyimd k+hfd++aypwnatqe+aw+dlfeknnv+rdpk lrpaae ++g+lkfyqirr++lr+lars+nlptfpllsr+ca+trvk+ywn aw+e y+vi+q+ +h+ms++dl +yawrr+lap++knlsr++im+rvndy+efl gpkfve gkapn+iil+n+vl+yy++p+++ e++sal++n f+++++y+kda+lrrle e+gp+r+q+ a+ qkl ++ra a ---------------
+--gewevlrqnslqfvpglalfceqardafavwnkiyeraykhgpkefsdnaeayvpaywfrgfsqeknmwvnqklskevslkelaqllhfmqslwrfgyglglslflggyslipaffelttetfapryfcrtteenkawrlantmyrwrsapsyimdikyhfdyyaypwnatqekawedlfeknnvkrdpkelrpaaerwegwlkfyqirrdelrwlarsqnlptfpllsrvcattrvkeywniawqesyqvivqrdyhnmsesdlweyawrrylapntknlsrevimvrvndyfeflggpkfvesgkapnliilinwvlsyyeepsfiteslsaleantfswlsryakdaylrrlerelgpnreqllafkqkleeeraeak---------------
+  1                                                                                                                                                                                                                                                                                                                                                                                         381
+  Ev<-                                                                                                                                                                                                                                                                                                                                                                                     ->Ev
+fragments chains: Ev
+##############################################################################################################################################################################################################################################################################################################################################################################################################
+

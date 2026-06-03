@@ -1,0 +1,68 @@
+20
+12
+SSSSSSSSSSSS
+0 1
+C C T C A G T C C G G G 
+C C C C A G T C C G G C 
+0 2
+G C C C A G T C T G G G 
+C C C C A G T C C G G C 
+0 3
+C C C C A G T C C G G C 
+C C T C A A T C C G G G 
+0 4
+C C C C A G T C T G G C 
+G C C T A G T C T G G C 
+0 5
+C C C T A G T C T G G C 
+C C C T A G T C T G G C 
+0 6
+C C T C A A T C T G G C 
+C C C C A G T C C A G C 
+0 7
+G C C C C G T C T G G G 
+C C C C A G T C C G G C 
+0 8
+C C C C A G T C C G G G 
+C C C C A G T C C G G G 
+0 9
+G T C C A G T C T G G C 
+C C C T A G T C T G G C 
+0 10
+G C C C A G T C T G G C 
+G C C C A G T C T G G C 
+0 11
+G T C C A G T C T G G C 
+G T C C A G T C T G G C 
+0 12
+C C C C C G T C C G G G 
+C C C C A G T C C G G G 
+0 13
+C C C C A G T C T A G C 
+C C C C A G T C T A G C 
+0 14
+C C C C A G A C C G G G 
+C C C C A G T C C G G G 
+0 15
+G C C C A G T C T G G C 
+G C C C A G T C T G G C 
+0 16
+G C C C A G T C T G G C 
+C C T C A G T C C G G C 
+0 17
+G T C C A G T C C G G C 
+C C C C A G T C T G G G 
+0 18
+G C C C A G T C T G G C 
+G C C C A G T C T G G C 
+0 19
+C C T C A A T C C G G C 
+C C T C A A T C C G G C 
+0 20
+C C T C C A T C C G G G 
+C C C C A G T C C G G C 
+Resolving with method S
+Method = S
+Method = S
+Method = S
+Performing Final Set of Iterations... nearly there!
