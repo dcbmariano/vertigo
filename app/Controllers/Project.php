@@ -23,11 +23,34 @@ class Project extends BaseController
 
         $alignmentFile = "./data/$id/alignments.txt";
         $hitsFile      = "./data/$id/alignmentHits.csv";
+        $fasta      = "./data/$id/hmm.fasta";
 
         if (file_exists($alignmentFile)) {
             $result['alignments'] = file_get_contents($alignmentFile);
         } else {
             $result['alignments'] = null;
+        }
+
+        if (file_exists($fasta)) {
+            $fastaContent = file_get_contents($fasta);
+            $sequences = [];
+            $currentId = null;
+            foreach (explode("\n", $fastaContent) as $line) {
+                $line = trim($line);
+                if ($line === '') {
+                    continue;
+                }
+                if ($line[0] === '>') {
+                    $currentId = substr($line, 1);
+                    $currentId = explode('_', $currentId)[0];
+                    $sequences[$currentId] = '';
+                } else {
+                    $sequences[$currentId] .= $line;
+                }
+            }
+            $result['fasta'] = $sequences;
+        } else {
+            $result['fasta'] = null;
         }
 
         $result['hits'] = [];

@@ -26,8 +26,8 @@ MVFFSTYRSKRIVAPGFLKGPVMASRAFFDYYFQRAWCGCVQWVIPGEVRLWACGVPVIYFIHRYHNDHSLEPDFVEKAM
   2                                                                                84
   Es<-                                                                           ->Es
 
---------------------------------------------------------------------------------------sldevrqltpqsqlrirayedltklrgdfgpqsvivrppgvllpgkdyyk---------
-                                                                                      2                                               51
+-------------------------------------------------------------------------------------gsldevrqltpqsqlrirayedltklrgdfgpqsvivrppgvllpgkdyykhki------
+                                                                                     1                                                   54      
                                                                                       Ei<-                                          ->Ei
 fragments chains: Es,Ei
 >tr|A0A640KG00|A0A640KG00_LEITA
@@ -106,8 +106,8 @@ MSQPLAFHDVSTDAIRQMQASEALQKHLENAQLAHRVCVAKALKADEPPVEKCALTWGEVVMRYNQWSEYRPAFHDSDAQ
       2                                                                 69
       GT<-                                                            ->GT
 
-------------------------------------------------------------------------------aqkryskywtekyqaae----
-                                                                              8              24
+--------------------------------------------------------------------------hhhhaqkryskywtekyqaae----
+                                                                          4                  24    
                                                                               Fi<-         ->Fi
 fragments chains: GT,Fi
 >LtaP08.0840.mRNA
