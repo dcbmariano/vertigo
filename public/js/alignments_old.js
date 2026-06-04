@@ -3,32 +3,17 @@ let selection = { start: null, end: null, residues: [] };
 let isSelecting = false;
 let originalAlignmentText = '';
 let alignmentBlocks = [];
+const aaColors = {
+    'A': '#80a0f0', 'I': '#80a0f0', 'L': '#80a0f0', 'M': '#80a0f0', 'V': '#80a0f0', 'F': '#00ff00', 'W': '#00ff00', 'Y': '#00ff00', 'K': '#ff0000', 'R': '#ff0000', 'D': '#ff00ff', 'E': '#ff00ff', 'N': '#00ffff', 'Q': '#00ffff', 'S': '#ffa500', 'T': '#ffa500', 'C': '#ffff00', 'G': '#ffffff', 'P': '#ff8080', 'H': '#8080ff', '-': '#666666'
+}; // cor da fonte - nao usado mais
+
+// const baaColors = {
+//     'A': '#9798FF', 'I': '#9798FF', 'L': '#9798FF', 'M': '#9798FF', 'V': '#9798FF', 'F': '#F79B20', 'W': '#F79B20', 'Y': '#F79B20', 'K': '#FF9799', 'R': '#FF9799', 'D': '#98CB99', 'E': '#98CB99', 'N': '#FEDA96', 'Q': '#FEDA96', 'S': '#FEDA96', 'T': '#FEDA96', 'C': '#FEDA96', 'G': '#9798FF', 'P': '#9798FF', 'H': '#FF9799', '-': '#ffffff'
+// }; // cor de fundo - atual
 
 const baaColors = {
-    'A': '#9798FF', 'I': '#9798FF', 'L': '#9798FF', 'M': '#9798FF', 'V': '#9798FF', 'F': '#F79B20', 'W': '#F79B20', 'Y': '#F79B20', 'K': '#FF9799', 'R': '#FF9799', 'D': '#98CB99', 'E': '#98CB99', 'N': '#FEDA96', 'Q': '#FEDA96', 'S': '#FEDA96', 'T': '#FEDA96', 'C': '#FEDA96', 'G': '#9798FF', 'P': '#9798FF', 'H': '#FF9799', '-': '#ffffff'
+    'A': '#FFFFFF', 'I': '#FFFFFF', 'L': '#FFFFFF', 'M': '#FFFFFF', 'V': '#FFFFFF', 'F': '#FFFFFF', 'W': '#FFFFFF', 'Y': '#FFFFFF', 'K': '#FFFFFF', 'R': '#FFFFFF', 'D': '#FFFFFF', 'E': '#FFFFFF', 'N': '#FFFFFF', 'Q': '#FFFFFF', 'S': '#FFFFFF', 'T': '#FFFFFF', 'C': '#FFFFFF', 'G': '#FFFFFF', 'P': '#FFFFFF', 'H': '#FFFFFF', '-': '#FFFFFF'
 }; // cor de fundo - atual
-
-const aaGroups = {
-
-    hydrophobic:
-        ['A', 'V', 'I', 'L', 'M'],
-
-    aromatic:
-        ['F', 'W', 'Y'],
-
-    positive:
-        ['K', 'R', 'H'],
-
-    negative:
-        ['D', 'E'],
-
-    polar:
-        ['S', 'T', 'N', 'Q', 'C'],
-
-    special:
-        ['G', 'P']
-
-};
 
 
 // seleções e eventos
@@ -64,20 +49,7 @@ function parseAlignments(text) {
      */
     return text
         .split(/(?=^>)/m)
-        .filter(block => block.trim())
-        .map(block => {
-
-            const lines =
-                block
-                    .trim()
-                    .split('\n');
-
-            return {
-                header: lines[0],
-                lines: lines
-            };
-
-        });
+        .filter(block => block.trim());
 }
 
 // ========================================
@@ -129,18 +101,13 @@ function createAlignmentCard(block, blockIndex) {
      * O cabeçalho exibe o identificador da sequência.
      */
 
-    const lines = block.lines;
-    const referenceSequence = lines[2];
+    const lines = block.trim().split('\n');
     const card = document.createElement('div');
-    const columnColors =
-        computeColumnColors(
-            block
-        );
 
     card.className = 'card mb-4';
     card.innerHTML = `
         <div class="card-header small">
-            <span class="bg-dark text-info badge">${block.header}</span>
+            <span class="bg-dark text-info badge">${lines[0]}</span>
         </div>
         <div class="card-body">
             <div class="alignment-container">
@@ -152,10 +119,10 @@ function createAlignmentCard(block, blockIndex) {
         card.querySelector(
             '.alignment-container'
         );
-
+    
     // laço que grava as linhas
-    lines.forEach((line, index) => {
-        if (line.trim().startsWith('fragments chains:')) {
+   lines.forEach((line, index) => {
+        if (line.trim().startsWith('fragments chains:')){
             container.appendChild(createAlignmentLine(line));
             return;
         }
@@ -169,7 +136,7 @@ function createAlignmentCard(block, blockIndex) {
         if (isSequenceLine(line)) {
             const startResidue = getStartResidue(lines, index);
             container.appendChild(
-                createAlignmentLine(line, startResidue, index, blockIndex, referenceSequence, columnColors)
+                createAlignmentLine(line, startResidue, index, blockIndex)
             );
         } else {
             container.appendChild(
@@ -180,22 +147,22 @@ function createAlignmentCard(block, blockIndex) {
     return card;
 }
 
-function createAlignmentLine(line, startResidue = null, lineNumber = null, blockNumber = null, referenceSequence = null, columnColors = null) {
+function createAlignmentLine(line, startResidue = null, lineNumber = null, blockNumber = null) {
     /**
      * Cria uma linha da visualização do alinhamento.
      * Sequências são formatadas; demais linhas são exibidas como texto.
      */
     const div = document.createElement('div');
     div.className = 'alignment-line';
-    if (isSequenceLine(line) && startResidue !== null) {
-        div.innerHTML = renderSequence(line, startResidue, lineNumber, blockNumber, referenceSequence, columnColors);
+    if (isSequenceLine(line) && startResidue !== null){
+        div.innerHTML = renderSequence(line, startResidue, lineNumber, blockNumber);
     } else {
         div.textContent = line;
     }
     return div;
 }
 
-function renderSequence(sequenceLine, startResidue, lineNumber, blockNumber, referenceSequence, columnColors) {
+function renderSequence(sequenceLine, startResidue, lineNumber, blockNumber){
     /**
      * Renderiza uma sequência de aminoácidos com numeração de resíduos.
      * Cada aminoácido é convertido em um elemento HTML independente.
@@ -203,27 +170,15 @@ function renderSequence(sequenceLine, startResidue, lineNumber, blockNumber, ref
     let residue = startResidue - 1;
     let residueIndex = 0;
     let columnIndex = -1;
-    const isReferenceSequence = lineNumber === 2;
 
     return [...sequenceLine]
         .map(char => {
-            columnIndex++;
             if (/[A-Za-z]/.test(char)) {
                 residue++;
                 residueIndex++;
-
-                const referenceAA =
-                    referenceSequence[
-                    columnIndex
-                    ];
-                const color =
-                    columnColors[
-                    columnIndex
-                    ];
-
+                columnIndex++;
                 return createResidueHtml(
                     char,
-                    color,
                     residue,
                     lineNumber,
                     residueIndex,
@@ -238,7 +193,6 @@ function renderSequence(sequenceLine, startResidue, lineNumber, blockNumber, ref
 
 function createResidueHtml(
     aa,
-    color,
     residueNumber,
     lineNumber,
     residueIndex,
@@ -249,15 +203,15 @@ function createResidueHtml(
      * Gera o HTML de um aminoácido com cor e tooltip.
      * O tooltip exibe a posição do resíduo na sequência.
      */
-    // const color =
-    //     baaColors[
-    //         aa.toUpperCase()
-    //     ] || '#cccccc';
+    const color =
+        baaColors[
+            aa.toUpperCase()
+        ] || '#cccccc';
 
     const cssClass =
         aa === '-'
-            ? 'aa gap'
-            : 'aa';
+        ? 'aa gap'
+        : 'aa';
 
     return `<span
         class="${cssClass}"
@@ -274,7 +228,7 @@ function createResidueHtml(
 }
 
 
-function isSequenceLine(line) {
+function isSequenceLine(line){
     /**
      * Verifica se uma linha representa uma sequência biológica.
      * Ignora cabeçalhos, coordenadas, fragmentos e separadores.
@@ -348,7 +302,7 @@ function getSequenceStart(coordinateLine) {
     return parseInt(match[0]);
 }
 
-function getStartResidue(lines, index) {
+function getStartResidue(lines, index){
     /**
      * Determina o resíduo inicial de uma sequência do alinhamento.
      * Usa coordenadas do arquivo ou retorna 1 para a sequência principal.
@@ -364,7 +318,7 @@ function getStartResidue(lines, index) {
 }
 
 
-function initializeSelection() {
+function initializeSelection(){
     /* Responsável por permitir a seleção de seqs */
     document.addEventListener(
         'mousedown',
@@ -382,9 +336,9 @@ function initializeSelection() {
     );
 }
 
-function startSelection(event) {
+function startSelection(event){
     /* Responsável por iniciar a seleção de seqs */
-    if (!event.target.classList.contains('aa')) {
+    if(!event.target.classList.contains('aa')){
         return;
     }
 
@@ -398,22 +352,22 @@ function startSelection(event) {
     redrawSelection();
 }
 
-function updateSelection(event) {
+function updateSelection(event){
     /* Responsável por arrastar e manter a seleção de seqs */
-    if (!isSelecting) {
+    if(!isSelecting){
         return;
     }
-    if (!event.target.classList.contains('aa')) {
+    if(!event.target.classList.contains('aa')){
         return;
     }
-    if (event.target.dataset.line !== selection.start.dataset.line) {
+    if(event.target.dataset.line !== selection.start.dataset.line){
         return;
     }
     selection.end = event.target;
     redrawSelection();
 }
 
-function redrawSelection() {
+function redrawSelection(){
     /* Responsável por atualizar borda vermelha */
     clearSelectionMarks();
 
@@ -421,29 +375,29 @@ function redrawSelection() {
     const line = selection.start.dataset.line;
     const start = parseInt(selection.start.dataset.index);
     const end = parseInt(selection.end.dataset.index);
-    const min = Math.min(start, end);
-    const max = Math.max(start, end);
+    const min = Math.min(start,end);
+    const max = Math.max(start,end);
 
     document
         .querySelectorAll(
             `.aa[data-block="${block}"][data-line="${line}"]`
         )
-        .forEach(residue => {
+        .forEach(residue=>{
             const idx = parseInt(residue.dataset.index);
-            if (idx >= min && idx <= max) {
+            if(idx >= min &&idx <= max){
                 residue.classList.add('selected');
             }
         });
 }
 
 
-function clearSelectionMarks() {
+function clearSelectionMarks(){
     /* Responsável por limpar as bordas */
     document
         .querySelectorAll(
             '.aa.selected'
         )
-        .forEach(el => {
+        .forEach(el=>{
             el.classList.remove(
                 'selected'
             );
@@ -451,22 +405,22 @@ function clearSelectionMarks() {
         });
 }
 
-function finishSelection(event) {
+function finishSelection(event){
     /* Responsável por finalizar seleção */
-    if (!isSelecting) {
+    if(!isSelecting){
         return;
     }
 
     isSelecting = false;
     selection.residues = [...document.querySelectorAll('.aa.selected')];
-    if (selection.residues.length === 0) {
+    if(selection.residues.length === 0){
         return;
     }
 
     showEditButton(event.pageX, event.pageY);
 }
 
-function showEditButton(x, y) {
+function showEditButton(x,y){
     /* Responsável por mostrar o botão de edição */
     const menu = document.getElementById('selectionMenu');
     menu.style.left = x + 'px';
@@ -474,7 +428,7 @@ function showEditButton(x, y) {
     menu.style.display = 'block';
 }
 
-function clearSelection() {
+function clearSelection(){
     /* Apaga as bordas vermelhas */
     clearSelectionMarks();
 
@@ -484,13 +438,13 @@ function clearSelection() {
 
     const menu = document.getElementById('selectionMenu');
 
-    if (menu) {
+    if(menu){
         menu.style.display = 'none';
     }
 }
 
 
-function openEditModal() {
+function openEditModal(){
     /* Carrega o modal editar */
     const oldSequence =
         selection.residues
@@ -510,7 +464,7 @@ function openEditModal() {
 }
 
 
-function saveEditedSequence() {
+function saveEditedSequence(){
     const newSequence =
         document
             .getElementById('newSequence')
@@ -521,17 +475,6 @@ function saveEditedSequence() {
             .getElementById('oldSequence')
             .value
             .trim();
-    const blockIndex =
-        parseInt(
-            selection.residues[0]
-                .dataset.block
-        );
-
-    const lineIndex =
-        parseInt(
-            selection.residues[0]
-                .dataset.line
-        );
     const startColumn = parseInt(
         selection.residues[0]
             .dataset.column
@@ -541,57 +484,34 @@ function saveEditedSequence() {
             selection.residues.length - 1
         ].dataset.column
     );
-    let sequenceLine =
-        alignmentBlocks[
-            blockIndex
-        ].lines[
-        lineIndex
-        ];
 
-    if (newSequence.length !== oldSequence.length) {
+    if(newSequence.length !== oldSequence.length){
         alert(
             'The new sequence must have the same length.'
         );
         return;
     }
-    const updatedLine =
-        sequenceLine.substring(
-            0,
-            startColumn
-        )
-        +
-        newSequence
-        +
-        sequenceLine.substring(
-            endColumn + 1
-        );
 
-
-    alignmentBlocks[
-        blockIndex
-    ].lines[
-        lineIndex
-    ] = updatedLine;
-
-    renderAlignments(
-        alignmentBlocks
+    selection.residues.forEach(
+        (residue,index)=>{
+            const aa = newSequence[index];
+            residue.textContent = aa;
+            residue.dataset.residue = aa;
+            const color =
+                baaColors[
+                    aa.toUpperCase()
+                ] || '#cccccc';
+            residue.style.backgroundColor = color;
+        }
     );
 
-    initializeTooltips();
-
-    clearSelection();
-
     bootstrap.Modal
-        .getInstance(
-            document.getElementById(
-                'editModal'
-            )
-        )
+        .getInstance(document.getElementById('editModal'))
         .hide();
 }
 
 
-async function saveAlignmentsFile() {
+async function saveAlignmentsFile(){
     /* Responsável por salvar o alinhamento */
 
     let content = '';
@@ -603,30 +523,30 @@ async function saveAlignmentsFile() {
         });
 
     const response =
-        await fetch(`/project/${projectId}/save-alignments`, {
-            method: 'POST',
-            headers: {
-                'Content-Type':
-                    'application/json'
-            },
-            body: JSON.stringify({
-                content
-            })
-        }
+        await fetch(`/project/${projectId}/save-alignments`,{
+                method: 'POST',
+                headers: {
+                    'Content-Type':
+                        'application/json'
+                },
+                body: JSON.stringify({
+                    content
+                })
+            }
         );
     const result = await response.json();
     alert(result.message);
 }
 
 
-function hideSelectionMenu(event) {
+function hideSelectionMenu(event){
     /* Esta função esconde o menu Edit */
     const menu =
         document.getElementById(
             'selectionMenu'
         );
 
-    if (!menu) {
+    if(!menu){
         return;
     }
 
@@ -638,122 +558,12 @@ function hideSelectionMenu(event) {
     if (modal && modal.contains(event.target)) {
         return;
     }
-    if (menu.contains(event.target)) {
+    if(menu.contains(event.target)){
         return;
     }
-    if (event.target.classList.contains('aa')) {
+    if(event.target.classList.contains('aa')){
         return;
     }
     menu.style.display = 'none';
     clearSelection();
-}
-
-
-function getResidueColor(referenceAA, currentAA) {
-
-    referenceAA = referenceAA.toUpperCase();
-    currentAA = currentAA.toUpperCase();
-
-    // gaps
-    if (referenceAA === '-' || currentAA === '-'){
-        return '#FFFFFF';
-    }
-
-    // idênticos
-    if (referenceAA === currentAA) {
-        return '#008CA6';
-    }
-
-    // mesmo grupo químico
-    for (
-        const group of Object.values(
-            aaGroups
-        )
-    ) {
-        if (
-            group.includes(
-                referenceAA
-            )
-            &&
-            group.includes(
-                currentAA
-            )
-        ) {
-            return '#CCCCCC';
-        }
-    }
-
-    // diferentes
-    return '#D54344';
-}
-
-
-function computeColumnColors(block){
-
-    const reference = block.lines[2];
-
-    const colors =
-        Array(
-            reference.length
-        ).fill('#FFFFFF');
-
-    const sequenceLines =
-        block.lines.filter(
-            isSequenceLine
-        );
-
-    for (let col = 0; col < reference.length; col++) {
-
-        const refAA = reference[col];
-
-        let identical = 0;
-        let similar = 0;
-        let different = 0;
-
-        for (let i = 1; i < sequenceLines.length; i++) {
-            const aa =
-                sequenceLines[i][col];
-
-            if (
-                !aa ||
-                aa === '-'
-            ) {
-                continue;
-            }
-
-            const color =
-                getResidueColor(
-                    refAA,
-                    aa
-                );
-
-            if (color === '#008CA6'){
-                identical++;
-            }
-            else if (color === '#CCCCCC'){
-                similar++;
-            }
-            else {
-                different++;
-            }
-        }
-
-        if (identical > 0) {
-            colors[col] =
-                '#008CA6';
-        }
-        else if (
-            similar > 0
-        ) {
-            colors[col] = '#CCCCCC';
-        }
-        else if (different > 0) {
-            colors[col] = '#D54344';
-        }
-        else {
-            colors[col] =
-                '#FFFFFF';
-        }
-    }
-    return colors;
 }
