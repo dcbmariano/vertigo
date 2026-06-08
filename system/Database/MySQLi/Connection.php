@@ -123,7 +123,7 @@ class Connection extends BaseConnection
             $this->mysqli->options(MYSQLI_OPT_INT_AND_FLOAT_NATIVE, 1);
         }
 
-        if ($this->strictOn !== null) {
+        if (isset($this->strictOn)) {
             if ($this->strictOn) {
                 $this->mysqli->options(
                     MYSQLI_INIT_COMMAND,

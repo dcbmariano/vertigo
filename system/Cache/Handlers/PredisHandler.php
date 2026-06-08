@@ -31,13 +31,7 @@ class PredisHandler extends BaseHandler
     /**
      * Default config
      *
-     * @var array{
-     *   scheme: string,
-     *   host: string,
-     *   password: string|null,
-     *   port: int,
-     *   timeout: int
-     * }
+     * @var array
      */
     protected $config = [
         'scheme'   => 'tcp',
@@ -160,10 +154,6 @@ class PredisHandler extends BaseHandler
 
         foreach (new Keyspace($this->redis, $pattern) as $key) {
             $matchedKeys[] = $key;
-        }
-
-        if ($matchedKeys === []) {
-            return 0;
         }
 
         return $this->redis->del($matchedKeys);

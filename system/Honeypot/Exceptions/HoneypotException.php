@@ -41,8 +41,6 @@ class HoneypotException extends ConfigException
      * Thrown when the hidden value of config is false.
      *
      * @return static
-     *
-     * @deprecated 4.6.4 Never used.
      */
     public static function forNoHiddenValue()
     {

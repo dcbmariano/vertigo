@@ -136,9 +136,7 @@ class ClassStaticsPlugin extends AbstractPlugin implements PluginCompleteInterfa
             $context->access_path = '\\'.$context->owner_class.'::$'.$context->name;
         }
 
-        if (KINT_PHP81 === false) {
-            $pr->setAccessible(true);
-        }
+        $pr->setAccessible(true);
 
         /**
          * @psalm-suppress TooFewArguments

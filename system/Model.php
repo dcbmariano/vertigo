@@ -396,7 +396,7 @@ class Model extends BaseModel
 
         // If insertion succeeded then save the insert ID
         if ($result) {
-            $this->insertID = $this->useAutoIncrement ? $this->db->insertID() : $row[$this->primaryKey];
+            $this->insertID = ! $this->useAutoIncrement ? $row[$this->primaryKey] : $this->db->insertID();
         }
 
         return $result;
@@ -551,8 +551,9 @@ class Model extends BaseModel
      * Compiles a replace into string and runs the query
      * This method works only with dbCalls.
      *
-     * @param row_array|null $row       Data
-     * @param bool           $returnSQL Set to true to return Query String
+     * @param         array|null     $row       Data
+     * @phpstan-param row_array|null $row
+     * @param         bool           $returnSQL Set to true to return Query String
      *
      * @return BaseResult|false|Query|string
      */
@@ -773,10 +774,12 @@ class Model extends BaseModel
      * Inserts data into the database. If an object is provided,
      * it will attempt to convert it to an array.
      *
-     * @param object|row_array|null $row
-     * @param bool                  $returnID Whether insert ID should be returned or not.
+     * @param         array|object|null     $row
+     * @phpstan-param row_array|object|null $row
+     * @param         bool                  $returnID Whether insert ID should be returned or not.
      *
-     * @return ($returnID is true ? false|int|string : bool)
+     * @return         bool|int|string
+     * @phpstan-return ($returnID is true ? int|string|false : bool)
      *
      * @throws ReflectionException
      */

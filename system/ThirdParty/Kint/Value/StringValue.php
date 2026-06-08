@@ -72,10 +72,7 @@ class StringValue extends AbstractValue
             return $this->value;
         }
 
-        /** @psalm-var string $encoded */
-        $encoded = \mb_convert_encoding($this->value, 'UTF-8', $this->encoding);
-
-        return $encoded;
+        return \mb_convert_encoding($this->value, 'UTF-8', $this->encoding);
     }
 
     /** @psalm-api */

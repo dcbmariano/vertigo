@@ -17,6 +17,9 @@ use CodeIgniter\I18n\Time;
 use DateTime;
 use Exception;
 
+/**
+ * Class DatetimeCast
+ */
 class DatetimeCast extends BaseCast
 {
     /**

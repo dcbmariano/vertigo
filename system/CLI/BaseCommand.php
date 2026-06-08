@@ -142,7 +142,7 @@ abstract class BaseCommand
     {
         CLI::write(lang('CLI.helpUsage'), 'yellow');
 
-        if ($this->usage !== null) {
+        if (isset($this->usage)) {
             $usage = $this->usage;
         } else {
             $usage = $this->name;
@@ -154,7 +154,7 @@ abstract class BaseCommand
 
         CLI::write($this->setPad($usage, 0, 0, 2));
 
-        if ($this->description !== null) {
+        if (isset($this->description)) {
             CLI::newLine();
             CLI::write(lang('CLI.helpDescription'), 'yellow');
             CLI::write($this->setPad($this->description, 0, 0, 2));

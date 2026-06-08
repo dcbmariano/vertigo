@@ -96,7 +96,7 @@ class Database
     {
         $dsn = parse_url($params['DSN']);
 
-        if (in_array($dsn, [0, '', '0', [], false, null], true)) {
+        if ($dsn === 0 || $dsn === '' || $dsn === '0' || $dsn === [] || $dsn === false || $dsn === null) {
             throw new InvalidArgumentException('Your DSN connection string is invalid.');
         }
 
@@ -136,9 +136,9 @@ class Database
      */
     protected function initDriver(string $driver, string $class, $argument): object
     {
-        $classname = str_contains($driver, '\\')
-            ? $driver . '\\' . $class
-            : "CodeIgniter\\Database\\{$driver}\\{$class}";
+        $classname = (! str_contains($driver, '\\'))
+            ? "CodeIgniter\\Database\\{$driver}\\{$class}"
+            : $driver . '\\' . $class;
 
         return new $classname($argument);
     }

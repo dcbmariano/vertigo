@@ -15,16 +15,13 @@ namespace CodeIgniter\Test\Mock;
 
 use CodeIgniter\Language\Language;
 
-/**
- * @phpstan-import-type LoadedStrings from Language
- */
 class MockLanguage extends Language
 {
     /**
      * Stores the data that should be
      * returned by the 'requireFile()' method.
      *
-     * @var LoadedStrings|null
+     * @var mixed
      */
     protected $data;
 
@@ -33,15 +30,11 @@ class MockLanguage extends Language
      * 'requireFile()' method to allow easy overrides
      * during testing.
      *
-     * @param LoadedStrings $data
-     *
      * @return $this
      */
     public function setData(string $file, array $data, ?string $locale = null)
     {
         $this->language[$locale ?? $this->locale][$file] = $data;
-
-        $this->data = $data;
 
         return $this;
     }
@@ -49,8 +42,6 @@ class MockLanguage extends Language
     /**
      * Provides an override that allows us to set custom
      * data to be returned easily during testing.
-     *
-     * @return LoadedStrings
      */
     protected function requireFile(string $path): array
     {
@@ -59,8 +50,6 @@ class MockLanguage extends Language
 
     /**
      * Arbitrarily turnoff internationalization support for testing
-     *
-     * @return void
      */
     public function disableIntlSupport()
     {

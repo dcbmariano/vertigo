@@ -46,7 +46,13 @@ class PageCache implements FilterInterface
 
         $response = service('response');
 
-        return $this->pageCache->get($request, $response);
+        $cachedResponse = $this->pageCache->get($request, $response);
+
+        if ($cachedResponse instanceof ResponseInterface) {
+            return $cachedResponse;
+        }
+
+        return null;
     }
 
     /**

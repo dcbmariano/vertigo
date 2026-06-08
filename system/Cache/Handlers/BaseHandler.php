@@ -53,7 +53,7 @@ abstract class BaseHandler implements CacheInterface
      * Keys that exceed MAX_KEY_LENGTH are hashed.
      * From https://github.com/symfony/cache/blob/7b024c6726af21fd4984ac8d1eae2b9f3d90de88/CacheItem.php#L158
      *
-     * @param mixed  $key    The key to validate
+     * @param string $key    The key to validate
      * @param string $prefix Optional prefix to include in length calculations
      *
      * @throws InvalidArgumentException When $key is not valid
@@ -67,8 +67,7 @@ abstract class BaseHandler implements CacheInterface
             throw new InvalidArgumentException('Cache key cannot be empty.');
         }
 
-        $reserved = config(Cache::class)->reservedCharacters;
-
+        $reserved = config(Cache::class)->reservedCharacters ?? self::RESERVED_CHARACTERS;
         if ($reserved !== '' && strpbrk($key, $reserved) !== false) {
             throw new InvalidArgumentException('Cache key contains reserved characters ' . $reserved);
         }
@@ -84,7 +83,7 @@ abstract class BaseHandler implements CacheInterface
      * @param int              $ttl      Time to live
      * @param Closure(): mixed $callback Callback return value
      *
-     * @return mixed
+     * @return array|bool|float|int|object|string|null
      */
     public function remember(string $key, int $ttl, Closure $callback)
     {
@@ -104,7 +103,7 @@ abstract class BaseHandler implements CacheInterface
      *
      * @param string $pattern Cache items glob-style pattern
      *
-     * @return int
+     * @return int|never
      *
      * @throws Exception
      */

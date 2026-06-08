@@ -68,7 +68,7 @@ final class PhpIniCheck extends BaseCommand
     protected $options = [];
 
     /**
-     * @return int
+     * {@inheritDoc}
      */
     public function run(array $params)
     {

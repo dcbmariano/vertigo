@@ -1,23 +1,23 @@
 <footer class=" bg-dark text-light py-5 ">
     <!-- <div class="row px-4">
         <div class="col-2"><a href="#">
-            <img src="<?= filtra_url(base_url('/img/1.png')) ?>" style="height:100px">
+            <img src="<?= base_url('/img/1.png') ?>" style="height:100px">
         </a></div>
         <div class="col-2"> <a href="#">
-            <img src="<?= filtra_url(base_url('/img/3.png')) ?>" style="height:100px">
+            <img src="<?= base_url('/img/3.png') ?>" style="height:100px">
           </a></div>
 
       
   
         <div class="col-2"><a href="#">
-            <img src="<?= filtra_url(base_url('/img/dcc_w.svg')) ?>" style="height:90px">
+            <img src="<?= base_url('/img/dcc_w.svg') ?>" style="height:90px">
           </a></div>
         <div class="col-2"><a href="#">
-              <img src="<?= filtra_url(base_url('/img/ufmg_w.svg')) ?>" style="height:85px">
+              <img src="<?= base_url('/img/ufmg_w.svg') ?>" style="height:85px">
           </a></div>
 
           <div class="col-2 ps-5 ms-5"><a href="#">
-            <img src="<?= filtra_url(base_url('/img/2.png')) ?>" style="height:100px">
+            <img src="<?= base_url('/img/2.png') ?>" style="height:100px">
           </a></div>
 
       </div>

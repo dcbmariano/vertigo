@@ -86,6 +86,10 @@ class IteratorPlugin extends AbstractPlugin implements PluginCompleteInterface
         $c = $v->getContext();
 
         foreach (self::$blacklist as $class) {
+            /**
+             * @psalm-suppress RedundantCondition
+             * Psalm bug #11076
+             */
             if ($var instanceof $class) {
                 $base = new BaseContext($class.' Iterator Contents');
                 $base->depth = $c->getDepth() + 1;

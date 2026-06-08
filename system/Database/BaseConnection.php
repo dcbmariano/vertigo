@@ -206,14 +206,16 @@ abstract class BaseConnection implements ConnectionInterface
     /**
      * Connection ID
      *
-     * @var false|TConnection
+     * @var         false|object|resource
+     * @phpstan-var false|TConnection
      */
     public $connID = false;
 
     /**
      * Result ID
      *
-     * @var false|TResult
+     * @var         false|object|resource
+     * @phpstan-var false|TResult
      */
     public $resultID = false;
 
@@ -496,7 +498,8 @@ abstract class BaseConnection implements ConnectionInterface
     /**
      * Create a persistent database connection.
      *
-     * @return false|TConnection
+     * @return         false|object|resource
+     * @phpstan-return false|TConnection
      */
     public function persistentConnect()
     {
@@ -509,7 +512,8 @@ abstract class BaseConnection implements ConnectionInterface
      * get that connection. If you pass either alias in and only a single
      * connection is present, it must return the sole connection.
      *
-     * @return false|TConnection
+     * @return         false|object|resource
+     * @phpstan-return TConnection
      */
     public function getConnection(?string $alias = null)
     {
@@ -588,7 +592,8 @@ abstract class BaseConnection implements ConnectionInterface
     /**
      * Executes the query against the database.
      *
-     * @return false|TResult
+     * @return         false|object|resource
+     * @phpstan-return false|TResult
      */
     abstract protected function execute(string $sql);
 
@@ -602,7 +607,8 @@ abstract class BaseConnection implements ConnectionInterface
      *
      * @param array|string|null $binds
      *
-     * @return BaseResult<TConnection, TResult>|bool|Query
+     * @return         BaseResult|bool|Query                       BaseResult when “read” type query, bool when “write” type query, Query when prepared query
+     * @phpstan-return BaseResult<TConnection, TResult>|bool|Query
      *
      * @todo BC set $queryClass default as null in 4.1
      */
@@ -652,7 +658,9 @@ abstract class BaseConnection implements ConnectionInterface
             $query->setDuration($startTime, $startTime);
 
             // This will trigger a rollback if transactions are being used
-            $this->handleTransStatus();
+            if ($this->transDepth !== 0) {
+                $this->transStatus = false;
+            }
 
             if (
                 $this->DBDebug
@@ -718,7 +726,8 @@ abstract class BaseConnection implements ConnectionInterface
      * is performed, nor are transactions handled. Simply takes a raw
      * query string and returns the database-specific result id.
      *
-     * @return false|TResult
+     * @return         false|object|resource
+     * @phpstan-return false|TResult
      */
     public function simpleQuery(string $sql)
     {
@@ -903,18 +912,6 @@ abstract class BaseConnection implements ConnectionInterface
     }
 
     /**
-     * Handle transaction status when a query fails
-     *
-     * @internal This method is for internal database component use only
-     */
-    public function handleTransStatus(): void
-    {
-        if ($this->transDepth !== 0) {
-            $this->transStatus = false;
-        }
-    }
-
-    /**
      * Begin Transaction
      */
     abstract protected function _transBegin(): bool;
@@ -1068,7 +1065,8 @@ abstract class BaseConnection implements ConnectionInterface
      * @param bool                       $protectIdentifiers Protect table or column names?
      * @param bool                       $fieldExists        Supplied $item contains a column name?
      *
-     * @return ($item is array ? array : string)
+     * @return         array|string
+     * @phpstan-return ($item is array ? array : string)
      */
     public function protectIdentifiers($item, bool $prefixSingle = false, ?bool $protectIdentifiers = null, bool $fieldExists = true)
     {
@@ -1272,7 +1270,8 @@ abstract class BaseConnection implements ConnectionInterface
      *
      * @param array|string $item
      *
-     * @return ($item is array ? array : string)
+     * @return         array|string
+     * @phpstan-return ($item is array ? array : string)
      */
     public function escapeIdentifiers($item)
     {
@@ -1356,7 +1355,8 @@ abstract class BaseConnection implements ConnectionInterface
      *
      * @param array|bool|float|int|object|string|null $str
      *
-     * @return ($str is array ? array : float|int|string)
+     * @return         array|float|int|string
+     * @phpstan-return ($str is array ? array : float|int|string)
      */
     public function escape($str)
     {
@@ -1787,7 +1787,8 @@ abstract class BaseConnection implements ConnectionInterface
      *
      * Must return an array with keys 'code' and 'message':
      *
-     * @return array{code: int|string|null, message: string|null}
+     * @return         array<string, int|string|null>
+     * @phpstan-return array{code: int|string|null, message: string|null}
      */
     abstract public function error(): array;
 

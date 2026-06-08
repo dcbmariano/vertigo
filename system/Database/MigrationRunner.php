@@ -47,7 +47,7 @@ class MigrationRunner
      *
      * @var string|null
      */
-    protected $namespace = APP_NAMESPACE;
+    protected $namespace;
 
     /**
      * The database Group to migrate.
@@ -135,6 +135,8 @@ class MigrationRunner
     {
         $this->enabled = $config->enabled ?? false;
         $this->table   = $config->table ?? 'migrations';
+
+        $this->namespace = APP_NAMESPACE;
 
         // Even if a DB connection is passed, since it is a test,
         // it is assumed to use the default group name
@@ -315,8 +317,6 @@ class MigrationRunner
      *
      * @param string $path Full path to a valid migration file
      * @param string $path Namespace of the target migration
-     *
-     * @return bool
      */
     public function force(string $path, string $namespace, ?string $group = null)
     {
@@ -575,8 +575,6 @@ class MigrationRunner
 
     /**
      * Truncates the history table.
-     *
-     * @return void
      */
     public function clearHistory()
     {
@@ -589,8 +587,6 @@ class MigrationRunner
      * Add a history to the table.
      *
      * @param object $migration
-     *
-     * @return void
      */
     protected function addHistory($migration, int $batch)
     {
@@ -618,8 +614,6 @@ class MigrationRunner
      * Removes a single history
      *
      * @param object $history
-     *
-     * @return void
      */
     protected function removeHistory($history)
     {
@@ -657,7 +651,7 @@ class MigrationRunner
 
         $query = $builder->orderBy('id', 'ASC')->get();
 
-        return empty($query) ? [] : $query->getResultObject();
+        return ! empty($query) ? $query->getResultObject() : [];
     }
 
     /**
@@ -674,7 +668,7 @@ class MigrationRunner
             ->orderBy('id', $order)
             ->get();
 
-        return empty($query) ? [] : $query->getResultObject();
+        return ! empty($query) ? $query->getResultObject() : [];
     }
 
     /**
@@ -758,8 +752,6 @@ class MigrationRunner
     /**
      * Ensures that we have created our migrations table
      * in the database.
-     *
-     * @return void
      */
     public function ensureTable()
     {

@@ -18,7 +18,6 @@ use CodeIgniter\Database\BaseConnection;
 use CodeIgniter\Database\BaseResult;
 use CodeIgniter\Database\Query;
 use CodeIgniter\Database\TableName;
-use stdClass;
 
 /**
  * @extends BaseConnection<object|resource, object|resource>
@@ -26,10 +25,7 @@ use stdClass;
 class MockConnection extends BaseConnection
 {
     /**
-     * @var array{
-     *   connect?: false|list<false|object|resource>|object|resource,
-     *   execute?: false|object|resource,
-     * }
+     * @var array{connect?: mixed, execute?: bool|object}
      */
     protected $returnValues = [];
 
@@ -40,18 +36,11 @@ class MockConnection extends BaseConnection
      */
     protected $schema;
 
-    /**
-     * @var string
-     */
     public $database;
-
-    /**
-     * @var Query
-     */
     public $lastQuery;
 
     /**
-     * @param false|list<false|object|resource>|object|resource $return
+     * @param mixed $return
      *
      * @return $this
      */
@@ -70,15 +59,14 @@ class MockConnection extends BaseConnection
      * Should automatically handle different connections for read/write
      * queries if needed.
      *
-     * @param mixed $binds
+     * @param mixed ...$binds
      *
-     * @return BaseResult<object|resource, object|resource>|bool|Query
+     * @return BaseResult|bool|Query
      *
      * @todo BC set $queryClass default as null in 4.1
      */
     public function query(string $sql, $binds = null, bool $setEscapeFlags = true, string $queryClass = '')
     {
-        /** @var class-string<Query> $queryClass */
         $queryClass = str_replace('Connection', 'Query', static::class);
 
         $query = new $queryClass($this);
@@ -93,24 +81,23 @@ class MockConnection extends BaseConnection
 
         $this->lastQuery = $query;
 
-        $this->resultID = $this->simpleQuery($query->getQuery());
-
-        if ($this->resultID === false) {
+        // Run the query
+        if (false === ($this->resultID = $this->simpleQuery($query->getQuery()))) {
             $query->setDuration($startTime, $startTime);
 
             // @todo deal with errors
+
             return false;
         }
 
         $query->setDuration($startTime);
 
         // resultID is not false, so it must be successful
-        if ($query->isWriteType()) {
+        if ($query->isWriteType($sql)) {
             return true;
         }
 
         // query is not write-type, so it must be read-type query; return QueryResult
-        /** @var class-string<BaseResult> $resultClass */
         $resultClass = str_replace('Connection', 'Result', static::class);
 
         return new $resultClass($this->connID, $this->resultID);
@@ -119,7 +106,7 @@ class MockConnection extends BaseConnection
     /**
      * Connect to the database.
      *
-     * @return false|object|resource
+     * @return mixed
      */
     public function connect(bool $persistent = false)
     {
@@ -166,7 +153,7 @@ class MockConnection extends BaseConnection
     /**
      * Executes the query against the database.
      *
-     * @return false|object|resource
+     * @return bool|object
      */
     protected function execute(string $sql)
     {
@@ -184,7 +171,9 @@ class MockConnection extends BaseConnection
     /**
      * Returns the last error code and message.
      *
-     * @return array{code: int, message: string}
+     * Must return an array with keys 'code' and 'message':
+     *
+     *  return ['code' => null, 'message' => null);
      */
     public function error(): array
     {
@@ -194,6 +183,9 @@ class MockConnection extends BaseConnection
         ];
     }
 
+    /**
+     * Insert ID
+     */
     public function insertID(): int
     {
         return $this->connID->insert_id;
@@ -219,25 +211,16 @@ class MockConnection extends BaseConnection
         return '';
     }
 
-    /**
-     * @return list<stdClass>
-     */
     protected function _fieldData(string $table): array
     {
         return [];
     }
 
-    /**
-     * @return array<string, stdClass>
-     */
     protected function _indexData(string $table): array
     {
         return [];
     }
 
-    /**
-     * @return array<string, stdClass>
-     */
     protected function _foreignKeyData(string $table): array
     {
         return [];

@@ -123,9 +123,7 @@ if (! function_exists('write_file')) {
 
             flock($fp, LOCK_EX);
 
-            $result = 0;
-
-            for ($written = 0, $length = strlen($data); $written < $length; $written += $result) {
+            for ($result = $written = 0, $length = strlen($data); $written < $length; $written += $result) {
                 if (($result = fwrite($fp, substr($data, $written))) === false) {
                     break;
                 }
@@ -255,14 +253,6 @@ if (! function_exists('get_dir_file_info')) {
      * @param string $sourceDir    Path to source
      * @param bool   $topLevelOnly Look only at the top level directory specified?
      * @param bool   $recursion    Internal variable to determine recursion status - do not use in calls
-     *
-     * @return array<string, array{
-     *  name: string,
-     *  server_path: string,
-     *  size: int,
-     *  date: int,
-     *  relative_path: string,
-     * }>
      */
     function get_dir_file_info(string $sourceDir, bool $topLevelOnly = true, bool $recursion = false): array
     {
@@ -306,19 +296,10 @@ if (! function_exists('get_file_info')) {
      * Options are: name, server_path, size, date, readable, writable, executable, fileperms
      * Returns false if the file cannot be found.
      *
-     * @param string              $file           Path to file
-     * @param list<string>|string $returnedValues Array or comma separated string of information returned
+     * @param string       $file           Path to file
+     * @param array|string $returnedValues Array or comma separated string of information returned
      *
-     * @return array{
-     *  name?: string,
-     *  server_path?: string,
-     *  size?: int,
-     *  date?: int,
-     *  readable?: bool,
-     *  writable?: bool,
-     *  executable?: bool,
-     *  fileperms?: int
-     * }|null
+     * @return array|null
      */
     function get_file_info(string $file, $returnedValues = ['name', 'server_path', 'size', 'date'])
     {

@@ -193,14 +193,9 @@ class Connection extends BaseConnection
             return $this->dataCache['version'];
         }
 
-        if ($this->connID === false) {
-            $this->initialize();
-        }
-
-        if (($versionString = oci_server_version($this->connID)) === false) {
+        if (! $this->connID || ($versionString = oci_server_version($this->connID)) === false) {
             return '';
         }
-
         if (preg_match('#Release\s(\d+(?:\.\d+)+)#', $versionString, $match)) {
             return $this->dataCache['version'] = $match[1];
         }
@@ -349,23 +344,10 @@ class Connection extends BaseConnection
             $retval[$i]->max_length = $length;
 
             $retval[$i]->nullable = $query[$i]->NULLABLE === 'Y';
-            $retval[$i]->default  = $this->normalizeDefault($query[$i]->DATA_DEFAULT);
+            $retval[$i]->default  = $query[$i]->DATA_DEFAULT;
         }
 
         return $retval;
-    }
-
-    /**
-     * Removes trailing whitespace from default values
-     * returned in database column metadata queries.
-     */
-    private function normalizeDefault(?string $default): ?string
-    {
-        if ($default === null) {
-            return $default;
-        }
-
-        return rtrim($default);
     }
 
     /**

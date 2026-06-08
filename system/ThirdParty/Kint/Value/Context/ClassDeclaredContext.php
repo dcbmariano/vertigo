@@ -38,9 +38,6 @@ abstract class ClassDeclaredContext extends ClassOwnedContext
     /** @psalm-var self::ACCESS_* */
     public int $access;
 
-    /** @psalm-var class-string */
-    public ?string $proto_class = null;
-
     /**
      * @psalm-param class-string $owner_class
      * @psalm-param self::ACCESS_* $access
@@ -72,22 +69,12 @@ abstract class ClassDeclaredContext extends ClassOwnedContext
             return $scope === $this->owner_class;
         }
 
-        if (KINT_PHP8412 && null !== $this->proto_class) {
-            if (\is_a($scope, $this->proto_class, true)) {
-                return true;
-            }
+        if (\is_a($scope, $this->owner_class, true)) {
+            return true;
+        }
 
-            if (\is_a($this->proto_class, $scope, true)) {
-                return true;
-            }
-        } else {
-            if (\is_a($scope, $this->owner_class, true)) {
-                return true;
-            }
-
-            if (\is_a($this->owner_class, $scope, true)) {
-                return true;
-            }
+        if (\is_a($this->owner_class, $scope, true)) {
+            return true;
         }
 
         return false;

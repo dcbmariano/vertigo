@@ -107,12 +107,12 @@ class CLI
     /**
      * List of array segments.
      *
-     * @var list<string>
+     * @var array
      */
     protected static $segments = [];
 
     /**
-     * @var array<string, string|null>
+     * @var array
      */
     protected static $options = [];
 
@@ -318,7 +318,11 @@ class CLI
         if ($opts === []) {
             $extraOutput = $extraOutputDefault;
         } else {
-            $optsKey     = array_keys($opts);
+            $optsKey = [];
+
+            foreach (array_keys($opts) as $key) {
+                $optsKey[] = $key;
+            }
             $extraOutput = '[' . $extraOutputDefault . ', ' . implode(', ', $optsKey) . ']';
             $extraOutput = 'You can specify multiple values separated by commas.' . PHP_EOL . $extraOutput;
         }
@@ -940,8 +944,6 @@ class CLI
 
     /**
      * Returns the raw array of segments found.
-     *
-     * @return list<string>
      */
     public static function getSegments(): array
     {
@@ -969,8 +971,6 @@ class CLI
 
     /**
      * Returns the raw array of options found.
-     *
-     * @return array<string, string|null>
      */
     public static function getOptions(): array
     {

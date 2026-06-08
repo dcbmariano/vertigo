@@ -69,7 +69,8 @@ if (! function_exists('cache')) {
      *    cache()->save('foo', 'bar');
      *    $foo = cache('bar');
      *
-     * @return ($key is null ? CacheInterface : mixed)
+     * @return         array|bool|CacheInterface|float|int|object|string|null
+     * @phpstan-return ($key is null ? CacheInterface : array|bool|float|int|object|string|null)
      */
     function cache(?string $key = null)
     {
@@ -123,6 +124,7 @@ if (! function_exists('command')) {
      */
     function command(string $command)
     {
+        $runner      = service('commands');
         $regexString = '([^\s]+?)(?:\s|(?<!\\\\)"|(?<!\\\\)\'|$)';
         $regexQuoted = '(?:"([^"\\\\]*(?:\\\\.[^"\\\\]*)*)"|\'([^\'\\\\]*(?:\\\\.[^\'\\\\]*)*)\')';
 
@@ -154,9 +156,8 @@ if (! function_exists('command')) {
             $cursor += strlen($match[0]);
         }
 
-        /** @var array<int|string, string|null> */
-        $params      = [];
         $command     = array_shift($args);
+        $params      = [];
         $optionValue = false;
 
         foreach ($args as $i => $arg) {
@@ -186,7 +187,7 @@ if (! function_exists('command')) {
         }
 
         ob_start();
-        service('commands')->run($command, $params);
+        $runner->run($command, $params);
 
         return ob_get_clean();
     }
@@ -200,7 +201,8 @@ if (! function_exists('config')) {
      *
      * @param class-string<ConfigTemplate>|string $name
      *
-     * @return ($name is class-string<ConfigTemplate> ? ConfigTemplate : object|null)
+     * @return         ConfigTemplate|null
+     * @phpstan-return ($name is class-string<ConfigTemplate> ? ConfigTemplate : object|null)
      */
     function config(string $name, bool $getShared = true)
     {
@@ -216,19 +218,9 @@ if (! function_exists('cookie')) {
     /**
      * Simpler way to create a new Cookie instance.
      *
-     * @param string $name  Name of the cookie
-     * @param string $value Value of the cookie
-     * @param array{
-     *     prefix?: string,
-     *     max-age?: int|numeric-string,
-     *     expires?: DateTimeInterface|int|string,
-     *     path?: string,
-     *     domain?: string,
-     *     secure?: bool,
-     *     httponly?: bool,
-     *     samesite?: string,
-     *     raw?: bool
-     * } $options Cookie configuration options
+     * @param string $name    Name of the cookie
+     * @param string $value   Value of the cookie
+     * @param array  $options Array of options to be passed to the cookie
      *
      * @throws CookieException
      */
@@ -362,27 +354,7 @@ if (! function_exists('db_connect')) {
      * If $getShared === false then a new connection instance will be provided,
      * otherwise it will all calls will return the same instance.
      *
-     * @param array{
-     *     DSN?: string,
-     *     hostname?: string,
-     *     username?: string,
-     *     password?: string,
-     *     database?: string,
-     *     DBDriver?: 'MySQLi'|'OCI8'|'Postgre'|'SQLite3'|'SQLSRV',
-     *     DBPrefix?: string,
-     *     pConnect?: bool,
-     *     DBDebug?: bool,
-     *     charset?: string,
-     *     DBCollat?: string,
-     *     swapPre?: string,
-     *     encrypt?: bool,
-     *     compress?: bool,
-     *     strictOn?: bool,
-     *     failover?: array<string, mixed>,
-     *     port?: int,
-     *     dateFormat?: array<string, string>,
-     *     foreignKeys?: bool
-     * }|ConnectionInterface|string|null $db
+     * @param array|ConnectionInterface|string|null $db
      *
      * @return BaseConnection
      */
@@ -399,9 +371,9 @@ if (! function_exists('env')) {
      * retrieving values set from the .env file for
      * use in config files.
      *
-     * @param array<int|string, mixed>|bool|float|int|object|string|null $default
+     * @param string|null $default
      *
-     * @return array<int|string, mixed>|bool|float|int|object|string|null
+     * @return bool|string|null
      */
     function env(string $key, $default = null)
     {
@@ -432,13 +404,13 @@ if (! function_exists('esc')) {
      * If $data is an array, then it loops over it, escaping each
      * 'value' of the key/value pairs.
      *
-     * @param array<int|string, array<int|string, mixed>|string>|string $data
-     * @param 'attr'|'css'|'html'|'js'|'raw'|'url'                      $context
-     * @param string|null                                               $encoding Current encoding for escaping.
-     *                                                                            If not UTF-8, we convert strings from this encoding
-     *                                                                            pre-escaping and back to this encoding post-escaping.
+     * @param         array|string                         $data
+     * @phpstan-param 'html'|'js'|'css'|'url'|'attr'|'raw' $context
+     * @param         string|null                          $encoding Current encoding for escaping.
+     *                                                               If not UTF-8, we convert strings from this encoding
+     *                                                               pre-escaping and back to this encoding post-escaping.
      *
-     * @return ($data is string ? string : array<int|string, array<int|string, mixed>|string>)
+     * @return array|string
      *
      * @throws InvalidArgumentException
      */
@@ -590,7 +562,7 @@ if (! function_exists('helper')) {
      *   2. {namespace}/Helpers
      *   3. system/Helpers
      *
-     * @param list<string>|string $filenames
+     * @param array|string $filenames
      *
      * @throws FileNotFoundException
      */
@@ -759,8 +731,6 @@ if (! function_exists('lang')) {
      * A convenience method to translate a string or array of them and format
      * the result with the intl extension's MessageFormatter.
      *
-     * @param array<array-key, float|int|string> $args
-     *
      * @return list<string>|string
      */
     function lang(string $line, array $args = [], ?string $locale = null)
@@ -826,7 +796,8 @@ if (! function_exists('model')) {
      *
      * @param class-string<ModelTemplate>|string $name
      *
-     * @return ($name is class-string<ModelTemplate> ? ModelTemplate : object|null)
+     * @return         ModelTemplate|null
+     * @phpstan-return ($name is class-string<ModelTemplate> ? ModelTemplate : object|null)
      */
     function model(string $name, bool $getShared = true, ?ConnectionInterface &$conn = null)
     {
@@ -839,8 +810,9 @@ if (! function_exists('old')) {
      * Provides access to "old input" that was set in the session
      * during a redirect()->withInput().
      *
-     * @param string|null                                $default
-     * @param 'attr'|'css'|'html'|'js'|'raw'|'url'|false $escape
+     * @param         string|null                                $default
+     * @param         false|string                               $escape
+     * @phpstan-param false|'attr'|'css'|'html'|'js'|'raw'|'url' $escape
      *
      * @return array|string|null
      */
@@ -993,7 +965,8 @@ if (! function_exists('session')) {
      *    session()->set('foo', 'bar');
      *    $foo = session('bar');
      *
-     * @return ($val is null ? Session : mixed)
+     * @return         array|bool|float|int|object|Session|string|null
+     * @phpstan-return ($val is null ? Session : array|bool|float|int|object|string|null)
      */
     function session(?string $val = null)
     {
@@ -1121,7 +1094,7 @@ if (! function_exists('stringify_attributes')) {
     {
         $atts = '';
 
-        if (in_array($attributes, ['', [], null], true)) {
+        if ($attributes === '' || $attributes === [] || $attributes === null) {
             return $atts;
         }
 
@@ -1150,7 +1123,8 @@ if (! function_exists('timer')) {
      * @param non-empty-string|null    $name
      * @param (callable(): mixed)|null $callable
      *
-     * @return ($name is null ? Timer : ($callable is (callable(): mixed) ? mixed : Timer))
+     * @return         mixed|Timer
+     * @phpstan-return ($name is null ? Timer : ($callable is (callable(): mixed) ? mixed : Timer))
      */
     function timer(?string $name = null, ?callable $callable = null)
     {
@@ -1226,7 +1200,7 @@ if (! function_exists('class_basename')) {
     /**
      * Get the class "basename" of the given object / class.
      *
-     * @param class-string|object $class
+     * @param object|string $class
      *
      * @return string
      *
@@ -1244,9 +1218,9 @@ if (! function_exists('class_uses_recursive')) {
     /**
      * Returns all traits used by a class, its parent classes and trait of their traits.
      *
-     * @param class-string|object $class
+     * @param object|string $class
      *
-     * @return array<class-string, class-string>
+     * @return array
      *
      * @codeCoverageIgnore
      */
@@ -1270,9 +1244,9 @@ if (! function_exists('trait_uses_recursive')) {
     /**
      * Returns all traits used by a trait and its traits.
      *
-     * @param class-string $trait
+     * @param string $trait
      *
-     * @return array<class-string, class-string>
+     * @return array
      *
      * @codeCoverageIgnore
      */

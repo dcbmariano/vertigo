@@ -41,7 +41,7 @@ class BaseBuilder
     /**
      * QB SELECT data
      *
-     * @var list<string>
+     * @var array
      */
     protected $QBSelect = [];
 
@@ -256,7 +256,7 @@ class BaseBuilder
      * Specifies which sql statements
      * support the ignore option.
      *
-     * @var array<string, string>
+     * @var array
      */
     protected $supportedIgnoreStatements = [];
 
@@ -1152,7 +1152,7 @@ class BaseBuilder
             return $this;
         }
 
-        $keyValue = is_array($field) ? $field : [$field => $match];
+        $keyValue = ! is_array($field) ? [$field => $match] : $field;
 
         foreach ($keyValue as $k => $v) {
             if ($insensitiveSearch) {
@@ -2113,7 +2113,7 @@ class BaseBuilder
             if (is_string($set)) {
                 $set = explode(',', $set);
 
-                $set = array_map(trim(...), $set);
+                $set = array_map(static fn ($key): string => trim($key), $set);
             }
 
             if ($set instanceof RawSql) {
@@ -2157,7 +2157,7 @@ class BaseBuilder
         if (is_string($query)) {
             if ($columns !== null && is_string($columns)) {
                 $columns = explode(',', $columns);
-                $columns = array_map(trim(...), $columns);
+                $columns = array_map(static fn ($key): string => trim($key), $columns);
             }
 
             $columns = (array) $columns;
@@ -3065,7 +3065,7 @@ class BaseBuilder
         if ($selectOverride !== false) {
             $sql = $selectOverride;
         } else {
-            $sql = $this->QBDistinct ? 'SELECT DISTINCT ' : 'SELECT ';
+            $sql = (! $this->QBDistinct) ? 'SELECT ' : 'SELECT DISTINCT ';
 
             if (empty($this->QBSelect)) {
                 $sql .= '*';
@@ -3257,9 +3257,6 @@ class BaseBuilder
     {
         if (is_array($this->QBOrderBy) && $this->QBOrderBy !== []) {
             foreach ($this->QBOrderBy as &$orderBy) {
-                if (is_string($orderBy)) {
-                    continue;
-                }
                 if ($orderBy['escape'] !== false && ! $this->isLiteral($orderBy['field'])) {
                     $orderBy['field'] = $this->db->protectIdentifiers($orderBy['field']);
                 }
@@ -3267,7 +3264,11 @@ class BaseBuilder
                 $orderBy = $orderBy['field'] . $orderBy['direction'];
             }
 
-            return "\nORDER BY " . implode(', ', $this->QBOrderBy);
+            return $this->QBOrderBy = "\nORDER BY " . implode(', ', $this->QBOrderBy);
+        }
+
+        if (is_string($this->QBOrderBy)) {
+            return $this->QBOrderBy;
         }
 
         return '';
@@ -3379,8 +3380,6 @@ class BaseBuilder
      * Resets the query builder values.  Called by the get() function
      *
      * @param array $qbResetItems An array of fields to reset
-     *
-     * @return void
      */
     protected function resetRun(array $qbResetItems)
     {
@@ -3391,8 +3390,6 @@ class BaseBuilder
 
     /**
      * Resets the query builder values.  Called by the get() function
-     *
-     * @return void
      */
     protected function resetSelect()
     {
@@ -3410,7 +3407,7 @@ class BaseBuilder
             'QBUnion'    => [],
         ]);
 
-        if ($this->db instanceof BaseConnection) {
+        if (! empty($this->db)) {
             $this->db->setAliasedTables([]);
         }
 
@@ -3424,8 +3421,6 @@ class BaseBuilder
      * Resets the query builder "write" values.
      *
      * Called by the insert() update() insertBatch() updateBatch() and delete() functions
-     *
-     * @return void
      */
     protected function resetWrite()
     {

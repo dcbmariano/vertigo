@@ -115,8 +115,6 @@ class Seeder
     /**
      * Loads the specified seeder and runs it.
      *
-     * @return void
-     *
      * @throws InvalidArgumentException
      */
     public function call(string $class)

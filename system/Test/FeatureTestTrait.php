@@ -13,17 +13,13 @@ declare(strict_types=1);
 
 namespace CodeIgniter\Test;
 
-use Closure;
 use CodeIgniter\Events\Events;
 use CodeIgniter\HTTP\Exceptions\RedirectException;
-use CodeIgniter\HTTP\Header;
 use CodeIgniter\HTTP\IncomingRequest;
 use CodeIgniter\HTTP\Method;
 use CodeIgniter\HTTP\Request;
-use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\HTTP\SiteURI;
 use CodeIgniter\HTTP\URI;
-use CodeIgniter\Router\RouteCollection;
 use Config\App;
 use Config\Services;
 use Exception;
@@ -34,12 +30,6 @@ use ReflectionException;
  *
  * Provides additional utilities for doing full HTTP testing
  * against your application in trait format.
- *
- * @property array<int|string, mixed>           $session
- * @property array<string, Header|list<Header>> $headers
- * @property RouteCollection|null               $routes
- *
- * @mixin CIUnitTestCase
  */
 trait FeatureTestTrait
 {
@@ -52,12 +42,7 @@ trait FeatureTestTrait
      *    ['GET', 'home', 'Home::index'],
      * ]
      *
-     * @param array<int, array{
-     *      0: string,
-     *      1: string,
-     *      2: ((Closure(mixed...): (ResponseInterface|string|void)))|string,
-     *      3?: array<string, mixed>
-     *  }>|null $routes Array to set routes
+     * @param array|null $routes Array to set routes
      *
      * @return $this
      */
@@ -99,7 +84,7 @@ trait FeatureTestTrait
     /**
      * Sets any values that should exist during this session.
      *
-     * @param array<int|string, mixed>|null $values Array of values, or null to use the current $_SESSION
+     * @param array|null $values Array of values, or null to use the current $_SESSION
      *
      * @return $this
      */
@@ -118,7 +103,7 @@ trait FeatureTestTrait
      *  'Authorization' => 'Token'
      * ])
      *
-     * @param array<string, Header|list<Header>> $headers Array of headers
+     * @param array $headers Array of headers
      *
      * @return $this
      */
@@ -228,7 +213,7 @@ trait FeatureTestTrait
             ->run($routes, true);
 
         // Reset directory if it has been set
-        service('router')->setDirectory();
+        service('router')->setDirectory(null);
 
         return new TestResponse($response);
     }
@@ -400,11 +385,11 @@ trait FeatureTestTrait
             $request->setGlobal($name, $params);
             $request->setGlobal(
                 'request',
-                (array) $request->fetchGlobal('post') + (array) $request->fetchGlobal('get'),
+                $request->fetchGlobal('post') + $request->fetchGlobal('get'),
             );
         }
 
-        $_SESSION = $this->session;
+        $_SESSION = $this->session ?? [];
 
         return $request;
     }

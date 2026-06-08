@@ -104,8 +104,7 @@ class CallableDefinitionRepresentation extends AbstractRepresentation
             return null;
         }
 
-        $string = (string) \substr($ds, 3, -2);
-        /** @psalm-var string $string */
+        $string = \substr($ds, 3, -2);
         $string = \preg_replace('/^\\s*\\*\\s*?(\\S|$)/m', '\\1', $string);
 
         return \trim($string);

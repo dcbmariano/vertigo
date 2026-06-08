@@ -17,7 +17,7 @@ use CodeIgniter\CLI\CLI;
 use CodeIgniter\View\Table;
 
 /**
- * Checks php.ini settings in production environment.
+ * Checks php.ini settings
  *
  * @used-by \CodeIgniter\Commands\Utilities\PhpIniCheck
  * @see \CodeIgniter\Security\CheckPhpIniTest
@@ -27,33 +27,30 @@ class CheckPhpIni
     /**
      * @param bool $isCli Set false if you run via Web
      *
-     * @return ($isCli is true ? null : string)
+     * @return string|null HTML string or void in CLI
      */
     public static function run(bool $isCli = true, ?string $argument = null)
     {
-        $output = self::checkIni($argument);
+        $output = static::checkIni($argument);
 
         $thead = ['Directive', 'Global', 'Current', 'Recommended', 'Remark'];
+        $tbody = [];
 
+        // CLI
         if ($isCli) {
-            self::outputForCli($output, $thead);
+            self::outputForCli($output, $thead, $tbody);
 
             return null;
         }
 
-        return self::outputForWeb($output, $thead);
+        // Web
+        return self::outputForWeb($output, $thead, $tbody);
     }
 
-    /**
-     * @param array<string, array{global: string, current: string, recommended: string, remark: string}> $output
-     * @param array{string, string, string, string, string}                                              $thead
-     */
-    private static function outputForCli(array $output, array $thead): void
+    private static function outputForCli(array $output, array $thead, array $tbody): void
     {
-        $tbody = [];
-
         foreach ($output as $directive => $values) {
-            $current        = $values['current'];
+            $current        = $values['current'] ?? '';
             $notRecommended = false;
 
             if ($values['recommended'] !== '') {
@@ -67,27 +64,16 @@ class CheckPhpIni
             }
 
             $directive = $notRecommended ? CLI::color($directive, 'red') : $directive;
-
-            $tbody[] = [
-                $directive,
-                $values['global'],
-                $current,
-                $values['recommended'],
-                $values['remark'],
+            $tbody[]   = [
+                $directive, $values['global'], $current, $values['recommended'], $values['remark'],
             ];
         }
 
         CLI::table($tbody, $thead);
     }
 
-    /**
-     * @param array<string, array{global: string, current: string, recommended: string, remark: string}> $output
-     * @param array{string, string, string, string, string}                                              $thead
-     */
-    private static function outputForWeb(array $output, array $thead): string
+    private static function outputForWeb(array $output, array $thead, array $tbody): string
     {
-        $tbody = [];
-
         foreach ($output as $directive => $values) {
             $current        = $values['current'];
             $notRecommended = false;
@@ -109,27 +95,27 @@ class CheckPhpIni
             $directive = $notRecommended
                 ? '<span style="color: red">' . $directive . '</span>'
                 : $directive;
-
             $tbody[] = [
-                $directive,
-                $values['global'],
-                $current,
-                $values['recommended'],
-                $values['remark'],
+                $directive, $values['global'], $current, $values['recommended'], $values['remark'],
             ];
         }
 
-        $table = new Table();
-        $table->setTemplate(['table_open' => '<table border="1" cellpadding="4" cellspacing="0">']);
+        $table    = new Table();
+        $template = [
+            'table_open' => '<table border="1" cellpadding="4" cellspacing="0">',
+        ];
+        $table->setTemplate($template);
+
         $table->setHeading($thead);
 
         return '<pre>' . $table->generate($tbody) . '</pre>';
     }
 
     /**
-     * @return array<string, array{global: string, current: string, recommended: string, remark: string}>
+     * @internal Used for testing purposes only.
+     * @testTag
      */
-    private static function checkIni(?string $argument = null): array
+    public static function checkIni(?string $argument = null): array
     {
         // Default items
         $items = [
@@ -149,7 +135,7 @@ class CheckPhpIni
             'date.timezone'           => ['recommended' => 'UTC'],
             'mbstring.language'       => ['recommended' => 'neutral'],
             'opcache.enable'          => ['recommended' => '1'],
-            'opcache.enable_cli'      => ['recommended' => '0', 'remark' => 'Enable when you are using queues or running repetitive CLI tasks'],
+            'opcache.enable_cli'      => ['recommended' => '1'],
             'opcache.jit'             => ['recommended' => 'tracing'],
             'opcache.jit_buffer_size' => ['recommended' => '128', 'remark' => 'Adjust with your free space of memory'],
             'zend.assertions'         => ['recommended' => '-1'],
@@ -158,26 +144,24 @@ class CheckPhpIni
         if ($argument === 'opcache') {
             $items = [
                 'opcache.enable'                  => ['recommended' => '1'],
-                'opcache.enable_cli'              => ['recommended' => '0', 'remark' => 'Enable when you are using queues or running repetitive CLI tasks'],
+                'opcache.enable_cli'              => ['recommended' => '0', 'remark' => 'Enable when you using CLI'],
                 'opcache.jit'                     => ['recommended' => 'tracing', 'remark' => 'Disable when you used third-party extensions'],
                 'opcache.jit_buffer_size'         => ['recommended' => '128', 'remark' => 'Adjust with your free space of memory'],
                 'opcache.memory_consumption'      => ['recommended' => '128', 'remark' => 'Adjust with your free space of memory'],
                 'opcache.interned_strings_buffer' => ['recommended' => '16'],
                 'opcache.max_accelerated_files'   => ['remark' => 'Adjust based on the number of PHP files in your project (e.g.: find your_project/ -iname \'*.php\'|wc -l)'],
                 'opcache.max_wasted_percentage'   => ['recommended' => '10'],
-                'opcache.validate_timestamps'     => ['recommended' => '0', 'remark' => 'When disabled, opcache will hold your code into shared memory. Restart webserver as needed'],
+                'opcache.validate_timestamps'     => ['recommended' => '0', 'remark' => 'When you disabled, opcache hold your code into shared memory. Restart webserver needed'],
                 'opcache.revalidate_freq'         => [],
                 'opcache.file_cache'              => ['remark' => 'Location file caching, It should improve performance when SHM memory is full'],
-                'opcache.file_cache_only'         => ['remark' => 'Opcode caching in shared memory, Disabled when you are using Windows'],
-                'opcache.file_cache_fallback'     => ['remark' => 'Enable when you are using Windows'],
-                'opcache.save_comments'           => ['recommended' => '0', 'remark' => 'Enable when your code requires to read docblock annotations at runtime'],
+                'opcache.file_cache_only'         => ['remark' => 'Opcode caching in shared memory, Disabled when you using Windows'],
+                'opcache.file_cache_fallback'     => ['remark' => 'Set enable when you using Windows'],
+                'opcache.save_comments'           => ['recommended' => '0', 'remark' => 'Enable when you using package require docblock annotation'],
             ];
         }
 
         $output = [];
-
-        $ini = ini_get_all();
-        assert(is_array($ini));
+        $ini    = ini_get_all();
 
         foreach ($items as $key => $values) {
             $hasKeyInIni  = array_key_exists($key, $ini);
@@ -189,6 +173,7 @@ class CheckPhpIni
             ];
         }
 
+        // [directive => [current_value, recommended_value]]
         return $output;
     }
 }

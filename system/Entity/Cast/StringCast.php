@@ -13,8 +13,14 @@ declare(strict_types=1);
 
 namespace CodeIgniter\Entity\Cast;
 
+/**
+ * Class StringCast
+ */
 class StringCast extends BaseCast
 {
+    /**
+     * {@inheritDoc}
+     */
     public static function get($value, array $params = []): string
     {
         return (string) $value;

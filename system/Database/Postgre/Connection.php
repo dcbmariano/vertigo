@@ -242,7 +242,8 @@ class Connection extends BaseConnection
      *
      * @param array|bool|float|int|object|string|null $str
      *
-     * @return ($str is array ? array : float|int|string)
+     * @return         array|float|int|string
+     * @phpstan-return ($str is array ? array : float|int|string)
      */
     public function escape($str)
     {
@@ -382,7 +383,7 @@ class Connection extends BaseConnection
             $obj         = new stdClass();
             $obj->name   = $row->indexname;
             $_fields     = explode(',', preg_replace('/^.*\((.+?)\)$/', '$1', trim($row->indexdef)));
-            $obj->fields = array_map(trim(...), $_fields);
+            $obj->fields = array_map(static fn ($v): string => trim($v), $_fields);
 
             if (str_starts_with($row->indexdef, 'CREATE UNIQUE INDEX pk')) {
                 $obj->type = 'PRIMARY';
@@ -516,8 +517,6 @@ class Connection extends BaseConnection
 
     /**
      * Build a DSN from the provided parameters
-     *
-     * @return void
      */
     protected function buildDSN()
     {

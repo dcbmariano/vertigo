@@ -11,7 +11,6 @@
 
 namespace CodeIgniter\Config;
 
-use CodeIgniter\Autoloader\FileLocatorInterface;
 use CodeIgniter\Exceptions\ConfigException;
 use CodeIgniter\Exceptions\RuntimeException;
 use Config\Encryption;
@@ -253,7 +252,6 @@ class BaseConfig
 
             static::$discovering = true;
 
-            /** @var FileLocatorInterface */
             $locator         = service('locator');
             $registrarsFiles = $locator->search('Config/Registrar.php');
 

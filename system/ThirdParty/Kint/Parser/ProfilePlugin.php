@@ -71,19 +71,11 @@ class ProfilePlugin extends AbstractPlugin implements PluginBeginInterface, Plug
             $this->instance_count_stack[$hash] ??= 0;
 
             if (0 === $this->instance_count_stack[$hash]) {
-                /**
-                 * @psalm-suppress PossiblyFalseIterator
-                 * Psalm bug #11392
-                 */
                 foreach (\class_parents($var) as $class) {
                     $this->class_count_stack[$class] ??= 0;
                     ++$this->class_count_stack[$class];
                 }
 
-                /**
-                 * @psalm-suppress PossiblyFalseIterator
-                 * Psalm bug #11392
-                 */
                 foreach (\class_implements($var) as $iface) {
                     $this->class_count_stack[$iface] ??= 0;
                     ++$this->class_count_stack[$iface];
@@ -102,18 +94,10 @@ class ProfilePlugin extends AbstractPlugin implements PluginBeginInterface, Plug
             --$this->instance_count_stack[$v->getSplObjectHash()];
 
             if (0 === $this->instance_count_stack[$v->getSplObjectHash()]) {
-                /**
-                 * @psalm-suppress PossiblyFalseIterator
-                 * Psalm bug #11392
-                 */
                 foreach (\class_parents($var) as $class) {
                     --$this->class_count_stack[$class];
                 }
 
-                /**
-                 * @psalm-suppress PossiblyFalseIterator
-                 * Psalm bug #11392
-                 */
                 foreach (\class_implements($var) as $iface) {
                     --$this->class_count_stack[$iface];
                 }
@@ -146,10 +130,6 @@ class ProfilePlugin extends AbstractPlugin implements PluginBeginInterface, Plug
                 $this->class_complexity[$v->getClassName()] ??= 0;
                 $this->class_complexity[$v->getClassName()] += $sub_complexity;
 
-                /**
-                 * @psalm-suppress PossiblyFalseIterator
-                 * Psalm bug #11392
-                 */
                 foreach (\class_parents($var) as $class) {
                     $this->class_complexity[$class] ??= 0;
                     if (0 === $this->class_count_stack[$class]) {
@@ -157,10 +137,6 @@ class ProfilePlugin extends AbstractPlugin implements PluginBeginInterface, Plug
                     }
                 }
 
-                /**
-                 * @psalm-suppress PossiblyFalseIterator
-                 * Psalm bug #11392
-                 */
                 foreach (\class_implements($var) as $iface) {
                     $this->class_complexity[$iface] ??= 0;
                     if (0 === $this->class_count_stack[$iface]) {

@@ -49,7 +49,7 @@ class Builder extends BaseBuilder
     ];
 
     /**
-     * @var array<string, string>
+     * @var array
      */
     protected $supportedIgnoreStatements = [
         'insert' => 'OR IGNORE',
@@ -151,8 +151,8 @@ class Builder extends BaseBuilder
                     return ($index->type === 'PRIMARY' || $index->type === 'UNIQUE') && $hasAllFields;
                 });
 
-                foreach ($allIndexes as $index) {
-                    $constraints = $index->fields;
+                foreach (array_map(static fn ($index) => $index->fields, $allIndexes) as $index) {
+                    $constraints[] = current($index);
                     break;
                 }
 

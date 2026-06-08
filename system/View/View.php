@@ -186,9 +186,7 @@ class View implements RendererInterface
 
             $this->renderVars['cacheName'] = $cacheName;
 
-            $output = cache($this->renderVars['cacheName']);
-
-            if (is_string($output) && $output !== '') {
+            if ($output = cache($this->renderVars['cacheName'])) {
                 $this->logPerformance(
                     $this->renderVars['start'],
                     microtime(true),
@@ -337,8 +335,9 @@ class View implements RendererInterface
     /**
      * Sets several pieces of view data at once.
      *
-     * @param 'attr'|'css'|'html'|'js'|'raw'|'url'|null $context The context to escape it for.
-     *                                                           If 'raw', no escaping will happen.
+     * @param         non-empty-string|null                     $context The context to escape it for.
+     *                                                                   If 'raw', no escaping will happen.
+     * @phpstan-param null|'html'|'js'|'css'|'url'|'attr'|'raw' $context
      */
     public function setData(array $data = [], ?string $context = null): RendererInterface
     {
@@ -355,9 +354,10 @@ class View implements RendererInterface
     /**
      * Sets a single piece of view data.
      *
-     * @param mixed                                     $value
-     * @param 'attr'|'css'|'html'|'js'|'raw'|'url'|null $context The context to escape it for.
-     *                                                           If 'raw', no escaping will happen.
+     * @param         mixed                                     $value
+     * @param         non-empty-string|null                     $context The context to escape it for.
+     *                                                                   If 'raw', no escaping will happen.
+     * @phpstan-param null|'html'|'js'|'css'|'url'|'attr'|'raw' $context
      */
     public function setVar(string $name, $value = null, ?string $context = null): RendererInterface
     {

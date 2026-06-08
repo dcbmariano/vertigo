@@ -109,10 +109,8 @@ class UserAgent implements Stringable
     {
         $this->config = $config ?? config(UserAgents::class);
 
-        $userAgent = service('superglobals')->server('HTTP_USER_AGENT');
-
-        if ($userAgent !== null) {
-            $this->agent = trim($userAgent);
+        if (isset($_SERVER['HTTP_USER_AGENT'])) {
+            $this->agent = trim($_SERVER['HTTP_USER_AGENT']);
             $this->compileData();
         }
     }
@@ -177,11 +175,10 @@ class UserAgent implements Stringable
     public function isReferral(): bool
     {
         if (! isset($this->referrer)) {
-            $referer = service('superglobals')->server('HTTP_REFERER');
-            if ($referer === null || $referer === '') {
+            if (empty($_SERVER['HTTP_REFERER'])) {
                 $this->referrer = false;
             } else {
-                $refererHost = @parse_url($referer, PHP_URL_HOST);
+                $refererHost = @parse_url($_SERVER['HTTP_REFERER'], PHP_URL_HOST);
                 $ownHost     = parse_url(\base_url(), PHP_URL_HOST);
 
                 $this->referrer = ($refererHost && $refererHost !== $ownHost);
@@ -244,9 +241,7 @@ class UserAgent implements Stringable
      */
     public function getReferrer(): string
     {
-        $referrer = service('superglobals')->server('HTTP_REFERER');
-
-        return $referrer === null ? '' : trim($referrer);
+        return empty($_SERVER['HTTP_REFERER']) ? '' : trim($_SERVER['HTTP_REFERER']);
     }
 
     /**
@@ -283,7 +278,7 @@ class UserAgent implements Stringable
         $this->setPlatform();
 
         foreach (['setRobot', 'setBrowser', 'setMobile'] as $function) {
-            if ($this->{$function}()) {
+            if ($this->{$function}() === true) {
                 break;
             }
         }

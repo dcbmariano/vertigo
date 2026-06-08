@@ -13,8 +13,6 @@ declare(strict_types=1);
 
 namespace CodeIgniter\Debug;
 
-use CodeIgniter\HTTP\CLIRequest;
-use CodeIgniter\HTTP\IncomingRequest;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Throwable;
@@ -23,8 +21,6 @@ interface ExceptionHandlerInterface
 {
     /**
      * Determines the correct way to display the error.
-     *
-     * @param CLIRequest|IncomingRequest $request
      */
     public function handle(
         Throwable $exception,

@@ -208,45 +208,41 @@ class SimpleXMLElementPlugin extends AbstractPlugin implements PluginBeginInterf
         $contents = [];
 
         foreach ($namespaces as $nsAlias => $_) {
-            $nsChildren = $var->children($nsAlias, true);
-            if (!(bool) $nsChildren) {
-                continue;
-            }
+            if ((bool) $nsChildren = $var->children($nsAlias, true)) {
+                $nsap = [];
+                foreach ($nsChildren as $name => $child) {
+                    $base = new ClassOwnedContext((string) $name, SimpleXMLElement::class);
+                    $base->depth = $cdepth + 1;
 
-            $nsap = [];
+                    if ('' !== $nsAlias) {
+                        $base->name = $nsAlias.':'.$name;
+                    }
 
-            foreach ($nsChildren as $name => $child) {
-                $base = new ClassOwnedContext((string) $name, SimpleXMLElement::class);
-                $base->depth = $cdepth + 1;
+                    if (null !== $ap) {
+                        if ('' === $nsAlias) {
+                            $base->access_path = $ap.'->';
+                        } else {
+                            $base->access_path = $ap.'->children('.\var_export($nsAlias, true).', true)->';
+                        }
 
-                if ('' !== $nsAlias) {
-                    $base->name = $nsAlias.':'.$name;
+                        if (Utils::isValidPhpName((string) $name)) {
+                            $base->access_path .= (string) $name;
+                        } else {
+                            $base->access_path .= '{'.\var_export((string) $name, true).'}';
+                        }
+
+                        if (isset($nsap[$base->access_path])) {
+                            ++$nsap[$base->access_path];
+                            $base->access_path .= '['.$nsap[$base->access_path].']';
+                        } else {
+                            $nsap[$base->access_path] = 0;
+                        }
+                    }
+
+                    $v = $this->parseElement($child, $base);
+                    $v->flags |= AbstractValue::FLAG_GENERATED;
+                    $contents[] = $v;
                 }
-
-                if (null !== $ap) {
-                    if ('' === $nsAlias) {
-                        $base->access_path = $ap.'->';
-                    } else {
-                        $base->access_path = $ap.'->children('.\var_export($nsAlias, true).', true)->';
-                    }
-
-                    if (Utils::isValidPhpName((string) $name)) {
-                        $base->access_path .= (string) $name;
-                    } else {
-                        $base->access_path .= '{'.\var_export((string) $name, true).'}';
-                    }
-
-                    if (isset($nsap[$base->access_path])) {
-                        ++$nsap[$base->access_path];
-                        $base->access_path .= '['.$nsap[$base->access_path].']';
-                    } else {
-                        $nsap[$base->access_path] = 0;
-                    }
-                }
-
-                $v = $this->parseElement($child, $base);
-                $v->flags |= AbstractValue::FLAG_GENERATED;
-                $contents[] = $v;
             }
         }
 

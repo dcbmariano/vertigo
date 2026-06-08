@@ -284,13 +284,7 @@ class FormatRules
             $str = (string) $str;
         }
 
-        $decoded = base64_decode($str, true);
-
-        if ($decoded === false) {
-            return false;
-        }
-
-        return base64_encode($decoded) === $str;
+        return base64_encode(base64_decode($str, true)) === $str;
     }
 
     /**
@@ -422,7 +416,7 @@ class FormatRules
      */
     public function valid_url_strict($str = null, ?string $validSchemes = null): bool
     {
-        if (in_array($str, [null, '', '0'], true)) {
+        if ($str === null || $str === '' || $str === '0') {
             return false;
         }
 

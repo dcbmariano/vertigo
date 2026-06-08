@@ -21,15 +21,13 @@ use ReflectionException;
 
 /**
  * Core functionality for running, listing, etc commands.
- *
- * @phpstan-type commands_list array<string, array{'class': class-string<BaseCommand>, 'file': string, 'group': string,'description': string}>
  */
 class Commands
 {
     /**
      * The found commands.
      *
-     * @var commands_list
+     * @var array
      */
     protected $commands = [];
 
@@ -53,8 +51,6 @@ class Commands
 
     /**
      * Runs a command given
-     *
-     * @param array<int|string, string|null> $params
      *
      * @return int Exit code
      */
@@ -81,7 +77,7 @@ class Commands
     /**
      * Provide access to the list of commands.
      *
-     * @return commands_list
+     * @return array
      */
     public function getCommands()
     {
@@ -100,7 +96,7 @@ class Commands
             return;
         }
 
-        /** @var FileLocatorInterface */
+        /** @var FileLocatorInterface $locator */
         $locator = service('locator');
         $files   = $locator->listFiles('Commands/');
 
@@ -113,7 +109,6 @@ class Commands
         // Loop over each file checking to see if a command with that
         // alias exists in the class.
         foreach ($files as $file) {
-            /** @var class-string<BaseCommand>|false */
             $className = $locator->findQualifiedNameFromPath($file);
 
             if ($className === false || ! class_exists($className)) {
@@ -127,9 +122,10 @@ class Commands
                     continue;
                 }
 
+                /** @var BaseCommand $class */
                 $class = new $className($this->logger, $this);
 
-                if ($class->group !== null && ! isset($this->commands[$class->name])) {
+                if (isset($class->group) && ! isset($this->commands[$class->name])) {
                     $this->commands[$class->name] = [
                         'class'       => $className,
                         'file'        => $file,
@@ -150,8 +146,6 @@ class Commands
     /**
      * Verifies if the command being sought is found
      * in the commands list.
-     *
-     * @param commands_list $commands
      */
     public function verifyCommand(string $command, array $commands): bool
     {
@@ -159,9 +153,9 @@ class Commands
             return true;
         }
 
-        $message      = lang('CLI.commandNotFound', [$command]);
-        $alternatives = $this->getCommandAlternatives($command, $commands);
+        $message = lang('CLI.commandNotFound', [$command]);
 
+        $alternatives = $this->getCommandAlternatives($command, $commands);
         if ($alternatives !== []) {
             if (count($alternatives) === 1) {
                 $message .= "\n\n" . lang('CLI.altCommandSingular') . "\n    ";
@@ -181,17 +175,11 @@ class Commands
     /**
      * Finds alternative of `$name` among collection
      * of commands.
-     *
-     * @param commands_list $collection
-     *
-     * @return list<string>
      */
     protected function getCommandAlternatives(string $name, array $collection): array
     {
-        /** @var array<string, int> */
         $alternatives = [];
 
-        /** @var string $commandName */
         foreach (array_keys($collection) as $commandName) {
             $lev = levenshtein($name, $commandName);
 

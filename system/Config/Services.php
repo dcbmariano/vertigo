@@ -345,7 +345,7 @@ class Services extends BaseService
         $config ??= config(Images::class);
         assert($config instanceof Images);
 
-        $handler = in_array($handler, [null, '', '0'], true) ? $config->defaultHandler : $handler;
+        $handler = $handler !== null && $handler !== '' && $handler !== '0' ? $handler : $config->defaultHandler;
         $class   = $config->handlers[$handler];
 
         return new $class($config);
@@ -385,7 +385,7 @@ class Services extends BaseService
         }
 
         // Use '?:' for empty string check
-        $locale = in_array($locale, [null, '', '0'], true) ? $requestLocale : $locale;
+        $locale = $locale !== null && $locale !== '' && $locale !== '0' ? $locale : $requestLocale;
 
         return new Language($locale);
     }
@@ -484,7 +484,7 @@ class Services extends BaseService
             return static::getSharedInstance('parser', $viewPath, $config);
         }
 
-        $viewPath = in_array($viewPath, [null, '', '0'], true) ? (new Paths())->viewDirectory : $viewPath;
+        $viewPath = $viewPath !== null && $viewPath !== '' && $viewPath !== '0' ? $viewPath : (new Paths())->viewDirectory;
         $config ??= config(ViewConfig::class);
 
         return new Parser($config, $viewPath, AppServices::get('locator'), CI_DEBUG, AppServices::get('logger'));
@@ -503,7 +503,7 @@ class Services extends BaseService
             return static::getSharedInstance('renderer', $viewPath, $config);
         }
 
-        $viewPath = in_array($viewPath, [null, '', '0'], true) ? (new Paths())->viewDirectory : $viewPath;
+        $viewPath = $viewPath !== null && $viewPath !== '' && $viewPath !== '0' ? $viewPath : (new Paths())->viewDirectory;
         $config ??= config(ViewConfig::class);
 
         return new View($config, $viewPath, AppServices::get('locator'), CI_DEBUG, AppServices::get('logger'));
@@ -683,11 +683,6 @@ class Services extends BaseService
                 $driverName = MySQLiHandler::class;
             } elseif ($driverPlatform === 'Postgre') {
                 $driverName = PostgreHandler::class;
-            } else {
-                throw new InvalidArgumentException(sprintf(
-                    'Invalid session database handler "%s" provided. Only "MySQLi" and "Postgre" are supported.',
-                    $driverPlatform,
-                ));
             }
         }
 
