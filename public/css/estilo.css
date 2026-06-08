@@ -268,8 +268,8 @@ footer {
     overflow-x: auto;
     padding: 15px;
     border-radius: 8px;
-    font-family: "Courier New", monospace;
-    letter-spacing: 1px;
+    font-family: "Courier New", monospace; 
+    letter-spacing: 2px;
 }
 
 .alignment-line {
@@ -304,4 +304,22 @@ footer {
 .dt-paging-button:hover {
     border: solid white 1px !important;
     background: none !important;
+}
+
+.chain-link{
+    color:#0d6efd;
+    cursor:pointer;
+    text-decoration:underline;
+}
+
+.close-sequence-popover{
+    cursor:pointer; font-weight:bold; font-size:26px; margin-top:-30px !important;
+}
+
+.popover-body{
+    padding-top:5px !important;
+}
+
+.popover{
+    max-width:500px;
 }

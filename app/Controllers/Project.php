@@ -57,7 +57,7 @@ class Project extends BaseController
         if (file_exists($hitsFile)) {
             $handle = fopen($hitsFile, 'r');
             while (($row = fgetcsv($handle, 0, ';')) !== false) {
-                if($row[1] != '-'){
+                if ($row[1] != '-') {
                     $result['hits'][] = $row;
                 }
             }
@@ -71,6 +71,11 @@ class Project extends BaseController
     {
         $edited = "./data/$id/alignments_edited.txt";
         $original = "./data/$id/alignments.txt";
+
+        if($id == "Example"){
+            $edited = "./example/alignments_edited.txt";
+            $original = "./example/alignments.txt";
+        }
 
         if (file_exists($edited)) {
             $content = file_get_contents($edited);
@@ -98,4 +103,62 @@ class Project extends BaseController
             'message' => 'Alignment exported successfully.'
         ]);
     }
+
+    public function example(): string
+    {
+        $dados['id'] = 'Example';
+        $dados['ready'] = true;
+
+        if (file_exists('./example/alignments.txt')) {
+
+            $result = [];
+
+            $alignmentFile = "./example/alignments.txt";
+            $hitsFile      = "./example/alignmentHits.csv";
+            $fasta      = "./example/hmm.fasta";
+
+            if (file_exists($alignmentFile)) {
+                $result['alignments'] = file_get_contents($alignmentFile);
+            } else {
+                $result['alignments'] = null;
+            }
+
+            if (file_exists($fasta)) {
+                $fastaContent = file_get_contents($fasta);
+                $sequences = [];
+                $currentId = null;
+                foreach (explode("\n", $fastaContent) as $line) {
+                    $line = trim($line);
+                    if ($line === '') {
+                        continue;
+                    }
+                    if ($line[0] === '>') {
+                        $currentId = substr($line, 1);
+                        $currentId = explode('_', $currentId)[0];
+                        $sequences[$currentId] = '';
+                    } else {
+                        $sequences[$currentId] .= $line;
+                    }
+                }
+                $result['fasta'] = $sequences;
+            } else {
+                $result['fasta'] = null;
+            }
+
+            $result['hits'] = [];
+            if (file_exists($hitsFile)) {
+                $handle = fopen($hitsFile, 'r');
+                while (($row = fgetcsv($handle, 0, ';')) !== false) {
+                    if ($row[1] != '-') {
+                        $result['hits'][] = $row;
+                    }
+                }
+                fclose($handle);
+            }
+
+            $dados['results'] = $result;
+        }
+        return view('example', $dados);
+    }
+
 }

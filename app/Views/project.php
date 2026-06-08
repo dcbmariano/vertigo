@@ -122,13 +122,13 @@
     </table>
 
 
-    <h2>Alignments</h2>
+    <h2 class="pt-4">Alignments</h2>
     <script>
         const projectId = "<?= esc($id) ?>";
     </script>
 
     <div id="alignments" class="mb-5 pb-5"></div>
-    
+
     <div
         id="selectionMenu"
         class="card"
@@ -143,12 +143,39 @@
             Edit
         </button>
         <button
+            id="deleteSelectionBtn"
+            class="btn btn-sm btn-dark"
+            style="display:none">
+            Delete
+        </button>
+        <button
+            id="deleteGapBtn"
+            class="btn btn-sm btn-dark"
+            style="display:none">
+            Delete Gap
+        </button>
+        <button
             id="insertSelectionBtn"
-            class="btn btn-sm btn-success"
+            class="btn btn-sm btn-dark"
             style="display:none">
             Insert
         </button>
     </div>
+
+    <button
+    onclick="window.scrollTo({top:0,behavior:'smooth'})"
+    class="btn btn-outline-secondary"
+    data-bs-toggle="tooltip"
+    data-bs-placement="left"
+    data-bs-title="Back to top"    
+    style="
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 9999;
+    ">
+    <i class="bi bi-arrow-up"></i>
+</button>
 
     <?= $this->include('modal/edit_sequence') ?>
     <?= $this->include('modal/view_hmm_fasta') ?>

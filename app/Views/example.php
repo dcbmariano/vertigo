@@ -4,402 +4,182 @@
 <?= $this->extend('template') ?>
 
 <?= $this->section('scripts') ?>
-<!-- adicione links para scripts aqui -->
+
+<script src="https://cdn.datatables.net/2.3.2/js/dataTables.js"></script>
+<script src="https://cdn.datatables.net/2.3.2/js/dataTables.bootstrap5.js"></script>
+<script src="<?= base_url('/js/datatables_project.js') ?>"></script>
+<script src="<?= base_url('/js/alignments.js') ?>"></script>
 
 <?= $this->endSection() ?>
 
 <?= $this->section('conteudo') ?>
 <!-- adicione o conteúdo principal aqui -->
-
-<h1>Project example</h1>
-
-<div class="row mt-4">
-    <div class="col-12 col-md-9 small">
-        <div class="table-responsive">
-
-            <table class="table table-hover table-striped" id="resultado">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>ID</th>
-                        <th>Haplotype #1</th>
-                        <th>Allele Functional #1</th>
-                        <th>Allele #1</th>
-                        <th>Activity Value #1</th>
-                        <th>Haplotype #2</th>
-                        <th>Allele Functional #2</th>
-                        <th>Allele #2</th>
-                        <th>Activity Value #2</th>
-                        <th>Activity Score</th>
-                        <th>Phenotype</th>
-                        <th>CNV</th>
-                         <th>Diplotype</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
+<?php if (!$ready): ?>
+    <div class="container">
+        <div class="text-center text-muted my-5">
+            <div class="alert alert-info small">This is project ID <a href="<?= base_url('/project/' . $id) ?>"><?= $id ?></a>. When processing is complete, this page will automatically refresh.</div>
+            <h1 class="mt-5 pt-5">HMM Search is running...</h1>
+            <p class="mb-5">This page will be updated every 60 seconds. Please, wait...</p>
+            <meta http-equiv="refresh" content="60"><!-- atualiza a cada 60 segundos -->
+            <img src="<?= base_url('/img/loading.gif') ?>" class="text-center mb-5">
         </div>
     </div>
+<?php else: ?>
+    <section class="row mb-4" style="height: 180px; margin-top:-20px; background-color:#e4e4e4">
+        <div class="col-9 py-5 px-4">
+            <h2>
+                <strong><?= $id ?></strong>
+                <div class="dropdown d-inline ms-2" title="Export files">
+                    <div class="dropdown d-inline">
+                        <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Download
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><b class="ms-3">Export</b></li>
+                            <hr>
+                            <li><a class="dropdown-item" href="<?= base_url('/example/alignmentHits.csv') ?>">Hits list (csv)</a></li>
+                            <li><a class="dropdown-item mt-2" href="<?= base_url('/example/alignments.txt') ?>">Alignments (original)</a></li>
+                            <li><a class="dropdown-item mt-2" href="<?= base_url('/example/alignments_edited.txt') ?>">Alignments (updated)</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-primary" id="saveAlignmentsBtn" disabled title="You cannot save in the example page">
+                    <i class="bi bi-floppy"></i> Save alignment
+                </button>
+            </h2>
+        </div>
+        <div class="col-3 text-light" style="background-color: #00bc9e;">
+            <p style="text-align: center; font-size: 90px; padding-top:10px">
+                <strong id="mutations_found_title"></ /?=count($results['hits']) ?></strong>
+            </p>
+            <p style="font-size: 14px; text-align:center; margin-top: -30px">
+                alignments
+                <a href="#" data-toggle="modal" data-target="#help" style="color:#fff"><span class="glyphicon glyphicon-info-sign"></span></a>
+            </p>
+        </div>
+    </section>
 
-    <div class="col-12 col-md-3 p-4 bg-light">
-        <p class="text-muted">Download files:</p>
-        <ul>
-            <li><a href="<?= filtra_url(base_url('/example/final_table.csv')) ?>">final_table.csv</a></li>
-            <li><a href="<?= filtra_url(base_url('/example/final_cnv.csv')) ?>">final_cnv.csv</a></li>
+    <?php
+    function renderAlignmentLine($line)
+    {
+        $html = '';
+        foreach (str_split($line) as $char) {
+            $html .= '<span class="aa" data-aa="' .
+                htmlspecialchars($char) .
+                '">' .
+                htmlspecialchars($char) .
+                '</span>';
+        }
+        return $html;
+    }
+    $blocks = preg_split(
+        '/(?=^>)/m',
+        trim($results['alignments'])
+    );
+
+    $header = $results['hits'][0] ?? [];
+    $rows = array_slice($results['hits'], 1);
+    ?>
+
+    <script>
+        const fastaSequences = <?= json_encode($results['fasta']) ?>;
+    </script>
+
+    <table
+        id="hitsTable"
+        class="table table-striped table-hover table-bordered table-sm small">
+        <thead>
+            <tr>
+                <?php foreach ($header as $column): ?>
+                    <th><?= esc($column) ?></th>
+                <?php endforeach; ?>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($rows as $row): ?>
+                <tr>
+                    <?php foreach ($row as $i => $cell): ?>
+                        <td>
+                            <?php if ($i === 0): ?>
+                                <a href="#"
+                                    class="sequence-link"
+                                    data-id="<?= esc($cell) ?>">
+                                    <?= esc($cell) ?>
+                                </a>
+                            <?php elseif ($i === 2): ?>
+                                <?php $anchor = '>' . str_replace('|', '_', $cell); ?>
+                                <a href="#<?= esc($anchor) ?>">
+                                    <?= esc($cell) ?>
+                                </a>
+                            <?php else: ?>
+                                <?= esc($cell) ?>
+                            <?php endif; ?>
+                        </td>
+                    <?php endforeach; ?>
+                </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
 
 
-            <li><a href="<?= filtra_url(base_url('/example/halelos.csv')) ?>">haplotypes.csv</a></li>
-<!--            <li><a href="<?= filtra_url(base_url('/example/pacientes.csv')) ?>">pacientes.csv</a></li>
-    -->        <li><a href="<?= filtra_url(base_url('/example/output')) ?>">output</a></li>
-            <li><a href="<?= filtra_url(base_url('/example/output_freqs')) ?>">output_freqs</a></li>
-            <li><a href="<?= filtra_url(base_url('/example/output_hbg')) ?>">output_hbg</a></li>
-            <li><a href="<?= filtra_url(base_url('/example/output_monitor')) ?>">output_monitor</a></li>
-            <li><a href="<?= filtra_url(base_url('/example/output_pairs')) ?>">output_pairs</a></li>
-            <li><a href="<?= filtra_url(base_url('/example/output_probs')) ?>">output_probs</a></li>
-            <li><a href="<?= filtra_url(base_url('/example/output_recom')) ?>">output_recom</a></li>
-            <li><a href="<?= filtra_url(base_url('/example/log.txt')) ?>">log.txt</a></li>
-        </ul>
+    <h2 class="pt-4">Alignments</h2>
+    <script>
+        const projectId = "<?= esc($id) ?>";
+    </script>
+
+    <div id="alignments" class="mb-5 pb-5"></div>
+
+    <div
+        id="selectionMenu"
+        class="card"
+        style="
+        position:absolute;
+        display:none;
+        z-index:9999;
+    ">
+        <button
+            id="editSelectionBtn"
+            class="btn btn-sm btn-dark">
+            Edit
+        </button>
+        <button
+            id="deleteSelectionBtn"
+            class="btn btn-sm btn-dark"
+            style="display:none">
+            Delete
+        </button>
+        <button
+            id="deleteGapBtn"
+            class="btn btn-sm btn-dark"
+            style="display:none">
+            Delete Gap
+        </button>
+        <button
+            id="insertSelectionBtn"
+            class="btn btn-sm btn-dark"
+            style="display:none">
+            Insert
+        </button>
     </div>
-</div>
 
+    <button
+    onclick="window.scrollTo({top:0,behavior:'smooth'})"
+    class="btn btn-outline-secondary"
+    data-bs-toggle="tooltip"
+    data-bs-placement="left"
+    data-bs-title="Back to top"    
+    style="
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 9999;
+    ">
+    <i class="bi bi-arrow-up"></i>
+</button>
 
-<!-- gráficos -->
-<div class="container">
-    <div class="row py-5">
-        <div class="col">
-            <h2>Allele frequency</h2>
-            <canvas id="g1" style="max-width: auto"></canvas>
-        </div>
+    <?= $this->include('modal/edit_sequence') ?>
+    <?= $this->include('modal/view_hmm_fasta') ?>
 
-        <div class="col">
-            <h2>Diplotype frequency</h2>
-            <canvas id="g2" style="max-width: auto"></canvas>
-        </div>
-        
-    </div>
-    <div class="row pb-5">
-        <div class="col">
-            <h2>Activity score frequency</h2>
-            <canvas id="g4" style="max-width: auto"></canvas>
-        </div>
-
-        <div class="col">
-            <h2>Phenotype frequency</h2>
-            <canvas id="g3" style="max-width: auto"></canvas>
-        </div>
-    </div>
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
-
-<script>
-    // Função para contar a frequência dos alelos
-function countAlleles(data) {
-    const counts = {};
-    data.forEach(row => {
-        // Processar a coluna 1_allele
-        if (row['1_allele']){
-            const alleles1 = row['1_allele'].includes('/') ? row['1_allele'].split('/') : [row['1_allele']];
-
-            alleles1.forEach(allele => {
-                if (allele) {
-                    counts[allele] = (counts[allele] || 0) + 1;
-                }
-            });
-
-            // Processar a coluna 2_allele
-            const alleles2 = row['2_allele'].includes('/') ? row['2_allele'].split('/') : [row['2_allele']];
-            alleles2.forEach(allele => {
-                if (allele) {
-                    counts[allele] = (counts[allele] || 0) + 1;
-                }
-            });
-        }
-    });
-    return counts;
-}
-
-// Leitura do CSV e criação do gráfico
-Papa.parse('<?= filtra_url(base_url("/example/final_cnv.csv")) ?>', {
-    download: true,
-    header: true,
-    complete: function(results) {
-        const data = results.data;
-        
-        // Contar a frequência dos alelos
-        const alleleCounts = countAlleles(data);
-        
-        // Preparar dados para o gráfico
-        const labels = Object.keys(alleleCounts);
-        const values = Object.values(alleleCounts);
-
-        // Configuração do gráfico
-        const ctx = document.getElementById('g1').getContext('2d');
-        const alleleChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Frequency',
-                    data: values,
-                    backgroundColor: 'rgba(00, 108, 255)',
-                    borderColor: 'rgba(0, 0, 0, 0)',
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                scales: {
-                        x: {
-                            grid: {
-                                display: false // Remove as linhas de grade do eixo X
-                            }
-                        },
-                        y: {
-                            grid: {
-                                display: false, // Remove as linhas de grade do eixo y
-                                beginAtZero: true
-                            }
-                        }
-                    }
-            }
-        });
-    }
-});
-
-</script>
-
-<script>
-    // Função para contar a frequência dos haplótipos
-    function countHaplotypes(data, column) {
-        const counts = {};
-        data.forEach(row => {
-            // const haplotype = row[column];
-            // if (haplotype) {
-            //     counts[haplotype] = (counts[haplotype] || 0) + 1;
-            // }
-
-            const totalDiplotype = row['1_allele'] + '/' + row['2_allele'];
-            if (totalDiplotype) { counts[totalDiplotype] = (counts[totalDiplotype] || 0) + 1; }
-        });
-if ("undefined/undefined" in counts) {
-    delete counts["undefined/undefined"];
-}
-	//console.log(counts);
-        return counts;
-    }
-
-    // Leitura do CSV e criação do gráfico
-    Papa.parse('<?= filtra_url(base_url("/example/final_cnv.csv")) ?>', {
-        download: true,
-        header: true,
-        complete: function(results) {
-            const data2 = results.data;
-
-            // Contar a frequência dos haplótipos
-            const haplotype1Counts = countHaplotypes(data2, '1_enzymatic_activity');
-            const haplotype2Counts = countHaplotypes(data2, '2_enzymatic_activity');
-
-            // Combinar os haplótipos e suas frequências
-            const allHaplotypes = haplotype1Counts;
-            //for (const haplotype in haplotype1Counts) {
-            //    allHaplotypes[haplotype] = (allHaplotypes[haplotype] || 0) + haplotype1Counts[haplotype];
-            //}
-            //for (const haplotype in haplotype2Counts) {
-            //    allHaplotypes[haplotype] = (allHaplotypes[haplotype] || 0) + haplotype2Counts[haplotype];
-            //}
-
-            // Preparar dados para o gráfico
-            const labels = Object.keys(allHaplotypes);
-            const values = Object.values(allHaplotypes);
-
-            // Configuração do gráfico
-            const ctx2 = document.getElementById('g2').getContext('2d');
-            const haplotypeChart = new Chart(ctx2, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Frequency',
-                        data: values,
-                        backgroundColor: 'rgba(100, 100, 192)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-//                    indexAxis: 'y', // Isto transforma o gráfico de barras em horizontal
-                    scales: {
-                        x: {
-                            beginAtZero: true,
-                            grid: {
-                                display: false // Remove as linhas de grade do eixo X
-                            }
-                        },
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                stepSize: 1, // força incrementos inteiros
-                                callback: function(value) {
-                                    if (Number.isInteger(value)) {
-                                        return value;
-                                    }
-                                }
-                            },grid: {
-                                display: false // Remove as linhas de grade do eixo y
-                            }
-                        }
-                    }
-                }
-            });
-        }
-    });
-</script>
-
-<script>
-    // Função para contar a frequência dos fenótipos
-    function countPhenotypes(data) {
-        const counts = {};
-        data.forEach(row => {
-            const phenotype = row['phenotype'];
-            if (phenotype) {
-                counts[phenotype] = (counts[phenotype] || 0) + 1;
-            }
-        });
-        return counts;
-    }
-
-    // Leitura do CSV e criação do gráfico
-    Papa.parse('<?= filtra_url(base_url("/example/final_cnv.csv")) ?>', {
-        download: true,
-        header: true,
-        complete: function(results) {
-            const data = results.data;
-
-            // Contar a frequência dos fenótipos
-            const phenotypeCounts = countPhenotypes(data);
-
-            // Preparar dados para o gráfico
-            const labels = Object.keys(phenotypeCounts);
-            const values = Object.values(phenotypeCounts);
-
-            // Configuração do gráfico
-            const ctx = document.getElementById('g3').getContext('2d');
-            const phenotypeChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Frequency',
-                        data: values,
-                        backgroundColor: 'rgba(75, 192, 100)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    scales: {
-                        x: {
-                            grid: {
-                                display: false // Remove as linhas de grade do eixo X
-                            }
-                        },
-                        y: {
-                            grid: {
-                                display: false, // Remove as linhas de grade do eixo y
-                                beginAtZero: true
-                            }
-                        }
-                    }
-                }
-            });
-        }
-    });
-</script>
-<script>
-    // Função para contar a frequência dos valores de total_score
-    function countTotalScores(data) {
-        const counts = {};
-        data.forEach(row => {
-            const totalScore = row['total_score'];
-            if (totalScore) { counts[totalScore] = (counts[totalScore] || 0) + 1; }
-        });
-        return counts;
-    }
-
-    // Leitura do CSV e criação do gráfico
-    Papa.parse('<?= filtra_url(base_url("/example/final_cnv.csv")) ?>', {
-        download: true,
-        header: true,
-        complete: function(results) {
-            const data = results.data;
-
-            // Contar a frequência dos valores de total_score
-            const totalScoreCounts = countTotalScores(data);
-
-            // Preparar dados para o gráfico
-            const labels = Object.keys(totalScoreCounts);
-            const values = Object.values(totalScoreCounts);
-
-            // Configuração do gráfico
-            const ctx = document.getElementById('g4').getContext('2d');
-            const totalScoreChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Frequency',
-                        data: values,
-                        backgroundColor: 'rgba(75, 100, 100)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    scales: {
-                        x: {
-                            grid: {
-                                display: false // Remove as linhas de grade do eixo X
-                            }
-                        },
-                        y: {
-                            grid: {
-                                display: false, // Remove as linhas de grade do eixo y
-                                beginAtZero: true
-                            }
-                        }
-                    }
-                }
-            });
-        }
-    });
-</script>
-
-<!-- fim/gráficos -->
-
-<script>
-    $(() => {
-        fetch('<?= filtra_url(base_url("/example/final_cnv.csv")) ?>')
-            .then(response => response.text())
-            .then(dados => {
-
-                // console.log('datatable:', dados)
-                $('#resultado').DataTable({
-                    data: dados.split('\n')
-                        .filter(j => {
-                            if (j.substr(0, 1) != ',') {
-                                return j
-                            }
-                        })
-                        .map(i => {
-                            itens = i.split(',')
-                            diplotype = itens[4] + '/' + itens[8]
-                            itens = itens.concat([diplotype])
-                            return itens
-                        }),
-                    pageLength: 50,
-                })
-            })
-
-    })
-</script>
+<?php endif; ?>
 
 <?= $this->endSection() ?>
-

@@ -62,6 +62,7 @@
         </div>
       </div>
       <div class="modal-footer">
+        <img height="50" class="me-3" src="<?php echo filtra_url(base_url('/img/hamburg_b.png')); ?>">
         <img height="50" class="me-3" src="<?php echo filtra_url(base_url('/img/dcc_b.svg')); ?>">
         <img height="50"  class="me-3" src="<?php echo filtra_url(base_url('/img/ufmg_b.svg')); ?>">
 

@@ -44,7 +44,7 @@
               
               <a href="#" data-bs-toggle="modal" data-bs-target="#about">About</a>
               <a href="<?= base_url('/documentation') ?>">Documentation</a>
-              <a href="<?= base_url('/example') ?>">Example</a>
+              <a href="<?= base_url('/project-example') ?>">Example</a>
               <a href="<?= base_url('/#run') ?>">Run</a>
           </div>
 
