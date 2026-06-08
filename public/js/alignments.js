@@ -53,7 +53,7 @@ document.addEventListener('click', event => {
 
 async function init() {
     /* Carrega os alinhamentos do projeto, renderiza os blocos e inicializa os tooltips da interface. */
-    const response = await fetch(`/project/${projectId}/alignments`);
+    const response = await fetch(`${base_url}/project/${projectId}/alignments`);
     const text = await response.text();
     originalAlignmentText = text;
     alignmentBlocks = parseAlignments(text);
@@ -357,7 +357,7 @@ async function saveAlignmentsFile() {
     /* Salva o arquivo no servidor */
     let content = '';
     document.querySelectorAll('.alignment-line').forEach(line => content += line.textContent + '\n');
-    const response = await fetch(`/project/${projectId}/save-alignments`, {
+    const response = await fetch(`${base_url}/project/${projectId}/save-alignments`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content })

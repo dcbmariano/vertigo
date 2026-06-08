@@ -123,6 +123,7 @@
     <h2 class="pt-4">Alignments</h2>
     <script>
         const projectId = "<?= esc($id) ?>";
+        const base_url = "<?= base_url() ?>";
     </script>
 
     <div id="alignments" class="mb-5 pb-5"></div>
