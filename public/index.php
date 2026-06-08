@@ -1,15 +1,12 @@
 <?php
 
-use CodeIgniter\Boot;
-use Config\Paths;
-
 /*
  *---------------------------------------------------------------
  * CHECK PHP VERSION
  *---------------------------------------------------------------
  */
 
-$minPhpVersion = '8.2'; // If you update this, don't forget to update `spark`.
+$minPhpVersion = '8.1'; // If you update this, don't forget to update `spark`.
 if (version_compare(PHP_VERSION, $minPhpVersion, '<')) {
     $message = sprintf(
         'Your PHP version must be %s or higher to run CodeIgniter. Current version: %s',
@@ -51,9 +48,9 @@ if (getcwd() . DIRECTORY_SEPARATOR !== FCPATH) {
 require FCPATH . '../app/Config/Paths.php';
 // ^^^ Change this line if you move your application folder
 
-$paths = new Paths();
+$paths = new Config\Paths();
 
 // LOAD THE FRAMEWORK BOOTSTRAP FILE
 require $paths->systemDirectory . '/Boot.php';
 
-exit(Boot::bootWeb($paths));
+exit(CodeIgniter\Boot::bootWeb($paths));

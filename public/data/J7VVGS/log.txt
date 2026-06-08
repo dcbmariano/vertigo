@@ -1,2 +1,0 @@
-usage: hs.py [-h] -o OUTPUT -d HMM -p PROT [PROT ...] -r RNA [RNA ...] [-q]
-hs.py: error: argument -p/--prot: expected at least one argument
