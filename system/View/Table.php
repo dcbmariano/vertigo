@@ -83,7 +83,7 @@ class Table
     /**
      * Callback for custom table layout
      *
-     * @var (callable(mixed): mixed)|null
+     * @var callable|null
      */
     public $function;
 

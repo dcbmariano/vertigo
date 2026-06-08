@@ -254,13 +254,4 @@ class Database extends BaseCollector
     {
         $this->connections = \Config\Database::getConnections();
     }
-
-    /**
-     * Reset collector state for worker mode.
-     * Clears collected queries between requests.
-     */
-    public function reset(): void
-    {
-        static::$queries = [];
-    }
 }

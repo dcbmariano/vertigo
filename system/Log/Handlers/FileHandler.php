@@ -19,7 +19,7 @@ use Exception;
 /**
  * Log error messages to file system
  *
- * @see FileHandlerTest
+ * @see \CodeIgniter\Log\Handlers\FileHandlerTest
  */
 class FileHandler extends BaseHandler
 {
@@ -121,8 +121,7 @@ class FileHandler extends BaseHandler
         fclose($fp);
 
         if ($newfile) {
-            // The log entry is already persisted - permission changes are best-effort.
-            @chmod($filepath, $this->filePermissions);
+            chmod($filepath, $this->filePermissions);
         }
 
         return is_int($result);

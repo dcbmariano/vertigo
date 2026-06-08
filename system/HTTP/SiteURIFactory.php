@@ -24,9 +24,9 @@ use Config\App;
  *
  * @see \CodeIgniter\HTTP\SiteURIFactoryTest
  */
-final readonly class SiteURIFactory
+final class SiteURIFactory
 {
-    public function __construct(private App $appConfig, private Superglobals $superglobals)
+    public function __construct(private readonly App $appConfig, private readonly Superglobals $superglobals)
     {
     }
 

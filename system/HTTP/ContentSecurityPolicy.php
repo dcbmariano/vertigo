@@ -13,7 +13,6 @@ declare(strict_types=1);
 
 namespace CodeIgniter\HTTP;
 
-use CodeIgniter\Exceptions\InvalidArgumentException;
 use Config\App;
 use Config\ContentSecurityPolicy as ContentSecurityPolicyConfig;
 
@@ -29,7 +28,12 @@ use Config\ContentSecurityPolicy as ContentSecurityPolicyConfig;
  */
 class ContentSecurityPolicy
 {
-    private const DIRECTIVES_ALLOWING_SOURCE_LISTS = [
+    /**
+     * CSP directives
+     *
+     * @var array<string, string> [name => property]
+     */
+    protected array $directives = [
         'base-uri'        => 'baseURI',
         'child-src'       => 'childSrc',
         'connect-src'     => 'connectSrc',
@@ -44,293 +48,212 @@ class ContentSecurityPolicy
         'plugin-types'    => 'pluginTypes',
         'script-src'      => 'scriptSrc',
         'style-src'       => 'styleSrc',
-        'sandbox'         => 'sandbox',
         'manifest-src'    => 'manifestSrc',
-        'script-src-elem' => 'scriptSrcElem',
-        'script-src-attr' => 'scriptSrcAttr',
-        'style-src-elem'  => 'styleSrcElem',
-        'style-src-attr'  => 'styleSrcAttr',
-        'worker-src'      => 'workerSrc',
+        'sandbox'         => 'sandbox',
+        'report-uri'      => 'reportURI',
     ];
 
     /**
-     * Map of CSP directives to this class's properties.
+     * Used for security enforcement
      *
-     * @var array<string, string>
-     */
-    protected array $directives = [
-        ...self::DIRECTIVES_ALLOWING_SOURCE_LISTS,
-        'report-uri' => 'reportURI',
-        'report-to'  => 'reportTo',
-    ];
-
-    /**
-     * The `base-uri` directive restricts the URLs that can be used to specify the document base URL.
-     *
-     * @var array<string, bool>|string|null
+     * @var array|string
      */
     protected $baseURI = [];
 
     /**
-     * The `child-src` directive governs the creation of nested browsing contexts as well
-     * as Worker execution contexts.
+     * Used for security enforcement
      *
-     * @var array<string, bool>|string
+     * @var array|string
      */
     protected $childSrc = [];
 
     /**
-     * The `connect-src` directive restricts which URLs the protected resource can load using script interfaces.
+     * Used for security enforcement
      *
-     * @var array<string, bool>|string
+     * @var array
      */
     protected $connectSrc = [];
 
     /**
-     * The `default-src` directive sets a default source list for a number of directives.
+     * Used for security enforcement
      *
-     * @var array<string, bool>|string|null
+     * @var array|string
      */
     protected $defaultSrc = [];
 
     /**
-     * The `font-src` directive restricts from where the protected resource can load fonts.
+     * Used for security enforcement
      *
-     * @var array<string, bool>|string
+     * @var array|string
      */
     protected $fontSrc = [];
 
     /**
-     * The `form-action` directive restricts which URLs can be used as the action of HTML form elements.
+     * Used for security enforcement
      *
-     * @var array<string, bool>|string
+     * @var array|string
      */
     protected $formAction = [];
 
     /**
-     * The `frame-ancestors` directive indicates whether the user agent should allow embedding
-     * the resource using a `frame`, `iframe`, `object`, `embed` or `applet` element,
-     * or equivalent functionality in non-HTML resources.
+     * Used for security enforcement
      *
-     * @var array<string, bool>|string
+     * @var array|string
      */
     protected $frameAncestors = [];
 
     /**
-     * The `frame-src` directive restricts the URLs which may be loaded into child navigables.
+     * Used for security enforcement
      *
-     * @var array<string, bool>|string
+     * @var array|string
      */
     protected $frameSrc = [];
 
     /**
-     * The `img-src` directive restricts from where the protected resource can load images.
+     * Used for security enforcement
      *
-     * @var array<string, bool>|string
+     * @var array|string
      */
     protected $imageSrc = [];
 
     /**
-     * The `media-src` directive restricts from where the protected resource can load video,
-     * audio, and associated text tracks.
+     * Used for security enforcement
      *
-     * @var array<string, bool>|string
+     * @var array|string
      */
     protected $mediaSrc = [];
 
     /**
-     * The `object-src` directive restricts from where the protected resource can load plugins.
+     * Used for security enforcement
      *
-     * @var array<string, bool>|string
+     * @var array|string
      */
     protected $objectSrc = [];
 
     /**
-     * The `plugin-types` directive restricts the set of plugins that can be invoked by the
-     * protected resource by limiting the types of resources that can be embedded.
+     * Used for security enforcement
      *
-     * @var array<string, bool>|string
+     * @var array|string
      */
     protected $pluginTypes = [];
 
     /**
-     * The `script-src` directive restricts which scripts the protected resource can execute.
+     * Used for security enforcement
      *
-     * @var array<string, bool>|string
+     * @var array|string
      */
     protected $scriptSrc = [];
 
     /**
-     * The `style-src` directive restricts which styles the user may applies to the protected resource.
+     * Used for security enforcement
      *
-     * @var array<string, bool>|string
+     * @var array|string
      */
     protected $styleSrc = [];
 
     /**
-     * The `sandbox` directive specifies an HTML sandbox policy that the user agent applies to the protected resource.
+     * Used for security enforcement
      *
-     * @var array<string, bool>|string
+     * @var array|string
+     */
+    protected $manifestSrc = [];
+
+    /**
+     * Used for security enforcement
+     *
+     * @var array|string
      */
     protected $sandbox = [];
 
     /**
-     * The `report-uri` directive specifies a URL to which the user agent sends reports about policy violation.
+     * A set of endpoints to which csp violation reports will be sent when
+     * particular behaviors are prevented.
      *
      * @var string|null
      */
     protected $reportURI;
 
     /**
-     * The `report-to` directive specifies a named group in a Reporting API
-     * endpoint to which the user agent sends reports about policy violation.
-     */
-    protected ?string $reportTo = null;
-
-    // --------------------------------------------------------------
-    // CSP Level 3 Directives
-    // --------------------------------------------------------------
-
-    /**
-     * The `manifest-src` directive restricts the URLs from which application manifests may be loaded.
-     *
-     * @var array<string, bool>|string
-     */
-    protected $manifestSrc = [];
-
-    /**
-     * The `script-src-elem` directive applies to all script requests and script blocks.
-     *
-     * @var array<string, bool>|string
-     */
-    protected array|string $scriptSrcElem = [];
-
-    /**
-     * The `script-src-attr` directive applies to event handlers and, if present,
-     * it will override the `script-src` directive for relevant checks.
-     *
-     * @var array<string, bool>|string
-     */
-    protected array|string $scriptSrcAttr = [];
-
-    /**
-     * The `style-src-elem` directive governs the behaviour of styles except
-     * for styles defined in inline attributes.
-     *
-     * @var array<string, bool>|string
-     */
-    protected array|string $styleSrcElem = [];
-
-    /**
-     * The `style-src-attr` directive governs the behaviour of style attributes.
-     *
-     * @var array<string, bool>|string
-     */
-    protected array|string $styleSrcAttr = [];
-
-    /**
-     * The `worker-src` directive restricts the URLs which may be loaded as a `Worker`,
-     * `SharedWorker`, or `ServiceWorker`.
-     *
-     * @var array<string, bool>|string
-     */
-    protected array|string $workerSrc = [];
-
-    /**
-     * Instructs user agents to rewrite URL schemes by changing HTTP to HTTPS.
+     * Used for security enforcement
      *
      * @var bool
      */
     protected $upgradeInsecureRequests = false;
 
     /**
-     * Set to `true` to make all directives report-only instead of enforced.
+     * Used for security enforcement
      *
      * @var bool
      */
     protected $reportOnly = false;
 
     /**
-     * Set of valid keyword-sources.
-     *
-     * @see https://www.w3.org/TR/CSP3/#source-expression
+     * Used for security enforcement
      *
      * @var list<string>
      */
     protected $validSources = [
-        // CSP2 keywords
         'self',
         'none',
         'unsafe-inline',
         'unsafe-eval',
-        // CSP3 keywords
-        'strict-dynamic',
-        'unsafe-hashes',
-        'report-sample',
-        'unsafe-allow-redirects',
-        'wasm-unsafe-eval',
-        'trusted-types-eval',
-        'report-sha256',
-        'report-sha384',
-        'report-sha512',
     ];
 
     /**
-     * Set of nonces generated.
+     * Used for security enforcement
      *
-     * @var list<string>
-     *
-     * @deprecated 4.7.0 Never used.
+     * @var array
      */
     protected $nonces = [];
 
     /**
-     * Nonce for style tags.
+     * Nonce for style
      *
-     * @var string|null
+     * @var string
      */
     protected $styleNonce;
 
     /**
-     * Nonce for script tags.
+     * Nonce for script
      *
-     * @var string|null
+     * @var string
      */
     protected $scriptNonce;
 
     /**
-     * Nonce placeholder for style tags.
+     * Nonce tag for style
      *
      * @var string
      */
     protected $styleNonceTag = '{csp-style-nonce}';
 
     /**
-     * Nonce placeholder for script tags.
+     * Nonce tag for script
      *
      * @var string
      */
     protected $scriptNonceTag = '{csp-script-nonce}';
 
     /**
-     * Replace nonce tags automatically?
+     * Replace nonce tag automatically
      *
      * @var bool
      */
     protected $autoNonce = true;
 
     /**
-     * An array of header info since we have to build
-     * ourselves before passing to a Response object.
+     * An array of header info since we have
+     * to build ourselves before passing to Response.
      *
-     * @var array<string, string>
+     * @var array
      */
     protected $tempHeaders = [];
 
     /**
-     * An array of header info to build that should only be reported.
+     * An array of header info to build
+     * that should only be reported.
      *
-     * @var array<string, string>
+     * @var array
      */
     protected $reportOnlyHeaders = [];
 
@@ -342,45 +265,27 @@ class ContentSecurityPolicy
     protected $CSPEnabled = false;
 
     /**
-     * Map of reporting endpoints to their URLs.
+     * Constructor.
      *
-     * @var array<string, string>
-     */
-    private array $reportingEndpoints = [];
-
-    /**
      * Stores our default values from the Config file.
      */
     public function __construct(ContentSecurityPolicyConfig $config)
     {
-        $this->CSPEnabled = config(App::class)->CSPEnabled;
+        $appConfig        = config(App::class);
+        $this->CSPEnabled = $appConfig->CSPEnabled;
 
         foreach (get_object_vars($config) as $setting => $value) {
-            if (! property_exists($this, $setting)) {
-                continue;
+            if (property_exists($this, $setting)) {
+                $this->{$setting} = $value;
             }
-
-            if (
-                in_array($setting, self::DIRECTIVES_ALLOWING_SOURCE_LISTS, true)
-                && is_array($value)
-                && array_is_list($value)
-            ) {
-                // Config sets these directives as `list<string>|string`
-                // but we need them as `array<string, bool>` internally.
-                $this->{$setting} = array_combine($value, array_fill(0, count($value), $this->reportOnly));
-
-                continue;
-            }
-
-            $this->{$setting} = $value;
         }
 
         if (! is_array($this->styleSrc)) {
-            $this->styleSrc = [$this->styleSrc => $this->reportOnly];
+            $this->styleSrc = [$this->styleSrc];
         }
 
         if (! is_array($this->scriptSrc)) {
-            $this->scriptSrc = [$this->scriptSrc => $this->reportOnly];
+            $this->scriptSrc = [$this->scriptSrc];
         }
     }
 
@@ -398,12 +303,8 @@ class ContentSecurityPolicy
     public function getStyleNonce(): string
     {
         if ($this->styleNonce === null) {
-            $this->styleNonce = base64_encode(random_bytes(12));
-            $this->addStyleSrc('nonce-' . $this->styleNonce);
-
-            if ($this->styleSrcElem !== []) {
-                $this->addStyleSrcElem('nonce-' . $this->styleNonce);
-            }
+            $this->styleNonce = bin2hex(random_bytes(12));
+            $this->styleSrc[] = 'nonce-' . $this->styleNonce;
         }
 
         return $this->styleNonce;
@@ -415,12 +316,8 @@ class ContentSecurityPolicy
     public function getScriptNonce(): string
     {
         if ($this->scriptNonce === null) {
-            $this->scriptNonce = base64_encode(random_bytes(12));
-            $this->addScriptSrc('nonce-' . $this->scriptNonce);
-
-            if ($this->scriptSrcElem !== []) {
-                $this->addScriptSrcElem('nonce-' . $this->scriptNonce);
-            }
+            $this->scriptNonce = bin2hex(random_bytes(12));
+            $this->scriptSrc[] = 'nonce-' . $this->scriptNonce;
         }
 
         return $this->scriptNonce;
@@ -435,7 +332,9 @@ class ContentSecurityPolicy
      */
     public function finalize(ResponseInterface $response)
     {
-        $this->generateNonces($response);
+        if ($this->autoNonce) {
+            $this->generateNonces($response);
+        }
 
         $this->buildHeaders($response);
     }
@@ -457,13 +356,13 @@ class ContentSecurityPolicy
     }
 
     /**
-     * Adds a new value to the `base-uri` directive.
+     * Adds a new baseURI value. Can be either a URI class or a simple string.
      *
-     * `base-uri` restricts the URLs that can appear in a page's <base> element.
+     * baseURI restricts the URLs that can appear in a page's <base> element.
      *
      * @see http://www.w3.org/TR/CSP/#directive-base-uri
      *
-     * @param list<string>|string $uri
+     * @param array|string $uri
      *
      * @return $this
      */
@@ -475,15 +374,16 @@ class ContentSecurityPolicy
     }
 
     /**
-     * Adds a new value to the `child-src` directive.
+     * Adds a new valid endpoint for a form's action. Can be either
+     * a URI class or a simple string.
      *
-     * `child-src` lists the URLs for workers and embedded frame contents.
+     * child-src lists the URLs for workers and embedded frame contents.
      * For example: child-src https://youtube.com would enable embedding
      * videos from YouTube but not from other origins.
      *
      * @see http://www.w3.org/TR/CSP/#directive-child-src
      *
-     * @param list<string>|string $uri
+     * @param array|string $uri
      *
      * @return $this
      */
@@ -495,14 +395,15 @@ class ContentSecurityPolicy
     }
 
     /**
-     * Adds a new value to the `connect-src` directive.
+     * Adds a new valid endpoint for a form's action. Can be either
+     * a URI class or a simple string.
      *
-     * `connect-src` limits the origins to which you can connect
+     * connect-src limits the origins to which you can connect
      * (via XHR, WebSockets, and EventSource).
      *
      * @see http://www.w3.org/TR/CSP/#directive-connect-src
      *
-     * @param list<string>|string $uri
+     * @param array|string $uri
      *
      * @return $this
      */
@@ -514,14 +415,15 @@ class ContentSecurityPolicy
     }
 
     /**
-     * Adds a new value to the `default-src` directive.
+     * Adds a new valid endpoint for a form's action. Can be either
+     * a URI class or a simple string.
      *
-     * `default-src` is the URI that is used for many of the settings when
+     * default_src is the URI that is used for many of the settings when
      * no other source has been set.
      *
      * @see http://www.w3.org/TR/CSP/#directive-default-src
      *
-     * @param list<string>|string $uri
+     * @param array|string $uri
      *
      * @return $this
      */
@@ -533,13 +435,14 @@ class ContentSecurityPolicy
     }
 
     /**
-     * Adds a new value to the `font-src` directive.
+     * Adds a new valid endpoint for a form's action. Can be either
+     * a URI class or a simple string.
      *
-     * `font-src` specifies the origins that can serve web fonts.
+     * font-src specifies the origins that can serve web fonts.
      *
      * @see http://www.w3.org/TR/CSP/#directive-font-src
      *
-     * @param list<string>|string $uri
+     * @param array|string $uri
      *
      * @return $this
      */
@@ -551,11 +454,12 @@ class ContentSecurityPolicy
     }
 
     /**
-     * Adds a new value to the `form-action` directive.
+     * Adds a new valid endpoint for a form's action. Can be either
+     * a URI class or a simple string.
      *
      * @see http://www.w3.org/TR/CSP/#directive-form-action
      *
-     * @param list<string>|string $uri
+     * @param array|string $uri
      *
      * @return $this
      */
@@ -567,11 +471,12 @@ class ContentSecurityPolicy
     }
 
     /**
-     * Adds a new value to the `frame-ancestors` directive.
+     * Adds a new resource that should allow embedding the resource using
+     * <frame>, <iframe>, <object>, <embed>, or <applet>
      *
      * @see http://www.w3.org/TR/CSP/#directive-frame-ancestors
      *
-     * @param list<string>|string $uri
+     * @param array|string $uri
      *
      * @return $this
      */
@@ -583,11 +488,12 @@ class ContentSecurityPolicy
     }
 
     /**
-     * Adds a new value to the `frame-src` directive.
+     * Adds a new valid endpoint for valid frame sources. Can be either
+     * a URI class or a simple string.
      *
      * @see http://www.w3.org/TR/CSP/#directive-frame-src
      *
-     * @param list<string>|string $uri
+     * @param array|string $uri
      *
      * @return $this
      */
@@ -599,11 +505,12 @@ class ContentSecurityPolicy
     }
 
     /**
-     * Adds a new value to the `img-src` directive.
+     * Adds a new valid endpoint for valid image sources. Can be either
+     * a URI class or a simple string.
      *
      * @see http://www.w3.org/TR/CSP/#directive-img-src
      *
-     * @param list<string>|string $uri
+     * @param array|string $uri
      *
      * @return $this
      */
@@ -615,11 +522,12 @@ class ContentSecurityPolicy
     }
 
     /**
-     * Adds a new value to the `media-src` directive.
+     * Adds a new valid endpoint for valid video and audio. Can be either
+     * a URI class or a simple string.
      *
      * @see http://www.w3.org/TR/CSP/#directive-media-src
      *
-     * @param list<string>|string $uri
+     * @param array|string $uri
      *
      * @return $this
      */
@@ -631,11 +539,12 @@ class ContentSecurityPolicy
     }
 
     /**
-     * Adds a new value to the `manifest-src` directive.
+     * Adds a new valid endpoint for manifest sources. Can be either
+     * a URI class or simple string.
      *
      * @see https://www.w3.org/TR/CSP/#directive-manifest-src
      *
-     * @param list<string>|string $uri
+     * @param array|string $uri
      *
      * @return $this
      */
@@ -647,11 +556,12 @@ class ContentSecurityPolicy
     }
 
     /**
-     * Adds a new value to the `object-src` directive.
+     * Adds a new valid endpoint for Flash and other plugin sources. Can be either
+     * a URI class or a simple string.
      *
      * @see http://www.w3.org/TR/CSP/#directive-object-src
      *
-     * @param list<string>|string $uri
+     * @param array|string $uri
      *
      * @return $this
      */
@@ -663,11 +573,12 @@ class ContentSecurityPolicy
     }
 
     /**
-     * Adds a new value to the `plugin-types` directive.
+     * Limits the types of plugins that can be used. Can be either
+     * a URI class or a simple string.
      *
      * @see http://www.w3.org/TR/CSP/#directive-plugin-types
      *
-     * @param list<string>|string $mime
+     * @param array|string $mime One or more plugin mime types, separate by spaces
      *
      * @return $this
      */
@@ -679,138 +590,8 @@ class ContentSecurityPolicy
     }
 
     /**
-     * Adds a new value to the `sandbox` directive.
-     *
-     * @see http://www.w3.org/TR/CSP/#directive-sandbox
-     *
-     * @param list<string>|string $flags
-     *
-     * @return $this
-     */
-    public function addSandbox($flags, ?bool $explicitReporting = null)
-    {
-        $this->addOption($flags, 'sandbox', $explicitReporting ?? $this->reportOnly);
-
-        return $this;
-    }
-
-    /**
-     * Adds a new value to the `script-src` directive.
-     *
-     * @see http://www.w3.org/TR/CSP/#directive-script-src
-     *
-     * @param list<string>|string $uri
-     *
-     * @return $this
-     */
-    public function addScriptSrc($uri, ?bool $explicitReporting = null)
-    {
-        $this->addOption($uri, 'scriptSrc', $explicitReporting ?? $this->reportOnly);
-
-        return $this;
-    }
-
-    /**
-     * Adds a new value to the `script-src-elem` directive.
-     *
-     * @see https://www.w3.org/TR/CSP/#directive-script-src-elem
-     *
-     * @param list<string>|string $uri
-     */
-    public function addScriptSrcElem(array|string $uri, ?bool $explicitReporting = null): static
-    {
-        $this->addOption($uri, 'scriptSrcElem', $explicitReporting ?? $this->reportOnly);
-
-        return $this;
-    }
-
-    /**
-     * Adds a new value to the `script-src-attr` directive.
-     *
-     * @see https://www.w3.org/TR/CSP/#directive-script-src-attr
-     *
-     * @param list<string>|string $uri
-     */
-    public function addScriptSrcAttr(array|string $uri, ?bool $explicitReporting = null): static
-    {
-        $this->addOption($uri, 'scriptSrcAttr', $explicitReporting ?? $this->reportOnly);
-
-        return $this;
-    }
-
-    /**
-     * Adds a new value to the `style-src` directive.
-     *
-     * @see http://www.w3.org/TR/CSP/#directive-style-src
-     *
-     * @param list<string>|string $uri
-     *
-     * @return $this
-     */
-    public function addStyleSrc($uri, ?bool $explicitReporting = null)
-    {
-        $this->addOption($uri, 'styleSrc', $explicitReporting ?? $this->reportOnly);
-
-        return $this;
-    }
-
-    /**
-     * Adds a new value to the `style-src-elem` directive.
-     *
-     * @see https://www.w3.org/TR/CSP/#directive-style-src-elem
-     *
-     * @param list<string>|string $uri
-     */
-    public function addStyleSrcElem(array|string $uri, ?bool $explicitReporting = null): static
-    {
-        $this->addOption($uri, 'styleSrcElem', $explicitReporting ?? $this->reportOnly);
-
-        return $this;
-    }
-
-    /**
-     * Adds a new value to the `style-src-attr` directive.
-     *
-     * @see https://www.w3.org/TR/CSP/#directive-style-src-attr
-     *
-     * @param list<string>|string $uri
-     */
-    public function addStyleSrcAttr(array|string $uri, ?bool $explicitReporting = null): static
-    {
-        $this->addOption($uri, 'styleSrcAttr', $explicitReporting ?? $this->reportOnly);
-
-        return $this;
-    }
-
-    /**
-     * Adds a new value to the `worker-src` directive.
-     *
-     * @see https://www.w3.org/TR/CSP/#directive-worker-src
-     *
-     * @param list<string>|string $uri
-     */
-    public function addWorkerSrc($uri, ?bool $explicitReporting = null): static
-    {
-        $this->addOption($uri, 'workerSrc', $explicitReporting ?? $this->reportOnly);
-
-        return $this;
-    }
-
-    /**
-     * Sets whether the user agents should rewrite URL schemes, changing HTTP to HTTPS.
-     *
-     * @return $this
-     */
-    public function upgradeInsecureRequests(bool $value = true)
-    {
-        $this->upgradeInsecureRequests = $value;
-
-        return $this;
-    }
-
-    /**
      * Specifies a URL where a browser will send reports when a content
-     * security policy is violated.
+     * security policy is violated. Can be either a URI class or a simple string.
      *
      * @see http://www.w3.org/TR/CSP/#directive-report-uri
      *
@@ -827,43 +608,65 @@ class ContentSecurityPolicy
     }
 
     /**
-     * Specifies a named group in a Reporting API endpoint to which the user
-     * agent sends reports about policy violation.
+     * specifies an HTML sandbox policy that the user agent applies to
+     * the protected resource.
      *
-     * @see https://www.w3.org/TR/CSP/#directive-report-to
+     * @see http://www.w3.org/TR/CSP/#directive-sandbox
      *
-     * @param string $endpoint The name of the reporting endpoint. Set `''` if you
-     *                         want to remove this directive at runtime.
+     * @param array|string $flags An array of sandbox flags that can be added to the directive.
+     *
+     * @return $this
      */
-    public function setReportToEndpoint(string $endpoint): static
+    public function addSandbox($flags, ?bool $explicitReporting = null)
     {
-        if ($endpoint === '') {
-            $this->reportURI = null;
-            $this->reportTo  = null;
-
-            return $this;
-        }
-
-        if (! array_key_exists($endpoint, $this->reportingEndpoints)) {
-            throw new InvalidArgumentException(sprintf('The reporting endpoint "%s" has not been defined.', $endpoint));
-        }
-
-        $this->reportURI = $this->reportingEndpoints[$endpoint]; // for BC with browsers that do not support `report-to`
-        $this->reportTo  = $endpoint;
+        $this->addOption($flags, 'sandbox', $explicitReporting ?? $this->reportOnly);
 
         return $this;
     }
 
     /**
-     * Adds reporting endpoints to the `Reporting-Endpoints` header.
+     * Adds a new valid endpoint for javascript file sources. Can be either
+     * a URI class or a simple string.
      *
-     * @param array<string, string> $endpoint
+     * @see http://www.w3.org/TR/CSP/#directive-connect-src
+     *
+     * @param array|string $uri
+     *
+     * @return $this
      */
-    public function addReportingEndpoints(array $endpoint): static
+    public function addScriptSrc($uri, ?bool $explicitReporting = null)
     {
-        foreach ($endpoint as $name => $url) {
-            $this->reportingEndpoints[$name] = $url;
-        }
+        $this->addOption($uri, 'scriptSrc', $explicitReporting ?? $this->reportOnly);
+
+        return $this;
+    }
+
+    /**
+     * Adds a new valid endpoint for CSS file sources. Can be either
+     * a URI class or a simple string.
+     *
+     * @see http://www.w3.org/TR/CSP/#directive-connect-src
+     *
+     * @param array|string $uri
+     *
+     * @return $this
+     */
+    public function addStyleSrc($uri, ?bool $explicitReporting = null)
+    {
+        $this->addOption($uri, 'styleSrc', $explicitReporting ?? $this->reportOnly);
+
+        return $this;
+    }
+
+    /**
+     * Sets whether the user agents should rewrite URL schemes, changing
+     * HTTP to HTTPS.
+     *
+     * @return $this
+     */
+    public function upgradeInsecureRequests(bool $value = true)
+    {
+        $this->upgradeInsecureRequests = $value;
 
         return $this;
     }
@@ -879,13 +682,15 @@ class ContentSecurityPolicy
     {
         // Ensure we have an array to work with...
         if (is_string($this->{$target})) {
-            $this->{$target} = [$this->{$target} => $this->reportOnly];
+            $this->{$target} = [$this->{$target}];
         }
 
-        $options = is_array($options) ? $options : [$options];
-
-        foreach ($options as $option) {
-            $this->{$target}[$option] = $explicitReporting ?? $this->reportOnly;
+        if (is_array($options)) {
+            foreach ($options as $opt) {
+                $this->{$target}[$opt] = $explicitReporting ?? $this->reportOnly;
+            }
+        } else {
+            $this->{$target}[$options] = $explicitReporting ?? $this->reportOnly;
         }
     }
 
@@ -898,31 +703,20 @@ class ContentSecurityPolicy
      */
     protected function generateNonces(ResponseInterface $response)
     {
-        if ($this->enabled() && ! $this->autoNonce) {
+        $body = $response->getBody();
+
+        if (empty($body)) {
             return;
         }
-
-        $body = (string) $response->getBody();
-
-        if ($body === '') {
-            return;
-        }
-
-        // Escape quotes for JSON responses to prevent corrupting the JSON body
-        $jsonEscape = str_contains($response->getHeaderLine('Content-Type'), 'json');
 
         // Replace style and script placeholders with nonces
-        $pattern = sprintf('/(%s|%s)/', preg_quote($this->styleNonceTag, '/'), preg_quote($this->scriptNonceTag, '/'));
+        $pattern = '/(' . preg_quote($this->styleNonceTag, '/')
+            . '|' . preg_quote($this->scriptNonceTag, '/') . ')/';
 
-        $body = preg_replace_callback($pattern, function ($match) use ($jsonEscape): string {
-            if (! $this->enabled()) {
-                return '';
-            }
-
+        $body = preg_replace_callback($pattern, function ($match): string {
             $nonce = $match[0] === $this->styleNonceTag ? $this->getStyleNonce() : $this->getScriptNonce();
-            $attr  = 'nonce="' . $nonce . '"';
 
-            return $jsonEscape ? str_replace('"', '\\"', $attr) : $attr;
+            return "nonce=\"{$nonce}\"";
         }, $body);
 
         $response->setBody($body);
@@ -937,32 +731,21 @@ class ContentSecurityPolicy
      */
     protected function buildHeaders(ResponseInterface $response)
     {
-        if (! $this->enabled()) {
-            return;
-        }
-
+        // Ensure both headers are available and arrays...
         $response->setHeader('Content-Security-Policy', []);
         $response->setHeader('Content-Security-Policy-Report-Only', []);
-        $response->setHeader('Reporting-Endpoints', []);
 
-        if (in_array($this->baseURI, ['', null, []], true)) {
+        // inject default base & default URIs if needed
+        if (empty($this->baseURI)) {
             $this->baseURI = 'self';
         }
 
-        if (in_array($this->defaultSrc, ['', null, []], true)) {
+        if (empty($this->defaultSrc)) {
             $this->defaultSrc = 'self';
         }
 
         foreach ($this->directives as $name => $property) {
-            if ($name === 'report-uri' && (string) $this->reportURI === '') {
-                continue;
-            }
-
-            if ($name === 'report-to' && (string) $this->reportTo === '') {
-                continue;
-            }
-
-            if ($this->{$property} !== null) {
+            if (! empty($this->{$property})) {
                 $this->addToHeader($name, $this->{$property});
             }
         }
@@ -970,50 +753,41 @@ class ContentSecurityPolicy
         // Compile our own header strings here since if we just
         // append it to the response, it will be joined with
         // commas, not semi-colons as we need.
-        if ($this->reportingEndpoints !== []) {
-            $endpoints = [];
-
-            foreach ($this->reportingEndpoints as $name => $url) {
-                $endpoints[] = trim("{$name}=\"{$url}\"");
-            }
-
-            $response->appendHeader('Reporting-Endpoints', implode(', ', $endpoints));
-            $this->reportingEndpoints = [];
-        }
-
-        if ($this->tempHeaders !== []) {
-            $header = [];
+        if (! empty($this->tempHeaders)) {
+            $header = '';
 
             foreach ($this->tempHeaders as $name => $value) {
-                $header[] = trim("{$name} {$value}");
+                $header .= " {$name} {$value};";
             }
 
+            // add token only if needed
             if ($this->upgradeInsecureRequests) {
-                $header[] = 'upgrade-insecure-requests';
+                $header .= ' upgrade-insecure-requests;';
             }
 
-            $response->appendHeader('Content-Security-Policy', implode('; ', $header));
-            $this->tempHeaders = [];
+            $response->appendHeader('Content-Security-Policy', $header);
         }
 
-        if ($this->reportOnlyHeaders !== []) {
-            $header = [];
+        if (! empty($this->reportOnlyHeaders)) {
+            $header = '';
 
             foreach ($this->reportOnlyHeaders as $name => $value) {
-                $header[] = trim("{$name} {$value}");
+                $header .= " {$name} {$value};";
             }
 
-            $response->appendHeader('Content-Security-Policy-Report-Only', implode('; ', $header));
-            $this->reportOnlyHeaders = [];
+            $response->appendHeader('Content-Security-Policy-Report-Only', $header);
         }
+
+        $this->tempHeaders       = [];
+        $this->reportOnlyHeaders = [];
     }
 
     /**
-     * Adds a directive and its options to the appropriate header. The $values
+     * Adds a directive and it's options to the appropriate header. The $values
      * array might have options that are geared toward either the regular or the
      * reportOnly header, since it's viable to have both simultaneously.
      *
-     * @param array<string, bool>|string $values
+     * @param array|string|null $values
      *
      * @return void
      */
@@ -1027,20 +801,19 @@ class ContentSecurityPolicy
         $reportSources = [];
 
         foreach ($values as $value => $reportOnly) {
-            if (
-                in_array($value, $this->validSources, true)
-                || str_starts_with($value, 'nonce-')
-                || str_starts_with($value, 'sha256-')
-                || str_starts_with($value, 'sha384-')
-                || str_starts_with($value, 'sha512-')
-            ) {
+            if (is_numeric($value) && is_string($reportOnly) && ($reportOnly !== '')) {
+                $value      = $reportOnly;
+                $reportOnly = $this->reportOnly;
+            }
+
+            if (str_starts_with($value, 'nonce-')) {
                 $value = "'{$value}'";
             }
 
-            if ($reportOnly) {
-                $reportSources[] = $value;
+            if ($reportOnly === true) {
+                $reportSources[] = in_array($value, $this->validSources, true) ? "'{$value}'" : $value;
             } else {
-                $sources[] = $value;
+                $sources[] = in_array($value, $this->validSources, true) ? "'{$value}'" : $value;
             }
         }
 
@@ -1053,21 +826,15 @@ class ContentSecurityPolicy
         }
     }
 
+    /**
+     * Clear the directive.
+     *
+     * @param string $directive CSP directive
+     */
     public function clearDirective(string $directive): void
     {
-        if (! array_key_exists($directive, $this->directives)) {
-            return;
-        }
-
-        if ($directive === 'report-uri') {
-            $this->reportURI = null;
-
-            return;
-        }
-
-        if ($directive === 'report-to') {
-            $this->reportURI = null;
-            $this->reportTo  = null;
+        if ($directive === 'report-uris') {
+            $this->{$this->directives[$directive]} = null;
 
             return;
         }

@@ -282,11 +282,6 @@ class Email
     protected $SMTPAuth = false;
 
     /**
-     * Which SMTP authentication method to use: login, plain
-     */
-    protected string $SMTPAuthMethod = 'login';
-
-    /**
      * Whether to send a Reply-To header
      *
      * @var bool
@@ -1708,7 +1703,7 @@ class Email
             $success = $this->{$method}();
         } catch (ErrorException $e) {
             $success = false;
-            log_message('error', 'Email: ' . $method . ' threw ' . $e);
+            log_message('error', 'Email: ' . $method . ' throwed ' . $e);
         }
 
         if (! $success) {
@@ -2030,72 +2025,45 @@ class Email
             return true;
         }
 
-        // If no username or password is set
-        if ($this->SMTPUser === '' || $this->SMTPPass === '') {
+        if ($this->SMTPUser === '' && $this->SMTPPass === '') {
             $this->setErrorMessage(lang('Email.noSMTPAuth'));
 
             return false;
         }
 
-        // normalize in case user entered capital words LOGIN/PLAIN
-        $this->SMTPAuthMethod = strtolower($this->SMTPAuthMethod);
-
-        // Validate supported authentication methods
-        if (! in_array($this->SMTPAuthMethod, ['login', 'plain'], true)) {
-            $this->setErrorMessage(lang('Email.invalidSMTPAuthMethod', [$this->SMTPAuthMethod]));
-
-            return false;
-        }
-
-        $upperAuthMethod = strtoupper($this->SMTPAuthMethod);
-        // send initial 'AUTH' command
-        $this->sendData('AUTH ' . $upperAuthMethod);
+        $this->sendData('AUTH LOGIN');
         $reply = $this->getSMTPData();
 
         if (str_starts_with($reply, '503')) {    // Already authenticated
             return true;
         }
 
-        // if 'AUTH' command is unsuported by the server
         if (! str_starts_with($reply, '334')) {
-            $this->setErrorMessage(lang('Email.failureSMTPAuthMethod', [$upperAuthMethod]));
+            $this->setErrorMessage(lang('Email.failedSMTPLogin', [$reply]));
 
             return false;
         }
 
-        switch ($this->SMTPAuthMethod) {
-            case 'login':
-                $this->sendData(base64_encode($this->SMTPUser));
-                $reply = $this->getSMTPData();
+        $this->sendData(base64_encode($this->SMTPUser));
+        $reply = $this->getSMTPData();
 
-                if (! str_starts_with($reply, '334')) {
-                    $this->setErrorMessage(lang('Email.SMTPAuthUsername', [$reply]));
+        if (! str_starts_with($reply, '334')) {
+            $this->setErrorMessage(lang('Email.SMTPAuthUsername', [$reply]));
 
-                    return false;
-                }
-
-                $this->sendData(base64_encode($this->SMTPPass));
-                break;
-
-            case 'plain':
-                // send credentials as the single second command
-                $authString = "\0" . $this->SMTPUser . "\0" . $this->SMTPPass;
-
-                $this->sendData(base64_encode($authString));
-                break;
+            return false;
         }
 
+        $this->sendData(base64_encode($this->SMTPPass));
         $reply = $this->getSMTPData();
-        if (! str_starts_with($reply, '235')) {  // Authentication failed
-            $errorMessage = $this->SMTPAuthMethod === 'plain' ? 'Email.SMTPAuthCredentials' : 'Email.SMTPAuthPassword';
 
-            $this->setErrorMessage(lang($errorMessage, [$reply]));
+        if (! str_starts_with($reply, '235')) {
+            $this->setErrorMessage(lang('Email.SMTPAuthPassword', [$reply]));
 
             return false;
         }
 
         if ($this->SMTPKeepAlive) {
-            $this->SMTPAuth = false; // Prevent re-authentication for keep-alive sessions
+            $this->SMTPAuth = false;
         }
 
         return true;
@@ -2265,7 +2233,7 @@ class Email
             } catch (ErrorException $e) {
                 $protocol = $this->getProtocol();
                 $method   = 'sendWith' . ucfirst($protocol);
-                log_message('error', 'Email: ' . $method . ' threw ' . $e);
+                log_message('error', 'Email: ' . $method . ' throwed ' . $e);
             }
         }
     }

@@ -15,26 +15,24 @@ namespace CodeIgniter\Session\Handlers;
 
 use CodeIgniter\I18n\Time;
 use CodeIgniter\Session\Exceptions\SessionException;
-use CodeIgniter\Session\PersistsConnection;
 use Config\Session as SessionConfig;
 use Memcached;
+use ReturnTypeWillChange;
 
 /**
- * Session handler using Memcached for persistence.
+ * Session handler using Memcache for persistence
  */
 class MemcachedHandler extends BaseHandler
 {
-    use PersistsConnection;
-
     /**
-     * Memcached instance.
+     * Memcached instance
      *
      * @var Memcached|null
      */
     protected $memcached;
 
     /**
-     * Key prefix.
+     * Key prefix
      *
      * @var string
      */
@@ -63,11 +61,11 @@ class MemcachedHandler extends BaseHandler
 
         $this->sessionExpiration = $config->expiration;
 
-        if ($this->savePath === '') {
+        if (empty($this->savePath)) {
             throw SessionException::forEmptySavepath();
         }
 
-        // Add session cookie name for multiple session cookies.
+        // Add sessionCookieName for multiple session cookies.
         $this->keyPrefix .= $config->cookieName . ':';
 
         if ($this->matchIP === true) {
@@ -80,28 +78,11 @@ class MemcachedHandler extends BaseHandler
     /**
      * Re-initialize existing session, or creates a new one.
      *
-     * @param string $path The path where to store/retrieve the session.
-     * @param string $name The session name.
+     * @param string $path The path where to store/retrieve the session
+     * @param string $name The session name
      */
     public function open($path, $name): bool
     {
-        if ($this->hasPersistentConnection()) {
-            $memcached = $this->getPersistentConnection();
-            $version   = $memcached->getVersion();
-
-            if (is_array($version)) {
-                foreach ($version as $serverVersion) {
-                    if ($serverVersion !== false) {
-                        $this->memcached = $memcached;
-
-                        return true;
-                    }
-                }
-            }
-
-            $this->setPersistentConnection(null);
-        }
-
         $this->memcached = new Memcached();
         $this->memcached->setOption(Memcached::OPT_BINARY_PROTOCOL, true); // required for touch() usage
 
@@ -150,17 +131,19 @@ class MemcachedHandler extends BaseHandler
             return false;
         }
 
-        $this->setPersistentConnection($this->memcached);
-
         return true;
     }
 
     /**
      * Reads the session data from the session storage, and returns the results.
      *
-     * @param string $id The session ID.
+     * @param string $id The session ID
+     *
+     * @return false|string Returns an encoded string of the read data.
+     *                      If nothing was read, it must return false.
      */
-    public function read($id): false|string
+    #[ReturnTypeWillChange]
+    public function read($id)
     {
         if (isset($this->memcached) && $this->lockSession($id)) {
             if (! isset($this->sessionID)) {
@@ -180,8 +163,8 @@ class MemcachedHandler extends BaseHandler
     /**
      * Writes the session data to the session storage.
      *
-     * @param string $id   The session ID.
-     * @param string $data The encoded session data.
+     * @param string $id   The session ID
+     * @param string $data The encoded session data
      */
     public function write($id, $data): bool
     {
@@ -227,6 +210,12 @@ class MemcachedHandler extends BaseHandler
                 $this->memcached->delete($this->lockKey);
             }
 
+            if (! $this->memcached->quit()) {
+                return false;
+            }
+
+            $this->memcached = null;
+
             return true;
         }
 
@@ -234,9 +223,9 @@ class MemcachedHandler extends BaseHandler
     }
 
     /**
-     * Destroys a session.
+     * Destroys a session
      *
-     * @param string $id The session ID being destroyed.
+     * @param string $id The session ID being destroyed
      */
     public function destroy($id): bool
     {
@@ -254,8 +243,11 @@ class MemcachedHandler extends BaseHandler
      *
      * @param int $max_lifetime Sessions that have not updated
      *                          for the last max_lifetime seconds will be removed.
+     *
+     * @return false|int Returns the number of deleted sessions on success, or false on failure.
      */
-    public function gc($max_lifetime): int
+    #[ReturnTypeWillChange]
+    public function gc($max_lifetime)
     {
         return 1;
     }
@@ -263,7 +255,7 @@ class MemcachedHandler extends BaseHandler
     /**
      * Acquires an emulated lock.
      *
-     * @param string $sessionID Session ID.
+     * @param string $sessionID Session ID
      */
     protected function lockSession(string $sessionID): bool
     {
@@ -307,7 +299,7 @@ class MemcachedHandler extends BaseHandler
     }
 
     /**
-     * Releases a previously acquired lock.
+     * Releases a previously acquired lock
      */
     protected function releaseLock(): bool
     {

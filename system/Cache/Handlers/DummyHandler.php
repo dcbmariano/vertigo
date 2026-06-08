@@ -22,60 +22,98 @@ use Closure;
  */
 class DummyHandler extends BaseHandler
 {
-    public function initialize(): void
+    /**
+     * {@inheritDoc}
+     */
+    public function initialize()
     {
     }
 
-    public function get(string $key): mixed
+    /**
+     * {@inheritDoc}
+     */
+    public function get(string $key)
     {
         return null;
     }
 
-    public function remember(string $key, int $ttl, Closure $callback): mixed
+    /**
+     * {@inheritDoc}
+     */
+    public function remember(string $key, int $ttl, Closure $callback)
     {
         return null;
     }
 
-    public function save(string $key, mixed $value, int $ttl = 60): bool
+    /**
+     * {@inheritDoc}
+     */
+    public function save(string $key, $value, int $ttl = 60)
     {
         return true;
     }
 
-    public function delete(string $key): bool
+    /**
+     * {@inheritDoc}
+     */
+    public function delete(string $key)
     {
         return true;
     }
 
-    public function deleteMatching(string $pattern): int
+    /**
+     * {@inheritDoc}
+     *
+     * @return int
+     */
+    public function deleteMatching(string $pattern)
     {
         return 0;
     }
 
-    public function increment(string $key, int $offset = 1): bool
+    /**
+     * {@inheritDoc}
+     */
+    public function increment(string $key, int $offset = 1)
     {
         return true;
     }
 
-    public function decrement(string $key, int $offset = 1): bool
+    /**
+     * {@inheritDoc}
+     */
+    public function decrement(string $key, int $offset = 1)
     {
         return true;
     }
 
-    public function clean(): bool
+    /**
+     * {@inheritDoc}
+     */
+    public function clean()
     {
         return true;
     }
 
-    public function getCacheInfo(): ?array
+    /**
+     * {@inheritDoc}
+     */
+    public function getCacheInfo()
     {
         return null;
     }
 
-    public function getMetaData(string $key): ?array
+    /**
+     * {@inheritDoc}
+     */
+    public function getMetaData(string $key)
     {
         return null;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function isSupported(): bool
     {
         return true;

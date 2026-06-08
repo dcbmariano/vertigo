@@ -762,7 +762,7 @@ var ciDebugBar = {
         var rowGet = this.toolbar.querySelectorAll(
             'td[data-debugbar-route="GET"]'
         );
-        var patt = /\(.+?\)/g;
+        var patt = /\((?:[^)(]+|\((?:[^)(]+|\([^)(]*\))*\))*\)/;
 
         for (var i = 0; i < rowGet.length; i++) {
             row = rowGet[i];
@@ -788,9 +788,10 @@ var ciDebugBar = {
                     '<form data-debugbar-route-tpl="' +
                     ciDebugBar.trimSlash(row.innerText.replace(patt, "?")) +
                     '">' +
-                    row.innerText.replace(patt, function (match) {
-                        return '<input type="text" placeholder="' + match + '">';
-                    }) +
+                    row.innerText.replace(
+                        patt,
+                        '<input id="debugbar-route-id-' + i + '" type="text" placeholder="$1">'
+                    ) +
                     '<input type="submit" value="Go" class="debug-bar-mleft4">' +
                     "</form>";
             }

@@ -310,7 +310,9 @@ class BaseBuilder
             throw new DatabaseException('A table must be specified when creating a new Query Builder.');
         }
 
-        /** @var BaseConnection $db */
+        /**
+         * @var BaseConnection $db
+         */
         $this->db = $db;
 
         if ($tableName instanceof TableName) {
@@ -945,8 +947,8 @@ class BaseBuilder
      * @used-by whereNotIn()
      * @used-by orWhereNotIn()
      *
-     * @param non-empty-string|null                                            $key
-     * @param BaseBuilder|(Closure(BaseBuilder): BaseBuilder)|list<mixed>|null $values The values searched on, or anonymous function with subquery
+     * @param non-empty-string|null                                      $key
+     * @param array|BaseBuilder|(Closure(BaseBuilder): BaseBuilder)|null $values The values searched on, or anonymous function with subquery
      *
      * @return $this
      *
@@ -1511,7 +1513,7 @@ class BaseBuilder
      */
     public function limit(?int $value = null, ?int $offset = 0)
     {
-        $limitZeroAsAll = config(Feature::class)->limitZeroAsAll ?? true; // @phpstan-ignore nullCoalesce.property
+        $limitZeroAsAll = config(Feature::class)->limitZeroAsAll ?? true;
         if ($limitZeroAsAll && $value === 0) {
             $value = null;
         }
@@ -1633,7 +1635,7 @@ class BaseBuilder
      */
     public function get(?int $limit = null, int $offset = 0, bool $reset = true)
     {
-        $limitZeroAsAll = config(Feature::class)->limitZeroAsAll ?? true; // @phpstan-ignore nullCoalesce.property
+        $limitZeroAsAll = config(Feature::class)->limitZeroAsAll ?? true;
         if ($limitZeroAsAll && $limit === 0) {
             $limit = null;
         }
@@ -1771,7 +1773,7 @@ class BaseBuilder
             $this->where($where);
         }
 
-        $limitZeroAsAll = config(Feature::class)->limitZeroAsAll ?? true; // @phpstan-ignore nullCoalesce.property
+        $limitZeroAsAll = config(Feature::class)->limitZeroAsAll ?? true;
         if ($limitZeroAsAll && $limit === 0) {
             $limit = null;
         }
@@ -2498,7 +2500,7 @@ class BaseBuilder
             $this->where($where);
         }
 
-        $limitZeroAsAll = config(Feature::class)->limitZeroAsAll ?? true; // @phpstan-ignore nullCoalesce.property
+        $limitZeroAsAll = config(Feature::class)->limitZeroAsAll ?? true;
         if ($limitZeroAsAll && $limit === 0) {
             $limit = null;
         }
@@ -2545,7 +2547,7 @@ class BaseBuilder
             $valStr[] = $key . ' = ' . $val;
         }
 
-        $limitZeroAsAll = config(Feature::class)->limitZeroAsAll ?? true; // @phpstan-ignore nullCoalesce.property
+        $limitZeroAsAll = config(Feature::class)->limitZeroAsAll ?? true;
         if ($limitZeroAsAll) {
             return 'UPDATE ' . $this->compileIgnore('update') . $table . ' SET ' . implode(', ', $valStr)
                 . $this->compileWhereHaving('QBWhere')
@@ -2822,7 +2824,7 @@ class BaseBuilder
 
         $sql = $this->_delete($this->removeAlias($table));
 
-        $limitZeroAsAll = config(Feature::class)->limitZeroAsAll ?? true; // @phpstan-ignore nullCoalesce.property
+        $limitZeroAsAll = config(Feature::class)->limitZeroAsAll ?? true;
         if ($limitZeroAsAll && $limit === 0) {
             $limit = null;
         }
@@ -3097,7 +3099,7 @@ class BaseBuilder
             . $this->compileWhereHaving('QBHaving')
             . $this->compileOrderBy();
 
-        $limitZeroAsAll = config(Feature::class)->limitZeroAsAll ?? true; // @phpstan-ignore nullCoalesce.property
+        $limitZeroAsAll = config(Feature::class)->limitZeroAsAll ?? true;
         if ($limitZeroAsAll) {
             if ($this->QBLimit) {
                 $sql = $this->_limit($sql . "\n");

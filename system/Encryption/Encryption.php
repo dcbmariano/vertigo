@@ -93,7 +93,7 @@ class Encryption
 
         $this->key    = $config->key;
         $this->driver = $config->driver;
-        $this->digest = $config->digest;
+        $this->digest = $config->digest ?? 'SHA512';
 
         $this->handlers = [
             'OpenSSL' => extension_loaded('openssl'),
@@ -118,7 +118,7 @@ class Encryption
         if ($config instanceof EncryptionConfig) {
             $this->key    = $config->key;
             $this->driver = $config->driver;
-            $this->digest = $config->digest;
+            $this->digest = $config->digest ?? 'SHA512';
         }
 
         if (empty($this->driver)) {
@@ -137,10 +137,6 @@ class Encryption
 
         $handlerName     = 'CodeIgniter\\Encryption\\Handlers\\' . $this->driver . 'Handler';
         $this->encrypter = new $handlerName($config);
-
-        if (($config->previousKeys ?? []) !== []) {
-            $this->encrypter = new KeyRotationDecorator($this->encrypter, $config->previousKeys);
-        }
 
         return $this->encrypter;
     }

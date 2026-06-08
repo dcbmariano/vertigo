@@ -31,11 +31,6 @@ class ContentSecurityPolicy extends BaseConfig
     public ?string $reportURI = null;
 
     /**
-     * Specifies a reporting endpoint to which violation reports ought to be sent.
-     */
-    public ?string $reportTo = null;
-
-    /**
      * Instructs user agents to rewrite URL schemes, changing
      * HTTP to HTTPS. This directive is for websites with
      * large numbers of old URLs that need to be rewritten.
@@ -43,12 +38,12 @@ class ContentSecurityPolicy extends BaseConfig
     public bool $upgradeInsecureRequests = false;
 
     // -------------------------------------------------------------------------
-    // CSP DIRECTIVES SETTINGS
+    // Sources allowed
     // NOTE: once you set a policy to 'none', it cannot be further restricted
     // -------------------------------------------------------------------------
 
     /**
-     * Will default to `'self'` if not overridden
+     * Will default to self if not overridden
      *
      * @var list<string>|string|null
      */
@@ -62,41 +57,11 @@ class ContentSecurityPolicy extends BaseConfig
     public $scriptSrc = 'self';
 
     /**
-     * Specifies valid sources for JavaScript <script> elements.
-     *
-     * @var list<string>|string
-     */
-    public array|string $scriptSrcElem = 'self';
-
-    /**
-     * Specifies valid sources for JavaScript inline event
-     * handlers and JavaScript URLs.
-     *
-     * @var list<string>|string
-     */
-    public array|string $scriptSrcAttr = 'self';
-
-    /**
      * Lists allowed stylesheets' URLs.
      *
      * @var list<string>|string
      */
     public $styleSrc = 'self';
-
-    /**
-     * Specifies valid sources for stylesheets <link> elements.
-     *
-     * @var list<string>|string
-     */
-    public array|string $styleSrcElem = 'self';
-
-    /**
-     * Specifies valid sources for stylesheets inline
-     * style attributes and `<style>` elements.
-     *
-     * @var list<string>|string
-     */
-    public array|string $styleSrcAttr = 'self';
 
     /**
      * Defines the origins from which images can be loaded.
@@ -181,11 +146,6 @@ class ContentSecurityPolicy extends BaseConfig
     public $manifestSrc;
 
     /**
-     * @var list<string>|string
-     */
-    public array|string $workerSrc = [];
-
-    /**
      * Limits the kinds of plugins a page may invoke.
      *
      * @var list<string>|string|null
@@ -200,17 +160,17 @@ class ContentSecurityPolicy extends BaseConfig
     public $sandbox;
 
     /**
-     * Nonce placeholder for style tags.
+     * Nonce tag for style
      */
     public string $styleNonceTag = '{csp-style-nonce}';
 
     /**
-     * Nonce placeholder for script tags.
+     * Nonce tag for script
      */
     public string $scriptNonceTag = '{csp-script-nonce}';
 
     /**
-     * Replace nonce tag automatically?
+     * Replace nonce tag automatically
      */
     public bool $autoNonce = true;
 }

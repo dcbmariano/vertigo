@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 namespace CodeIgniter\Commands\Cache;
 
+use CodeIgniter\Cache\CacheFactory;
 use CodeIgniter\CLI\BaseCommand;
 use CodeIgniter\CLI\CLI;
 use Config\Cache;
@@ -68,21 +69,22 @@ class ClearCache extends BaseCommand
         $handler = $params[0] ?? $config->handler;
 
         if (! array_key_exists($handler, $config->validHandlers)) {
-            CLI::error(lang('Cache.invalidHandler', [$handler]));
+            CLI::error($handler . ' is not a valid cache handler.');
 
-            return EXIT_ERROR;
+            return;
         }
 
         $config->handler = $handler;
+        $cache           = CacheFactory::getHandler($config);
 
-        if (! service('cache', $config)->clean()) {
+        if (! $cache->clean()) {
+            // @codeCoverageIgnoreStart
             CLI::error('Error while clearing the cache.');
 
-            return EXIT_ERROR;
+            return;
+            // @codeCoverageIgnoreEnd
         }
 
         CLI::write(CLI::color('Cache cleared.', 'green'));
-
-        return EXIT_SUCCESS;
     }
 }

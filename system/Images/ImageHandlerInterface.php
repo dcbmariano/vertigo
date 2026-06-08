@@ -149,11 +149,4 @@ interface ImageHandlerInterface
      * @return bool
      */
     public function save(?string $target = null, int $quality = 90);
-
-    /**
-     * Clear metadata before saving image as a new file.
-     *
-     * @return $this
-     */
-    public function clearMetadata(): static;
 }

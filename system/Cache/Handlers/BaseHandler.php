@@ -15,8 +15,10 @@ namespace CodeIgniter\Cache\Handlers;
 
 use Closure;
 use CodeIgniter\Cache\CacheInterface;
+use CodeIgniter\Exceptions\BadMethodCallException;
 use CodeIgniter\Exceptions\InvalidArgumentException;
 use Config\Cache;
+use Exception;
 
 /**
  * Base class for cache handling
@@ -75,7 +77,16 @@ abstract class BaseHandler implements CacheInterface
         return strlen($prefix . $key) > static::MAX_KEY_LENGTH ? $prefix . md5($key) : $prefix . $key;
     }
 
-    public function remember(string $key, int $ttl, Closure $callback): mixed
+    /**
+     * Get an item from the cache, or execute the given Closure and store the result.
+     *
+     * @param string           $key      Cache item name
+     * @param int              $ttl      Time to live
+     * @param Closure(): mixed $callback Callback return value
+     *
+     * @return mixed
+     */
+    public function remember(string $key, int $ttl, Closure $callback)
     {
         $value = $this->get($key);
 
@@ -89,24 +100,16 @@ abstract class BaseHandler implements CacheInterface
     }
 
     /**
-     * Check if connection is alive.
+     * Deletes items from the cache store matching a given pattern.
      *
-     * Default implementation for handlers that don't require connection management.
-     * Handlers with persistent connections (Redis, Predis, Memcached) should override this.
-     */
-    public function ping(): bool
-    {
-        return true;
-    }
-
-    /**
-     * Reconnect to the cache server.
+     * @param string $pattern Cache items glob-style pattern
      *
-     * Default implementation for handlers that don't require connection management.
-     * Handlers with persistent connections (Redis, Predis, Memcached) should override this.
+     * @return int
+     *
+     * @throws Exception
      */
-    public function reconnect(): bool
+    public function deleteMatching(string $pattern)
     {
-        return true;
+        throw new BadMethodCallException('The deleteMatching method is not implemented.');
     }
 }

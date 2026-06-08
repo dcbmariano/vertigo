@@ -22,18 +22,18 @@ use ReflectionMethod;
  *
  * @see \CodeIgniter\Commands\Utilities\Routes\AutoRouterImproved\ControllerMethodReaderTest
  */
-final readonly class ControllerMethodReader
+final class ControllerMethodReader
 {
-    private bool $translateURIDashes;
-    private bool $translateUriToCamelCase;
+    private readonly bool $translateURIDashes;
+    private readonly bool $translateUriToCamelCase;
 
     /**
      * @param string       $namespace   the default namespace
      * @param list<string> $httpMethods
      */
     public function __construct(
-        private string $namespace,
-        private array $httpMethods,
+        private readonly string $namespace,
+        private readonly array $httpMethods,
     ) {
         $config                        = config(Routing::class);
         $this->translateURIDashes      = $config->translateURIDashes;

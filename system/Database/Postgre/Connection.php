@@ -143,6 +143,20 @@ class Connection extends BaseConnection
     }
 
     /**
+     * Keep or establish the connection if no queries have been sent for
+     * a length of time exceeding the server's idle timeout.
+     *
+     * @return void
+     */
+    public function reconnect()
+    {
+        if ($this->connID === false || pg_ping($this->connID) === false) {
+            $this->close();
+            $this->initialize();
+        }
+    }
+
+    /**
      * Close the database connection.
      *
      * @return void
@@ -150,14 +164,6 @@ class Connection extends BaseConnection
     protected function _close()
     {
         pg_close($this->connID);
-    }
-
-    /**
-     * Ping the database connection.
-     */
-    protected function _ping(): bool
-    {
-        return pg_ping($this->connID);
     }
 
     /**
@@ -199,14 +205,7 @@ class Connection extends BaseConnection
         try {
             return pg_query($this->connID, $sql);
         } catch (ErrorException $e) {
-            $trace = array_slice($e->getTrace(), 2); // remove the call to error handler
-
-            log_message('error', "{message}\nin {exFile} on line {exLine}.\n{trace}", [
-                'message' => $e->getMessage(),
-                'exFile'  => clean_path($e->getFile()),
-                'exLine'  => $e->getLine(),
-                'trace'   => render_backtrace($trace),
-            ]);
+            log_message('error', (string) $e);
 
             if ($this->DBDebug) {
                 throw new DatabaseException($e->getMessage(), $e->getCode(), $e);
@@ -469,7 +468,7 @@ class Connection extends BaseConnection
      * Must return this format: ['code' => string|int, 'message' => string]
      * intval(code) === 0 means "no error".
      *
-     * @return array{code: int|string|null, message: string|null}
+     * @return array<string, int|string>
      */
     public function error(): array
     {

@@ -73,8 +73,8 @@ class Routes extends BaseCommand
      * @var array<string, string>
      */
     protected $options = [
-        '--sort-by-handler' => 'Sort by handler.',
-        '--host'            => 'Specify hostname in request URI.',
+        '-h'     => 'Sort by Handler.',
+        '--host' => 'Specify hostname in request URI.',
     ];
 
     /**
@@ -82,29 +82,22 @@ class Routes extends BaseCommand
      */
     public function run(array $params)
     {
-        $sortByHandler = array_key_exists('sort-by-handler', $params);
-
-        if (! $sortByHandler && array_key_exists('h', $params)) {
-            // @todo to remove support in v4.8.0
-            // Support -h as a shortcut but print a warning that it is not the intended use of -h.
-            CLI::write('Warning: -h will be used as shortcut for --help in v4.8.0. Please use --sort-by-handler to sort by handler.', 'yellow');
-            CLI::newLine();
-
-            $sortByHandler = true;
-        }
-
-        $host = $params['host'] ?? null;
+        $sortByHandler = array_key_exists('h', $params);
+        $host          = $params['host'] ?? null;
 
         // Set HTTP_HOST
         if ($host !== null) {
-            service('superglobals')->setServer('HTTP_HOST', $host);
+            $request              = service('request');
+            $_SERVER              = $request->getServer();
+            $_SERVER['HTTP_HOST'] = $host;
+            $request->setGlobal('server', $_SERVER);
         }
 
         $collection = service('routes')->loadRoutes();
 
         // Reset HTTP_HOST
         if ($host !== null) {
-            service('superglobals')->unsetServer('HTTP_HOST');
+            unset($_SERVER['HTTP_HOST']);
         }
 
         $methods = Router::HTTP_METHODS;
@@ -132,7 +125,7 @@ class Routes extends BaseCommand
         }
 
         if ($collection->shouldAutoRoute()) {
-            $autoRoutesImproved = config(Feature::class)->autoRoutesImproved;
+            $autoRoutesImproved = config(Feature::class)->autoRoutesImproved ?? false;
 
             if ($autoRoutesImproved) {
                 $autoRouteCollector = new AutoRouteCollectorImproved(

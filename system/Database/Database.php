@@ -65,12 +65,10 @@ class Database
 
     /**
      * Creates a Forge instance for the current database type.
-     *
-     * @param BaseConnection $db
      */
     public function loadForge(ConnectionInterface $db): Forge
     {
-        if ($db->connID === false) {
+        if (! $db->connID) {
             $db->initialize();
         }
 
@@ -79,12 +77,10 @@ class Database
 
     /**
      * Creates an instance of Utils for the current database type.
-     *
-     * @param BaseConnection $db
      */
     public function loadUtils(ConnectionInterface $db): BaseUtils
     {
-        if ($db->connID === false) {
+        if (! $db->connID) {
             $db->initialize();
         }
 

@@ -150,13 +150,11 @@ class FileCollection
 
         $this->files = [];
 
-        $files = service('superglobals')->getFilesArray();
-
-        if ($files === []) {
+        if ($_FILES === []) {
             return;
         }
 
-        $files = $this->fixFilesArray($files);
+        $files = $this->fixFilesArray($_FILES);
 
         foreach ($files as $name => $file) {
             $this->files[$name] = $this->createFileObject($file);

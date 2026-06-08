@@ -16,12 +16,16 @@ namespace CodeIgniter\Config;
 use CodeIgniter\View\ViewDecoratorInterface;
 
 /**
- * View configuration.
+ * View configuration
+ *
+ * @phpstan-type parser_callable (callable(mixed): mixed)
+ * @phpstan-type parser_callable_string (callable(mixed): mixed)&string
  */
 class View extends BaseConfig
 {
     /**
-     * When false, the view method will clear the data between each call.
+     * When false, the view method will clear the data between each
+     * call.
      *
      * @var bool
      */
@@ -37,7 +41,8 @@ class View extends BaseConfig
      *
      * @psalm-suppress UndefinedDocblockClass
      *
-     * @var array<string, (callable(mixed): mixed)&string>
+     * @var         array<string, string>
+     * @phpstan-var array<string, parser_callable_string>
      */
     public $filters = [];
 
@@ -48,14 +53,18 @@ class View extends BaseConfig
      *
      * @psalm-suppress UndefinedDocblockClass
      *
-     * @var array<string, (callable(mixed...): mixed)|((callable(mixed...): mixed)&string)|list<(callable(mixed...): mixed)&string>>
+     * @var         array<string, callable|list<string>|string>
+     * @phpstan-var array<string, list<parser_callable_string>|parser_callable_string|parser_callable>
      */
     public $plugins = [];
 
     /**
      * Built-in View filters.
      *
-     * @var array<string, (callable(mixed): mixed)&string>
+     * @psalm-suppress UndefinedDocblockClass
+     *
+     * @var         array<string, string>
+     * @phpstan-var array<string, parser_callable_string>
      */
     protected $coreFilters = [
         'abs'            => '\abs',
@@ -84,7 +93,10 @@ class View extends BaseConfig
     /**
      * Built-in View plugins.
      *
-     * @var array<string, (callable(mixed...): mixed)|((callable(mixed...): mixed)&string)|list<(callable(mixed...): mixed)&string>>
+     * @psalm-suppress UndefinedDocblockClass
+     *
+     * @var         array<string, callable|list<string>|string>
+     * @phpstan-var array<string, array<parser_callable_string>|parser_callable_string|parser_callable>
      */
     protected $corePlugins = [
         'csp_script_nonce'  => '\CodeIgniter\View\Plugins::cspScriptNonce',

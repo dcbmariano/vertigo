@@ -102,7 +102,7 @@ class Method
     /**
      * Returns all HTTP methods.
      *
-     * @return list<uppercase-string>
+     * @return list<string>
      */
     public static function all(): array
     {

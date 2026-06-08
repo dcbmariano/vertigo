@@ -17,8 +17,8 @@ namespace CodeIgniter\Database;
  * @template TConnection
  * @template TResult
  *
- * @property-read string                $DBDriver
  * @property      false|object|resource $connID
+ * @property-read string                $DBDriver
  */
 interface ConnectionInterface
 {
@@ -78,7 +78,7 @@ interface ConnectionInterface
      * Must return this format: ['code' => string|int, 'message' => string]
      * intval(code) === 0 means "no error".
      *
-     * @return array{code: int|string|null, message: string|null}
+     * @return array<string, int|string>
      */
     public function error(): array;
 

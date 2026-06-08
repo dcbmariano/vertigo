@@ -14,9 +14,7 @@ declare(strict_types=1);
 namespace CodeIgniter\Database\Postgre;
 
 use CodeIgniter\Database\BaseBuilder;
-use CodeIgniter\Database\BaseResult;
 use CodeIgniter\Database\Exceptions\DatabaseException;
-use CodeIgniter\Database\Query;
 use CodeIgniter\Database\RawSql;
 use CodeIgniter\Exceptions\InvalidArgumentException;
 
@@ -66,7 +64,7 @@ class Builder extends BaseBuilder
      *
      * @param string $direction ASC, DESC or RANDOM
      *
-     * @return $this
+     * @return BaseBuilder
      */
     public function orderBy(string $orderBy, string $direction = '', ?bool $escape = null)
     {
@@ -91,7 +89,7 @@ class Builder extends BaseBuilder
     /**
      * Increments a numeric column by the specified value.
      *
-     * @return bool
+     * @return mixed
      *
      * @throws DatabaseException
      */
@@ -99,7 +97,7 @@ class Builder extends BaseBuilder
     {
         $column = $this->db->protectIdentifiers($column);
 
-        $sql = $this->_update($this->QBFrom[0], [$column => "CAST({$column} AS numeric) + {$value}"]);
+        $sql = $this->_update($this->QBFrom[0], [$column => "to_number({$column}, '9999999') + {$value}"]);
 
         if (! $this->testMode) {
             $this->resetWrite();
@@ -113,7 +111,7 @@ class Builder extends BaseBuilder
     /**
      * Decrements a numeric column by the specified value.
      *
-     * @return bool
+     * @return mixed
      *
      * @throws DatabaseException
      */
@@ -121,7 +119,7 @@ class Builder extends BaseBuilder
     {
         $column = $this->db->protectIdentifiers($column);
 
-        $sql = $this->_update($this->QBFrom[0], [$column => "CAST({$column} AS numeric) - {$value}"]);
+        $sql = $this->_update($this->QBFrom[0], [$column => "to_number({$column}, '9999999') - {$value}"]);
 
         if (! $this->testMode) {
             $this->resetWrite();
@@ -140,7 +138,7 @@ class Builder extends BaseBuilder
      *
      * @param array|null $set An associative array of insert values
      *
-     * @return BaseResult|false|Query|string
+     * @return mixed
      *
      * @throws DatabaseException
      */
@@ -227,7 +225,7 @@ class Builder extends BaseBuilder
      *
      * @param mixed $where
      *
-     * @return bool|string
+     * @return mixed
      *
      * @throws DatabaseException
      */
@@ -305,7 +303,7 @@ class Builder extends BaseBuilder
      *
      * @param RawSql|string $cond
      *
-     * @return $this
+     * @return BaseBuilder
      */
     public function join(string $table, $cond, string $type = '', ?bool $escape = null)
     {

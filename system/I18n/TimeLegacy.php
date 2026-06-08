@@ -15,6 +15,7 @@ namespace CodeIgniter\I18n;
 
 use DateTime;
 use Exception;
+use ReturnTypeWillChange;
 
 /**
  * Legacy Time class.
@@ -54,9 +55,12 @@ class TimeLegacy extends DateTime
      *
      * @param int $timestamp
      *
+     * @return static
+     *
      * @throws Exception
      */
-    public function setTimestamp($timestamp): static
+    #[ReturnTypeWillChange]
+    public function setTimestamp($timestamp)
     {
         $time = date('Y-m-d H:i:s', $timestamp);
 

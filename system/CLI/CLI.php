@@ -255,7 +255,6 @@ class CLI
         }
 
         static::fwrite(STDOUT, $field . (trim($field) !== '' ? ' ' : '') . $extraOutput . ': ');
-        static::$lastWrite = 'write';
 
         // Read the input from keyboard.
         $input = trim(static::$io->input());
@@ -459,8 +458,7 @@ class CLI
         }
 
         if (static::$lastWrite !== 'write') {
-            $text = PHP_EOL . $text;
-
+            $text              = PHP_EOL . $text;
             static::$lastWrite = 'write';
         }
 
@@ -475,18 +473,11 @@ class CLI
     public static function error(string $text, string $foreground = 'light_red', ?string $background = null)
     {
         // Check color support for STDERR
-        $stdout = static::$isColored;
-
+        $stdout            = static::$isColored;
         static::$isColored = static::hasColorSupport(STDERR);
 
         if ($foreground !== '' || (string) $background !== '') {
             $text = static::color($text, $foreground, $background);
-        }
-
-        if (static::$lastWrite !== 'write') {
-            $text = PHP_EOL . $text;
-
-            static::$lastWrite = 'write';
         }
 
         static::fwrite(STDERR, $text . PHP_EOL);
@@ -778,12 +769,12 @@ class CLI
                         static::$width  = (int) $matches[2];
                     }
                 }
-            } elseif (($size = exec('stty size 2>/dev/null')) && preg_match('/(\d+)\s+(\d+)/', $size, $matches)) {
+            } elseif (($size = exec('stty size')) && preg_match('/(\d+)\s+(\d+)/', $size, $matches)) {
                 static::$height = (int) $matches[1];
                 static::$width  = (int) $matches[2];
             } else {
-                static::$height = (int) exec('tput lines 2>/dev/null');
-                static::$width  = (int) exec('tput cols 2>/dev/null');
+                static::$height = (int) exec('tput lines');
+                static::$width  = (int) exec('tput cols');
             }
         } catch (Throwable $e) {
             // Reset the dimensions so that the default values will be returned later.
@@ -1138,35 +1129,7 @@ class CLI
     /**
      * Testing purpose only
      *
-     * @internal
-     */
-    public static function reset(): void
-    {
-        static::$initialized = false;
-        static::$segments    = [];
-        static::$options     = [];
-        static::$lastWrite   = null;
-        static::$height      = null;
-        static::$width       = null;
-        static::$isColored   = static::hasColorSupport(STDOUT);
-
-        static::resetInputOutput();
-    }
-
-    /**
-     * Testing purpose only
-     *
-     * @internal
-     */
-    public static function resetLastWrite(): void
-    {
-        static::$lastWrite = null;
-    }
-
-    /**
-     * Testing purpose only
-     *
-     * @internal
+     * @testTag
      */
     public static function setInputOutput(InputOutput $io): void
     {
@@ -1176,7 +1139,7 @@ class CLI
     /**
      * Testing purpose only
      *
-     * @internal
+     * @testTag
      */
     public static function resetInputOutput(): void
     {
