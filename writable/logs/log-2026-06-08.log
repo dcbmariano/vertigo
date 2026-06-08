@@ -1,0 +1,25 @@
+CRITICAL - 2026-06-08 18:05:03 --> CodeIgniter\Files\Exceptions\FileNotFoundException: File not found: "App\Helpers\filtra_url_helper"
+[Method: GET, Route: /]
+in SYSTEMPATH/Common.php on line 604.
+ 1 SYSTEMPATH/Common.php(604): CodeIgniter\Files\Exceptions\FileNotFoundException::forFileNotFound('App\\Helpers\\filtra_url_helper')
+ 2 APPPATH/Views/layout/header.php(5): helper([...])
+ 3 SYSTEMPATH/View/View.php(224): include('/Users/diego/Documents/GitHub/vertigo/app/Views/layout/header.php')
+ 4 SYSTEMPATH/View/View.php(227): CodeIgniter\View\View->{closure:CodeIgniter\View\View::render():221}()
+ 5 SYSTEMPATH/View/View.php(475): CodeIgniter\View\View->render('layout/header', null, true)
+ 6 APPPATH/Views/template.php(1): CodeIgniter\View\View->include('layout/header')
+ 7 SYSTEMPATH/View/View.php(224): include('/Users/diego/Documents/GitHub/vertigo/app/Views/template.php')
+ 8 SYSTEMPATH/View/View.php(227): CodeIgniter\View\View->{closure:CodeIgniter\View\View::render():221}()
+ 9 SYSTEMPATH/View/View.php(240): CodeIgniter\View\View->render('template', [], true)
+10 SYSTEMPATH/Common.php(1173): CodeIgniter\View\View->render('home', [], true)
+11 APPPATH/Controllers/Home.php(13): view('home')
+12 SYSTEMPATH/CodeIgniter.php(933): App\Controllers\Home->entrada()
+13 SYSTEMPATH/CodeIgniter.php(507): CodeIgniter\CodeIgniter->runController(Object(App\Controllers\Home))
+14 SYSTEMPATH/CodeIgniter.php(354): CodeIgniter\CodeIgniter->handleRequest(null, Object(Config\Cache), false)
+15 SYSTEMPATH/Boot.php(334): CodeIgniter\CodeIgniter->run()
+16 SYSTEMPATH/Boot.php(67): CodeIgniter\Boot::runCodeIgniter(Object(CodeIgniter\CodeIgniter))
+17 FCPATH/index.php(56): CodeIgniter\Boot::bootWeb(Object(Config\Paths))
+18 SYSTEMPATH/rewrite.php(44): require_once('/Users/diego/Documents/GitHub/vertigo/public/index.php')
+CRITICAL - 2026-06-08 18:09:15 --> ErrorException: Cannot redeclare function filtra_url() (previously declared in /Users/diego/Documents/GitHub/vertigo/app/Views/layout/header.php:5)
+[Method: GET, Route: /]
+in APPPATH/Views/modal/autores.php on line 1.
+ 1 [internal function]: CodeIgniter\Debug\Exceptions->shutdownHandler()

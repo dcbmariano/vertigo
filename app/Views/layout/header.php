@@ -2,7 +2,7 @@
 <html lang="pt-br">
 
 <head>
-  <?php helper('App\Helpers\filtra_url'); ?>
+  <?php function filtra_url($i){ return $i; }?>
 
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">

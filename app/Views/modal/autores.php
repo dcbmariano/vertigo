@@ -1,5 +1,3 @@
-<?php helper('App\Helpers\filtra_url'); ?>
-
 <!-- MODAL: SOBRE -->
 <div class="modal fade" tabindex="-1" id="about" role="dialog">
   <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
