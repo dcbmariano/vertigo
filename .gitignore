@@ -5,4 +5,3 @@ writable/logs
 writable/cache
 writable/debugbar
 app/.DS_Store
-app/Controllers/Run.php
