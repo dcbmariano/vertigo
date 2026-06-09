@@ -68,7 +68,7 @@
 
     <form
       id="uploadForm"
-      action="/run"
+      action="<?= base_url('/run') ?>"
       method="POST"
       enctype="multipart/form-data">
       <div class="upload-grid">
