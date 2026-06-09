@@ -127,7 +127,6 @@ class Run extends BaseController
 
         shell_exec($command);
 
-        dd($command);
         // // grava dados no arquivo "input.inp"
         // Run::gravar($dados['input'], $projeto);
         // Run::gravar_model($dados['model'], $projeto);
