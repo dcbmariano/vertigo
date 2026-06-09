@@ -116,8 +116,16 @@ class Run extends BaseController
         // executa pipeline
         #python hs.py -p data/protein.fasta -r data/rna.fasta -d data/hmm_profiles -o output
         #shell_exec('nohup ../app/ThirdParty/pipeline.sh '.$projeto.' > ./data/'.$projeto.'/log.txt &');
+        
+        $host = $_SERVER['HTTP_HOST'];
+        if ($host === 'bioinfo.dcc.ufmg.br') {
+            $python = '/home/liase/miniconda3/bin/python';
+        } else {
+            $python = 'python';
+        }
+
         $command =
-            'nohup python ../app/ThirdParty/hs.py ' .
+            'nohup '.$python.' ../app/ThirdParty/hs.py ' .
             '-p ' . $proteinString . ' ' .
             '-r ' . $rnaString . ' ' .
             '-d ' . escapeshellarg($baseDir . '/hmm') . ' ' .
@@ -127,7 +135,6 @@ class Run extends BaseController
 
         shell_exec($command);
 
-        dd($command);
         // // grava dados no arquivo "input.inp"
         // Run::gravar($dados['input'], $projeto);
         // Run::gravar_model($dados['model'], $projeto);
