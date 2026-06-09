@@ -127,7 +127,7 @@ class Run extends BaseController
 
         shell_exec($command);
 
-        dd(getcwd());
+        dd(shell_exec('pwd'));
 
         // // grava dados no arquivo "input.inp"
         // Run::gravar($dados['input'], $projeto);
