@@ -115,17 +115,13 @@ class Run extends BaseController
 
         // executa pipeline
         #python hs.py -p data/protein.fasta -r data/rna.fasta -d data/hmm_profiles -o output
-        #shell_exec('nohup ../app/ThirdParty/pipeline.sh '.$projeto.' > ./data/'.$projeto.'/log.txt &');
         
         $host = $_SERVER['HTTP_HOST'];
         if ($host === 'bioinfo.dcc.ufmg.br') {
             $python = '/home/liase/miniconda3/bin/python';
-            dd('aqui');
         } else {
             $python = 'python';
         }
-
-        dd($host);
 
         $command =
             'nohup '.$python.' ../app/ThirdParty/hs.py ' .

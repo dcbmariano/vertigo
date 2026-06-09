@@ -5,3 +5,4 @@ writable/logs
 writable/cache
 writable/debugbar
 app/.DS_Store
+public/data
