@@ -4,33 +4,6 @@ namespace App\Controllers;
 
 class Run extends BaseController
 {
-    // private function gravar($texto, $projeto)
-    // {
-    //     // essa função grava os dados em um arquivo
-    //     $arquivo = "./data/$projeto/input.inp";
-    //     $fp = fopen($arquivo, "w");
-    //     fwrite($fp, $texto);
-    //     fclose($fp);
-    // }
-
-    // private function gravar_cnv($texto, $projeto)
-    // {
-    //     // essa função grava os dados em um arquivo
-    //     $arquivo = "./data/$projeto/cnv.csv";
-    //     $fp = fopen($arquivo, "w");
-    //     fwrite($fp, $texto);
-    //     fclose($fp);
-    // }
-
-    // private function gravar_model($texto, $projeto)
-    // {
-    //     // essa função grava os dados em um arquivo
-    //     $arquivo = "./data/$projeto/model.csv";
-    //     $fp = fopen($arquivo, "w");
-    //     fwrite($fp, $texto);
-    //     fclose($fp);
-    // }
-
     private function name_project($length = 6)
     {
         // dá um nome aleatório para o projeto
@@ -115,7 +88,6 @@ class Run extends BaseController
 
         // executa pipeline
         #python hs.py -p data/protein.fasta -r data/rna.fasta -d data/hmm_profiles -o output
-        
         $host = $_SERVER['HTTP_HOST'];
         if ($host === 'bioinfo.dcc.ufmg.br') {
             $python = '/home/liase/miniconda3/bin/python';
@@ -134,13 +106,15 @@ class Run extends BaseController
 
         shell_exec($command);
 
-        // // grava dados no arquivo "input.inp"
-        // Run::gravar($dados['input'], $projeto);
-        // Run::gravar_model($dados['model'], $projeto);
+        // converter hmm para fasta
+        $command2 =
+            'nohup '.$python.' ../app/ThirdParty/hmm_to_fasta.py ' .
+            '-d ' . escapeshellarg($baseDir . '/hmm') . ' ' .
+            '-o ' . escapeshellarg($baseDir) .
+            ' >> ' . escapeshellarg($baseDir . '/log.txt') .
+            ' 2>&1 &';
 
-        // if (!empty($dados['cnvData'])) {
-        //     Run::gravar_cnv($dados['cnvData'], $projeto);
-        // }
+        shell_exec($command2);
 
         return view('running', $dados);
     }

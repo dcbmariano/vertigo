@@ -29,7 +29,7 @@ document.getElementById('deleteSelectionBtn').addEventListener('click', deleteSe
 document
     .querySelectorAll('.sequence-link')
     .forEach(link => {
-        link.addEventListener('click', function(e) {
+        link.addEventListener('click', function (e) {
             e.preventDefault();
             const id = this.dataset.id;
             document.getElementById('sequenceTitle').textContent = id;
@@ -53,7 +53,7 @@ document.addEventListener('click', event => {
 
 async function init() {
     /* Carrega os alinhamentos do projeto, renderiza os blocos e inicializa os tooltips da interface. */
-    const response = await fetch(`${base_url}/project/${projectId}/alignments`);
+    const response = await fetch(`${base_url}project/${projectId}/alignments`);
     const text = await response.text();
     originalAlignmentText = text;
     alignmentBlocks = parseAlignments(text);
@@ -62,7 +62,7 @@ async function init() {
     document.querySelector('#mutations_found_title').textContent = blocks.length;
 
     renderAlignments(alignmentBlocks);
-    initializeTooltips();initializeChainPopovers();
+    initializeTooltips(); initializeChainPopovers();
     initializeSelection();
     initializeChainPopovers();
 }
@@ -90,10 +90,10 @@ function shouldRemoveConsensusLine(index, totalLines) {
     return index >= 3 && (index - 3) % 4 === 0;
 }
 
-function getColorBar(x){
-    if(x<30){ return 'danger' }
-    else if(x<70){ return 'warning' }  
-    else{ return 'success' }
+function getColorBar(x) {
+    if (x < 30) { return 'danger' }
+    else if (x < 70) { return 'warning' }
+    else { return 'success' }
 }
 
 function createAlignmentCard(block, blockIndex) {
@@ -153,10 +153,10 @@ function createAlignmentLine(line, startResidue = null, lineNumber = null, block
     if (isSequenceLine(line) && startResidue !== null) {
         div.innerHTML = renderSequence(line, startResidue, lineNumber, blockNumber, referenceSequence, columnColors);
     } else {
-        if(isChainLine(line)){
+        if (isChainLine(line)) {
             div.innerHTML = renderChainLine(line);
         }
-        else{
+        else {
             div.textContent = line;
         }
     }
@@ -265,28 +265,28 @@ function finishSelection(event) {
     deleteBtn.style.display = 'none';
     deleteGapBtn.style.display = 'none';
 
-    if(
+    if (
         isInsertionSelection()
-    ){
+    ) {
         insertBtn.style.display =
             'block';
     }
-    else if(
+    else if (
         isGapDeletionSelection()
-    ){
+    ) {
         deleteGapBtn.style.display =
             'block';
     }
-    else if(
+    else if (
         isDeleteSelection()
-    ){
+    ) {
         editBtn.style.display =
             'block';
 
         deleteBtn.style.display =
             'block';
     }
-    else{
+    else {
         editBtn.style.display =
             'block';
     }
@@ -331,7 +331,7 @@ function saveEditedSequence() {
         return;
     }
     alignmentBlocks[blockIndex].lines[lineIndex] = sequenceLine.substring(0, startColumn) + newSequence + sequenceLine.substring(endColumn + 1);
-    if (isInsertion){
+    if (isInsertion) {
         updateCoordinatesAfterInsertion(
             blockIndex,
             lineIndex,
@@ -357,7 +357,7 @@ async function saveAlignmentsFile() {
     /* Salva o arquivo no servidor */
     let content = '';
     document.querySelectorAll('.alignment-line').forEach(line => content += line.textContent + '\n');
-    const response = await fetch(`${base_url}/project/${projectId}/save-alignments`, {
+    const response = await fetch(`${base_url}project/${projectId}/save-alignments`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content })
@@ -430,16 +430,16 @@ function updateCoordinatesAfterInsertion(blockIndex, lineIndex, oldSequence, new
     let newCoordinateLine = Array(sequence.length).fill(' ');
     const startText = String(start);
 
-    for (let i = 0; i < startText.length; i++){
-        if (currentFirstAA + i >= 0 && currentFirstAA + i < newCoordinateLine.length){ 
+    for (let i = 0; i < startText.length; i++) {
+        if (currentFirstAA + i >= 0 && currentFirstAA + i < newCoordinateLine.length) {
             newCoordinateLine[currentFirstAA + i] = startText[i];
         }
     }
 
     const endText = String(end);
-    for (let i = 0; i < endText.length; i++){ 
-        if (currentLastAA - endText.length + 1 + i >= 0){ 
-            newCoordinateLine[currentLastAA - endText.length + 1 + i] = endText[i]; 
+    for (let i = 0; i < endText.length; i++) {
+        if (currentLastAA - endText.length + 1 + i >= 0) {
+            newCoordinateLine[currentLastAA - endText.length + 1 + i] = endText[i];
         }
     }
     alignmentBlocks[blockIndex].lines[coordinateIndex] = newCoordinateLine.join('');
@@ -460,12 +460,12 @@ function openInsertModal() {
 }
 
 
-function isDeleteSelection(){
-    if(selection.residues.length === 0){
+function isDeleteSelection() {
+    if (selection.residues.length === 0) {
         return false;
     }
     const line = parseInt(selection.residues[0].dataset.line);
-    if(line === 2){
+    if (line === 2) {
         return false;
     }
     return selection.residues.every(
@@ -516,7 +516,7 @@ function deleteSelection() {
         lineIndex
     );
     renderAlignments(alignmentBlocks);
-    initializeTooltips();initializeChainPopovers();
+    initializeTooltips(); initializeChainPopovers();
     clearSelection();
 }
 
@@ -544,7 +544,7 @@ function deleteGap() {
     alignmentBlocks[blockIndex].lines[lineIndex] = chars.join('');
     updateChainLine(blockIndex, lineIndex);
     renderAlignments(alignmentBlocks);
-    initializeTooltips();initializeChainPopovers();
+    initializeTooltips(); initializeChainPopovers();
     clearSelection();
 }
 
@@ -649,25 +649,26 @@ function updateChainLine(blockIndex, lineIndex) {
 
 function renderChainLine(line) {
     return line
-        .replace(/([A-Za-z0-9_]+)(<\-)/g, (match, chain, arrow) => 
+        .replace(/([A-Za-z0-9_]+)(<\-)/g, (match, chain, arrow) =>
             `<span class="chain-link" data-chain="${chain}">${chain}</span>${arrow}`
         )
-        .replace(/(\-\>)([A-Za-z0-9_]+)/g, (match, arrow, chain) => 
+        .replace(/(\-\>)([A-Za-z0-9_]+)/g, (match, arrow, chain) =>
             `${arrow}<span class="chain-link" data-chain="${chain}">${chain}</span>`
         );
 }
 
-function isChainLine(line){
+function isChainLine(line) {
     return (
         line.includes('<-') && line.includes('->')
     );
 }
 
 function initializeChainPopovers() {
+
     document.querySelectorAll('.chain-link').forEach(link => {
         const id = link.dataset.chain;
         const sequence = fastaSequences[id] || 'Sequence not found';
-        
+
         new bootstrap.Popover(link, {
             trigger: 'click',
             html: true,

@@ -81,6 +81,7 @@
 
     <script>
         const fastaSequences = <?= json_encode($results['fasta']) ?>;
+        console.log(fastaSequences)
     </script>
 
     <table
