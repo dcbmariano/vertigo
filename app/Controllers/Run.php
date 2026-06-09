@@ -120,9 +120,12 @@ class Run extends BaseController
         $host = $_SERVER['HTTP_HOST'];
         if ($host === 'bioinfo.dcc.ufmg.br') {
             $python = '/home/liase/miniconda3/bin/python';
+            dd('aqui');
         } else {
             $python = 'python';
         }
+
+        dd($host);
 
         $command =
             'nohup '.$python.' ../app/ThirdParty/hs.py ' .
