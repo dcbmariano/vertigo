@@ -41,6 +41,12 @@
                         </ul>
                     </div>
                 </div>
+                <button
+                    id="expandSequencesBtn"
+                    class="btn btn-dark">
+                    <i class="bi bi-arrows-expand-vertical"></i>
+                    Expand Sequences
+                </button>
                 <button type="button" class="btn btn-primary" id="saveAlignmentsBtn">
                     <i class="bi bi-floppy"></i> Save alignment
                 </button>
@@ -81,7 +87,6 @@
 
     <script>
         const fastaSequences = <?= json_encode($results['fasta']) ?>;
-        console.log(fastaSequences)
     </script>
 
     <table
@@ -129,53 +134,29 @@
 
     <div id="alignments" class="mb-5 pb-5"></div>
 
-    <div
-        id="selectionMenu"
-        class="card"
-        style="
-        position:absolute;
-        display:none;
-        z-index:9999;
-    ">
-        <button
-            id="editSelectionBtn"
-            class="btn btn-sm btn-dark">
+    <div id="selectionMenu" class="card" style="position:absolute; display:none; z-index:9999;">
+        <button id="moveLeftBtn" class="btn btn-sm btn-dark">
+            ←
+        </button>
+        <button id="moveRightBtn" class="btn btn-sm btn-dark">
+            →
+        </button>
+        <button id="editSelectionBtn" class="btn btn-sm btn-dark">
             Edit
         </button>
-        <button
-            id="deleteSelectionBtn"
-            class="btn btn-sm btn-dark"
-            style="display:none">
+        <button id="deleteSelectionBtn" class="btn btn-sm btn-dark" style="display:none">
             Delete
         </button>
-        <button
-            id="deleteGapBtn"
-            class="btn btn-sm btn-dark"
-            style="display:none">
+        <button id="deleteGapBtn" class="btn btn-sm btn-dark" style="display:none">
             Delete Gap
         </button>
-        <button
-            id="insertSelectionBtn"
-            class="btn btn-sm btn-dark"
-            style="display:none">
+        <button id="insertSelectionBtn" class="btn btn-sm btn-dark" style="display:none">
             Insert
         </button>
     </div>
 
-    <button
-    onclick="window.scrollTo({top:0,behavior:'smooth'})"
-    class="btn btn-outline-secondary"
-    data-bs-toggle="tooltip"
-    data-bs-placement="left"
-    data-bs-title="Back to top"    
-    style="
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        z-index: 9999;
-    ">
-    <i class="bi bi-arrow-up"></i>
-</button>
+    <button onclick="window.scrollTo({top:0,behavior:'smooth'})" class="btn btn-outline-secondary" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Back to top"    
+    style="position: fixed; bottom: 20px; right: 20px; z-index: 9999;"><i class="bi bi-arrow-up"></i></button>
 
     <?= $this->include('modal/edit_sequence') ?>
     <?= $this->include('modal/view_hmm_fasta') ?>

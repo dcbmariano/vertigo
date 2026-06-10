@@ -143,12 +143,12 @@ document.getElementById('uploadForm')
     const hmm =
         document.getElementById('hmmInput').files.length;
 
-    if(!protein || !rna || !hmm){
+    if(!protein || !hmm){
 
         e.preventDefault();
 
         alert(
-            'Protein FASTA, RNA FASTA and HMM files are required.'
+            'Protein FASTA and HMM files are required.'
         );
 
     }

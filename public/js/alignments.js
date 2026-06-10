@@ -25,9 +25,11 @@ document.getElementById('saveEditBtn').addEventListener('click', saveEditedSeque
 document.getElementById('saveAlignmentsBtn').addEventListener('click', saveAlignmentsFile);
 document.getElementById('insertSelectionBtn').addEventListener('click', openInsertModal);
 document.getElementById('deleteSelectionBtn').addEventListener('click', deleteSelection);
+document.getElementById('expandSequencesBtn').addEventListener('click', expandAllSequences);
+document.getElementById('moveLeftBtn').addEventListener('click', moveSelectionLeft);
+document.getElementById('moveRightBtn').addEventListener('click', moveSelectionRight);
 
-document
-    .querySelectorAll('.sequence-link')
+document.querySelectorAll('.sequence-link')
     .forEach(link => {
         link.addEventListener('click', function (e) {
             e.preventDefault();
@@ -151,7 +153,7 @@ function createAlignmentLine(line, startResidue = null, lineNumber = null, block
     const div = document.createElement('div');
     div.className = 'alignment-line';
     if (isSequenceLine(line) && startResidue !== null) {
-        div.innerHTML = renderSequence(line, startResidue, lineNumber, blockNumber, referenceSequence, columnColors);
+        div.innerHTML = renderSequence(line, startResidue, lineNumber, blockNumber, referenceSequence, columnColors, alignmentBlocks[blockNumber]);
     } else {
         if (isChainLine(line)) {
             div.innerHTML = renderChainLine(line);
@@ -163,14 +165,76 @@ function createAlignmentLine(line, startResidue = null, lineNumber = null, block
     return div;
 }
 
-function renderSequence(sequenceLine, startResidue, lineNumber, blockNumber, referenceSequence, columnColors) {
+function renderSequence(sequenceLine, startResidue, lineNumber, blockNumber, referenceSequence, columnColors, block) {
     /** Renderiza uma sequência de aminoácidos com numeração de resíduos. */
     let residue = startResidue - 1, residueIndex = 0, columnIndex = -1;
     return [...sequenceLine].map(char => {
         columnIndex++;
         if (/[A-Za-z]/.test(char)) {
             residue++; residueIndex++;
-            return createResidueHtml(char, columnColors[columnIndex], residue, lineNumber, residueIndex, blockNumber, columnIndex);
+            let color = '#FFFFFF';
+
+            if (lineNumber === 2) {
+
+                let aligned = false;
+
+                for (
+                    let i = 3;
+                    i < block.lines.length;
+                    i++
+                ) {
+
+                    if (
+                        !isSequenceLine(
+                            block.lines[i]
+                        )
+                    ) {
+                        continue;
+                    }
+
+                    const aa =
+                        block.lines[i][columnIndex];
+
+                    if (
+                        aa &&
+                        /[A-Za-z]/.test(aa)
+                    ) {
+
+                        aligned = true;
+                        break;
+
+                    }
+
+                }
+
+                if (aligned) {
+                    color = '#AEFF2F';
+                }
+
+            }
+            else {
+
+                const refAA =
+                    referenceSequence[
+                    columnIndex
+                    ];
+
+                color =
+                    getResidueColor(
+                        refAA,
+                        char
+                    );
+
+            }
+            return createResidueHtml(
+                char,
+                color,
+                residue,
+                lineNumber,
+                residueIndex,
+                blockNumber,
+                columnIndex
+            );
         }
         if (char === '-' || char === '.') {
             return createResidueHtml(char, '#FFFFFF', residue, lineNumber, residueIndex, blockNumber, columnIndex);
@@ -259,36 +323,32 @@ function finishSelection(event) {
     const insertBtn = document.getElementById('insertSelectionBtn');
     const deleteBtn = document.getElementById('deleteSelectionBtn');
     const deleteGapBtn = document.getElementById('deleteGapBtn');
+    const moveLeftBtn = document.getElementById('moveLeftBtn');
+    const moveRightBtn = document.getElementById('moveRightBtn');
 
     editBtn.style.display = 'none';
     insertBtn.style.display = 'none';
     deleteBtn.style.display = 'none';
     deleteGapBtn.style.display = 'none';
+    moveLeftBtn.style.display = 'none';
+    moveRightBtn.style.display = 'none';
 
-    if (
-        isInsertionSelection()
-    ) {
-        insertBtn.style.display =
-            'block';
+    if(isInsertionSelection()){
+        insertBtn.style.display = 'block';
     }
-    else if (
-        isGapDeletionSelection()
-    ) {
-        deleteGapBtn.style.display =
-            'block';
+    else if(isGapDeletionSelection()){
+        deleteGapBtn.style.display = 'block';
+        moveLeftBtn.style.display = 'block';
+        moveRightBtn.style.display = 'block';
     }
-    else if (
-        isDeleteSelection()
-    ) {
-        editBtn.style.display =
-            'block';
-
-        deleteBtn.style.display =
-            'block';
+    else if (isDeleteSelection()) {
+        editBtn.style.display = 'block';
+        deleteBtn.style.display = 'block';
+        moveLeftBtn.style.display = 'block';
+        moveRightBtn.style.display = 'block';
     }
     else {
-        editBtn.style.display =
-            'block';
+        editBtn.style.display = 'block';
     }
     showEditButton(event.pageX, event.pageY);
 }
@@ -681,14 +741,184 @@ function initializeChainPopovers() {
 }
 
 function formatSequenceForPopover(sequence) {
-    let numbers = '1', ruler = '|';
-    for (let i = 10; i <= sequence.length; i += 10) {
-        numbers += String(i).padStart(10, ' ');
-        ruler += '.........|';
+    const length = sequence.length;
+    let numbers = Array(length).fill(' ');
+    let ruler = Array(length).fill('.');
+
+    numbers[0] = '1';
+    ruler[0] = '|';
+
+    for (let pos = 10; pos <= length; pos += 10) {
+        const text = String(pos);
+        const start = pos - text.length;
+
+        for (let i = 0; i < text.length; i++) {
+            numbers[start + i] = text[i];
+        }
+        ruler[pos - 1] = '|';
     }
+
     return `<pre style="margin:0; font-family:monospace; white-space:pre;">
-${numbers}
-${ruler}
+${numbers.join('')}
+${ruler.join('')}
 ${sequence}
 </pre>`;
+}
+
+function expandAllSequences() {
+    alignmentBlocks.forEach(
+        (block, blockIndex) => {
+            for (let chainIndex = 0; chainIndex < block.lines.length; chainIndex++){
+                if (!isChainLine(block.lines[chainIndex])){
+                    continue;
+                }
+                
+                const coordinateIndex = chainIndex - 1;
+                const sequenceIndex = chainIndex - 2;
+
+                if (sequenceIndex < 0 || coordinateIndex < 0){
+                    continue;
+                }
+                const sequenceLine = block.lines[sequenceIndex];
+                const coordinateLine = block.lines[coordinateIndex];
+                const chainLine = block.lines[chainIndex];
+                const chainMatch = chainLine.match(/([A-Za-z0-9_]+)<-/);
+                const fullSequence = chainMatch ? fastaSequences[chainMatch[1]] : null;
+                if (!fullSequence) return;
+                const matches = coordinateLine.match(/-?\d+/g);
+                if (!matches || matches.length < 2) return;
+                const start = parseInt(matches[0]);
+                const end = parseInt(matches[1]);
+                const leftExtension = fullSequence.substring(0, start - 1);
+                const rightExtension = fullSequence.substring(end);
+
+                const firstAAColumn = sequenceLine.search(/[A-Za-z]/);
+                const lastAAColumn = sequenceLine.split('').findLastIndex(c => /[A-Za-z]/.test(c));
+
+                let expanded = sequenceLine.split('');
+                let insertedLeft = 0;
+                let insertedRight = 0;
+                for (let i = leftExtension.length - 1; i >= 0; i--) {
+                    const column = firstAAColumn - (leftExtension.length - i);
+                    if (column < 0) break;
+                    expanded[column] = leftExtension[i];
+                    insertedLeft++;
+                }
+                for (let i = 0; i < rightExtension.length; i++) {
+                    const column = lastAAColumn + 1 + i;
+                    if (column >= expanded.length) break;
+                    expanded[column] = rightExtension[i];
+                    insertedRight++;
+                }
+                block.lines[sequenceIndex] = expanded.join('');
+                block.lines[coordinateIndex] = rebuildCoordinateLine(
+                    expanded.length,
+                    start - insertedLeft,
+                    end + insertedRight,
+                    firstAAColumn - insertedLeft,
+                    lastAAColumn + insertedRight
+                );
+                updateChainLine(blockIndex, sequenceIndex);
+            }
+        }
+    );
+
+    renderAlignments(alignmentBlocks);
+    initializeTooltips();
+    initializeChainPopovers();
+    alert("All sequences aligned were expanded.")
+}
+
+function rebuildCoordinateLine(lineLength, start, end, firstAAColumn, lastAAColumn) {
+    let line = Array(lineLength).fill(' ');
+    const startText = String(start);
+    const endText = String(end);
+
+    for (let i = 0; i < startText.length; i++) {
+        if (firstAAColumn + i < line.length) {
+            line[firstAAColumn + i] = startText[i];
+        }
+    }
+
+    const endStart = lastAAColumn - endText.length + 1;
+    for (let i = 0; i < endText.length; i++) {
+        if (endStart + i >= 0 && endStart + i < line.length) {
+            line[endStart + i] = endText[i];
+        }
+    }
+
+    return line.join('');
+}
+
+function moveSelectionLeft() {
+    const first = selection.residues[0];
+    const blockIndex = parseInt(first.dataset.block);
+    const lineIndex = parseInt(first.dataset.line);
+    const columns = selection.residues.map(r => parseInt(r.dataset.column));
+    
+    const start = Math.min(...columns);
+    const end = Math.max(...columns);
+    let chars = alignmentBlocks[blockIndex].lines[lineIndex].split('');
+
+    if (start === 0 || chars[start - 1] !== '-') return;
+
+    const fragment = chars.slice(start, end + 1);
+
+    chars.splice(start, fragment.length, ...Array(fragment.length).fill('-'));
+    chars.splice(start - 1, fragment.length, ...fragment);
+
+    alignmentBlocks[blockIndex].lines[lineIndex] = chars.join('');
+
+    updateCoordinatesAfterMove(blockIndex, lineIndex);
+    updateChainLine(blockIndex, lineIndex);
+
+    renderAlignments(alignmentBlocks);
+    initializeTooltips();
+    initializeChainPopovers();
+    clearSelection();
+}
+
+function moveSelectionRight() {
+    const first = selection.residues[0];
+    const blockIndex = parseInt(first.dataset.block);
+    const lineIndex = parseInt(first.dataset.line);
+    const columns = selection.residues.map(r => parseInt(r.dataset.column));
+    
+    const start = Math.min(...columns);
+    const end = Math.max(...columns);
+    let chars = alignmentBlocks[blockIndex].lines[lineIndex].split('');
+
+    if (end >= chars.length - 1 || chars[end + 1] !== '-') return;
+
+    const fragment = chars.slice(start, end + 1);
+
+    chars.splice(start, fragment.length, ...Array(fragment.length).fill('-'));
+    chars.splice(start + 1, fragment.length, ...fragment);
+
+    alignmentBlocks[blockIndex].lines[lineIndex] = chars.join('');
+
+    updateCoordinatesAfterMove(blockIndex, lineIndex);
+    updateChainLine(blockIndex, lineIndex);
+
+    renderAlignments(alignmentBlocks);
+    initializeTooltips();
+    initializeChainPopovers();
+    clearSelection();
+}
+
+function updateCoordinatesAfterMove(blockIndex, lineIndex) {
+    const coordinateIndex = lineIndex + 1;
+    const block = alignmentBlocks[blockIndex];
+    const coordinateLine = block.lines[coordinateIndex];
+    const sequence = block.lines[lineIndex];
+
+    const matches = coordinateLine.match(/-?\d+/g);
+    if (!matches || matches.length < 2) return;
+
+    const start = parseInt(matches[0]);
+    const end = parseInt(matches[1]);
+    const firstAA = sequence.search(/[A-Za-z]/);
+    const lastAA = sequence.split('').findLastIndex(c => /[A-Za-z]/.test(c));
+
+    block.lines[coordinateIndex] = rebuildCoordinateLine(sequence.length, start, end, firstAA, lastAA);
 }
