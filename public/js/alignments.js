@@ -933,13 +933,23 @@ function addAlignment() {
     const start = parseInt(document.getElementById('newAlignmentStart').value);
     const chain = document.getElementById('newAlignmentChain').value;
     const sequence = fastaSequences[chain];
-    
+
     if (!sequence || !start || !chain) {
         alert('All fields are required.');
         return;
     }
 
     const block = alignmentBlocks[selectedBlockForInsertion];
+
+    const fragmentsLine = block.lines.find(line => line.startsWith('fragments chains:'));
+    if (fragmentsLine) {
+        const existingChains = fragmentsLine.replace('fragments chains:', '').split(',').map(c => c.trim());
+        if (existingChains.includes(chain)) {
+            alert('This chain is already present in the alignment.');
+            return;
+        }
+    }
+
     const alignmentLength = block.lines[2].length;
     const insertionStart = start - 1;
     let alignedSequence = Array(alignmentLength).fill('-');

@@ -3,6 +3,7 @@ let selection = { start: null, end: null, residues: [] };
 let isSelecting = false;
 let originalAlignmentText = '';
 let alignmentBlocks = [];
+let selectedBlockForRemoval = null;
 
 const baaColors = {
     'A': '#9798FF', 'I': '#9798FF', 'L': '#9798FF', 'M': '#9798FF', 'V': '#9798FF', 'F': '#F79B20', 'W': '#F79B20', 'Y': '#F79B20', 'K': '#FF9799', 'R': '#FF9799', 'D': '#98CB99', 'E': '#98CB99', 'N': '#FEDA96', 'Q': '#FEDA96', 'S': '#FEDA96', 'T': '#FEDA96', 'C': '#FEDA96', 'G': '#9798FF', 'P': '#9798FF', 'H': '#FF9799', '-': '#ffffff'
@@ -25,11 +26,15 @@ document.getElementById('saveEditBtn').addEventListener('click', saveEditedSeque
 document.getElementById('saveAlignmentsBtn').addEventListener('click', saveAlignmentsFile);
 document.getElementById('insertSelectionBtn').addEventListener('click', openInsertModal);
 document.getElementById('deleteSelectionBtn').addEventListener('click', deleteSelection);
+document.getElementById('expandSequencesBtn').addEventListener('click', expandAllSequences);
+document.getElementById('moveLeftBtn').addEventListener('click', moveSelectionLeft);
+document.getElementById('moveRightBtn').addEventListener('click', moveSelectionRight);
+document.getElementById('confirmAddAlignmentBtn').addEventListener('click', addAlignment);
+document.getElementById('confirmRemoveAlignmentBtn').addEventListener('click', removeAlignment);
 
-document
-    .querySelectorAll('.sequence-link')
+document.querySelectorAll('.sequence-link')
     .forEach(link => {
-        link.addEventListener('click', function(e) {
+        link.addEventListener('click', function (e) {
             e.preventDefault();
             const id = this.dataset.id;
             document.getElementById('sequenceTitle').textContent = id;
@@ -51,9 +56,42 @@ document.addEventListener('click', event => {
     });
 });
 
+document.addEventListener('click', event => {
+    const button = event.target.closest('.add-alignment-btn');
+    if (!button) return;
+
+    selectedBlockForInsertion = parseInt(button.dataset.block);
+    
+    const select = document.getElementById('newAlignmentChain');
+    select.innerHTML = Object.keys(fastaSequences)
+        .sort()
+        .map(chain => `<option value="${chain}">${chain} (${fastaSequences[chain].length} aa)</option>`)
+        .join('');
+
+    new bootstrap.Modal(document.getElementById('addAlignmentModal')).show();
+});
+
+document.addEventListener('click', event => {
+    const button = event.target.closest('.remove-alignment-btn');
+    if (!button) return;
+    const block = alignmentBlocks[parseInt(button.dataset.block)];
+    const fragmentsLine = block.lines.find(line => line.startsWith('fragments chains:'));
+    if (!fragmentsLine) return;
+    const chains = fragmentsLine.replace('fragments chains:', '').split(',').map(c => c.trim()).filter(Boolean);
+    if (chains.length <= 1) {
+        alert('The last alignment cannot be removed.');
+        return;
+    }
+    const select = document.getElementById('alignmentToRemove');
+    select.innerHTML = chains.map(chain => `<option value="${chain}">${chain}</option>`).join('');
+    selectedBlockForRemoval = parseInt(button.dataset.block);
+    new bootstrap.Modal(document.getElementById('removeAlignmentModal')).show();
+});
+
+
 async function init() {
     /* Carrega os alinhamentos do projeto, renderiza os blocos e inicializa os tooltips da interface. */
-    const response = await fetch(`/project/${projectId}/alignments`);
+    const response = await fetch(`${base_url}project/${projectId}/alignments`);
     const text = await response.text();
     originalAlignmentText = text;
     alignmentBlocks = parseAlignments(text);
@@ -62,7 +100,7 @@ async function init() {
     document.querySelector('#mutations_found_title').textContent = blocks.length;
 
     renderAlignments(alignmentBlocks);
-    initializeTooltips();initializeChainPopovers();
+    initializeTooltips(); initializeChainPopovers();
     initializeSelection();
     initializeChainPopovers();
 }
@@ -90,10 +128,10 @@ function shouldRemoveConsensusLine(index, totalLines) {
     return index >= 3 && (index - 3) % 4 === 0;
 }
 
-function getColorBar(x){
-    if(x<30){ return 'danger' }
-    else if(x<70){ return 'warning' }  
-    else{ return 'success' }
+function getColorBar(x) {
+    if (x < 30) { return 'danger' }
+    else if (x < 70) { return 'warning' }
+    else { return 'success' }
 }
 
 function createAlignmentCard(block, blockIndex) {
@@ -103,21 +141,24 @@ function createAlignmentCard(block, blockIndex) {
     const card = document.createElement('div');
     const columnColors = computeColumnColors(block);
     const statistics = computeAlignmentStatistics(block);
-    card.className = 'card mb-4';
+    card.className = 'card mb-5';
     card.innerHTML = `<div class="card-header small" id="${block.header.replace(/\|/g, '_')}">
-        <div class="row small">
-            <div class="col-3"><span class="bg-dark text-info badge">${block.header}</span></div>
-            <div class="col-3 text-end">Coverage: ${statistics.coverage.toFixed(1)}%
+        <div class="row small pt-2">
+            <div class="col-6"><h6 class="card-title"><strong class="pt-1 me-2">${block.header}</strong>
+            <button type="button" class="btn btn-outline-primary btn-sm btn-sm add-alignment-btn" data-block="${blockIndex}"><i class="bi bi-plus-circle-fill"></i> Add alignment</button>
+            <button type="button" class="btn btn-outline-danger btn-sm remove-alignment-btn" data-block="${blockIndex}"><i class="bi bi-dash-circle-fill"></i> Remove alignment</button>
+            </h6></span></div>
+            <div class="col-2 text-end"><strong>Coverage:</strong> ${statistics.coverage.toFixed(1)}%
             <div class="progress" role="progressbar" aria-label="Example 1px high" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100" style="height: 5px">
                 <div class="progress-bar bg-${getColorBar(statistics.coverage.toFixed(1))}" style="width: ${statistics.coverage.toFixed(1)}%"></div>
             </div>
             </div>
-            <div class="col-3 text-end">Identity: ${statistics.identity.toFixed(1)}%
+            <div class="col-2 text-end"><strong>Identity:</strong> ${statistics.identity.toFixed(1)}%
                 <div class="progress" role="progressbar" aria-label="Example 1px high" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100" style="height: 5px">
                     <div class="progress-bar bg-${getColorBar(statistics.identity.toFixed(1))}" style="width: ${statistics.identity.toFixed(1)}%"></div>
                 </div>
             </div>
-            <div class="col-3 text-end">Positives: ${statistics.positives.toFixed(1)}%
+            <div class="col-2 text-end"><strong>Positives:</strong> ${statistics.positives.toFixed(1)}%
                 <div class="progress" role="progressbar" aria-label="Example 1px high" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100" style="height: 5px">
                     <div class="progress-bar bg-${getColorBar(statistics.positives.toFixed(1))}" style="width: ${statistics.positives.toFixed(1)}%"></div>
                 </div>
@@ -151,26 +192,55 @@ function createAlignmentLine(line, startResidue = null, lineNumber = null, block
     const div = document.createElement('div');
     div.className = 'alignment-line';
     if (isSequenceLine(line) && startResidue !== null) {
-        div.innerHTML = renderSequence(line, startResidue, lineNumber, blockNumber, referenceSequence, columnColors);
+        div.innerHTML = renderSequence(line, startResidue, lineNumber, blockNumber, referenceSequence, columnColors, alignmentBlocks[blockNumber]);
     } else {
-        if(isChainLine(line)){
+        if (isChainLine(line)) {
             div.innerHTML = renderChainLine(line);
         }
-        else{
+        else {
             div.textContent = line;
         }
     }
     return div;
 }
 
-function renderSequence(sequenceLine, startResidue, lineNumber, blockNumber, referenceSequence, columnColors) {
+function renderSequence(sequenceLine, startResidue, lineNumber, blockNumber, referenceSequence, columnColors, block) {
     /** Renderiza uma sequência de aminoácidos com numeração de resíduos. */
     let residue = startResidue - 1, residueIndex = 0, columnIndex = -1;
     return [...sequenceLine].map(char => {
         columnIndex++;
         if (/[A-Za-z]/.test(char)) {
             residue++; residueIndex++;
-            return createResidueHtml(char, columnColors[columnIndex], residue, lineNumber, residueIndex, blockNumber, columnIndex);
+            let color = '#FFFFFF';
+            if (lineNumber === 2) {
+                let aligned = false;
+                for (let i = 3; i < block.lines.length; i++) {
+                    if (!isSequenceLine(block.lines[i])) {
+                        continue;
+                    }
+                    const aa = block.lines[i][columnIndex];
+                    if (aa && /[A-Za-z]/.test(aa)) {
+                        aligned = true;
+                        break;
+                    }
+                }
+                if (aligned) {
+                    color = '#CCCCCC';
+                }
+            }
+            else {
+                const refAA = referenceSequence[columnIndex];
+                color = getResidueColor(refAA, char);
+            }
+            return createResidueHtml(
+                char,
+                color,
+                residue,
+                lineNumber,
+                residueIndex,
+                blockNumber,
+                columnIndex
+            );
         }
         if (char === '-' || char === '.') {
             return createResidueHtml(char, '#FFFFFF', residue, lineNumber, residueIndex, blockNumber, columnIndex);
@@ -259,36 +329,32 @@ function finishSelection(event) {
     const insertBtn = document.getElementById('insertSelectionBtn');
     const deleteBtn = document.getElementById('deleteSelectionBtn');
     const deleteGapBtn = document.getElementById('deleteGapBtn');
+    const moveLeftBtn = document.getElementById('moveLeftBtn');
+    const moveRightBtn = document.getElementById('moveRightBtn');
 
     editBtn.style.display = 'none';
     insertBtn.style.display = 'none';
     deleteBtn.style.display = 'none';
     deleteGapBtn.style.display = 'none';
+    moveLeftBtn.style.display = 'none';
+    moveRightBtn.style.display = 'none';
 
-    if(
-        isInsertionSelection()
-    ){
-        insertBtn.style.display =
-            'block';
+    if(isInsertionSelection()){
+        insertBtn.style.display = 'block';
     }
-    else if(
-        isGapDeletionSelection()
-    ){
-        deleteGapBtn.style.display =
-            'block';
+    else if(isGapDeletionSelection()){
+        deleteGapBtn.style.display = 'block';
+        moveLeftBtn.style.display = 'block';
+        moveRightBtn.style.display = 'block';
     }
-    else if(
-        isDeleteSelection()
-    ){
-        editBtn.style.display =
-            'block';
-
-        deleteBtn.style.display =
-            'block';
+    else if (isDeleteSelection()) {
+        editBtn.style.display = 'block';
+        deleteBtn.style.display = 'block';
+        moveLeftBtn.style.display = 'block';
+        moveRightBtn.style.display = 'block';
     }
-    else{
-        editBtn.style.display =
-            'block';
+    else {
+        editBtn.style.display = 'block';
     }
     showEditButton(event.pageX, event.pageY);
 }
@@ -331,7 +397,7 @@ function saveEditedSequence() {
         return;
     }
     alignmentBlocks[blockIndex].lines[lineIndex] = sequenceLine.substring(0, startColumn) + newSequence + sequenceLine.substring(endColumn + 1);
-    if (isInsertion){
+    if (isInsertion) {
         updateCoordinatesAfterInsertion(
             blockIndex,
             lineIndex,
@@ -357,7 +423,7 @@ async function saveAlignmentsFile() {
     /* Salva o arquivo no servidor */
     let content = '';
     document.querySelectorAll('.alignment-line').forEach(line => content += line.textContent + '\n');
-    const response = await fetch(`/project/${projectId}/save-alignments`, {
+    const response = await fetch(`${base_url}project/${projectId}/save-alignments`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ content })
@@ -378,11 +444,11 @@ function getResidueColor(referenceAA, currentAA) {
     /* Calcula a cor baseada na similaridade química */
     referenceAA = referenceAA.toUpperCase(); currentAA = currentAA.toUpperCase();
     if (referenceAA === '-' || currentAA === '-') return '#FFFFFF';
-    if (referenceAA === currentAA) return '#008CA6';
+    if (referenceAA === currentAA) return '#00BFFF';
     for (const group of Object.values(aaGroups)) {
-        if (group.includes(referenceAA) && group.includes(currentAA)) return '#CCCCCC';
+        if (group.includes(referenceAA) && group.includes(currentAA)) return '#87CEFA';
     }
-    return '#D54344';
+    return '#FF6347';
 }
 
 function computeColumnColors(block) {
@@ -397,13 +463,13 @@ function computeColumnColors(block) {
             const aa = sequenceLines[i][col];
             if (!aa || aa === '-') continue;
             const color = getResidueColor(refAA, aa);
-            if (color === '#008CA6') identical++;
-            else if (color === '#CCCCCC') similar++;
+            if (color === '#00BFFF') identical++;
+            else if (color === '#87CEFA') similar++;
             else different++;
         }
-        if (identical > 0) colors[col] = '#008CA6';
-        else if (similar > 0) colors[col] = '#CCCCCC';
-        else if (different > 0) colors[col] = '#D54344';
+        if (identical > 0) colors[col] = '#00BFFF';
+        else if (similar > 0) colors[col] = '#87CEFA';
+        else if (different > 0) colors[col] = '#FF6347';
     }
     return colors;
 }
@@ -430,16 +496,16 @@ function updateCoordinatesAfterInsertion(blockIndex, lineIndex, oldSequence, new
     let newCoordinateLine = Array(sequence.length).fill(' ');
     const startText = String(start);
 
-    for (let i = 0; i < startText.length; i++){
-        if (currentFirstAA + i >= 0 && currentFirstAA + i < newCoordinateLine.length){ 
+    for (let i = 0; i < startText.length; i++) {
+        if (currentFirstAA + i >= 0 && currentFirstAA + i < newCoordinateLine.length) {
             newCoordinateLine[currentFirstAA + i] = startText[i];
         }
     }
 
     const endText = String(end);
-    for (let i = 0; i < endText.length; i++){ 
-        if (currentLastAA - endText.length + 1 + i >= 0){ 
-            newCoordinateLine[currentLastAA - endText.length + 1 + i] = endText[i]; 
+    for (let i = 0; i < endText.length; i++) {
+        if (currentLastAA - endText.length + 1 + i >= 0) {
+            newCoordinateLine[currentLastAA - endText.length + 1 + i] = endText[i];
         }
     }
     alignmentBlocks[blockIndex].lines[coordinateIndex] = newCoordinateLine.join('');
@@ -460,12 +526,12 @@ function openInsertModal() {
 }
 
 
-function isDeleteSelection(){
-    if(selection.residues.length === 0){
+function isDeleteSelection() {
+    if (selection.residues.length === 0) {
         return false;
     }
     const line = parseInt(selection.residues[0].dataset.line);
-    if(line === 2){
+    if (line === 2) {
         return false;
     }
     return selection.residues.every(
@@ -516,7 +582,7 @@ function deleteSelection() {
         lineIndex
     );
     renderAlignments(alignmentBlocks);
-    initializeTooltips();initializeChainPopovers();
+    initializeTooltips(); initializeChainPopovers();
     clearSelection();
 }
 
@@ -544,7 +610,7 @@ function deleteGap() {
     alignmentBlocks[blockIndex].lines[lineIndex] = chars.join('');
     updateChainLine(blockIndex, lineIndex);
     renderAlignments(alignmentBlocks);
-    initializeTooltips();initializeChainPopovers();
+    initializeTooltips(); initializeChainPopovers();
     clearSelection();
 }
 
@@ -591,9 +657,9 @@ function computeAlignmentStatistics(block) {
     let matches = 0, positives = 0, mismatches = 0;
 
     columnColors.forEach(color => {
-        if (color === '#008CA6') matches++;
-        else if (color === '#CCCCCC') positives++;
-        else if (color === '#D54344') mismatches++;
+        if (color === '#00BFFF') matches++;
+        else if (color === '#87CEFA') positives++;
+        else if (color === '#FF6347') mismatches++;
     });
 
     const aligned = matches + positives + mismatches;
@@ -649,25 +715,26 @@ function updateChainLine(blockIndex, lineIndex) {
 
 function renderChainLine(line) {
     return line
-        .replace(/([A-Za-z0-9_]+)(<\-)/g, (match, chain, arrow) => 
+        .replace(/([A-Za-z0-9_]+)(<\-)/g, (match, chain, arrow) =>
             `<span class="chain-link" data-chain="${chain}">${chain}</span>${arrow}`
         )
-        .replace(/(\-\>)([A-Za-z0-9_]+)/g, (match, arrow, chain) => 
+        .replace(/(\-\>)([A-Za-z0-9_]+)/g, (match, arrow, chain) =>
             `${arrow}<span class="chain-link" data-chain="${chain}">${chain}</span>`
         );
 }
 
-function isChainLine(line){
+function isChainLine(line) {
     return (
         line.includes('<-') && line.includes('->')
     );
 }
 
 function initializeChainPopovers() {
+
     document.querySelectorAll('.chain-link').forEach(link => {
         const id = link.dataset.chain;
         const sequence = fastaSequences[id] || 'Sequence not found';
-        
+
         new bootstrap.Popover(link, {
             trigger: 'click',
             html: true,
@@ -680,14 +747,293 @@ function initializeChainPopovers() {
 }
 
 function formatSequenceForPopover(sequence) {
-    let numbers = '1', ruler = '|';
-    for (let i = 10; i <= sequence.length; i += 10) {
-        numbers += String(i).padStart(10, ' ');
-        ruler += '.........|';
+    const length = sequence.length;
+    let numbers = Array(length).fill(' ');
+    let ruler = Array(length).fill('.');
+
+    numbers[0] = '1';
+    ruler[0] = '|';
+
+    for (let pos = 10; pos <= length; pos += 10) {
+        const text = String(pos);
+        const start = pos - text.length;
+
+        for (let i = 0; i < text.length; i++) {
+            numbers[start + i] = text[i];
+        }
+        ruler[pos - 1] = '|';
     }
+
     return `<pre style="margin:0; font-family:monospace; white-space:pre;">
-${numbers}
-${ruler}
+${numbers.join('')}
+${ruler.join('')}
 ${sequence}
 </pre>`;
+}
+
+function expandAllSequences() {
+    alignmentBlocks.forEach(
+        (block, blockIndex) => {
+            for (let chainIndex = 0; chainIndex < block.lines.length; chainIndex++){
+                if (!isChainLine(block.lines[chainIndex])){
+                    continue;
+                }
+                
+                const coordinateIndex = chainIndex - 1;
+                const sequenceIndex = chainIndex - 2;
+
+                if (sequenceIndex < 0 || coordinateIndex < 0){
+                    continue;
+                }
+                const sequenceLine = block.lines[sequenceIndex];
+                const coordinateLine = block.lines[coordinateIndex];
+                const chainLine = block.lines[chainIndex];
+                const chainMatch = chainLine.match(/([A-Za-z0-9_]+)<-/);
+                const fullSequence = chainMatch ? fastaSequences[chainMatch[1]] : null;
+                if (!fullSequence) return;
+                const matches = coordinateLine.match(/-?\d+/g);
+                if (!matches || matches.length < 2) return;
+                const start = parseInt(matches[0]);
+                const end = parseInt(matches[1]);
+                const leftExtension = fullSequence.substring(0, start - 1);
+                const rightExtension = fullSequence.substring(end);
+
+                const firstAAColumn = sequenceLine.search(/[A-Za-z]/);
+                const lastAAColumn = sequenceLine.split('').findLastIndex(c => /[A-Za-z]/.test(c));
+
+                let expanded = sequenceLine.split('');
+                let insertedLeft = 0;
+                let insertedRight = 0;
+                for (let i = leftExtension.length - 1; i >= 0; i--) {
+                    const column = firstAAColumn - (leftExtension.length - i);
+                    if (column < 0) break;
+                    expanded[column] = leftExtension[i];
+                    insertedLeft++;
+                }
+                for (let i = 0; i < rightExtension.length; i++) {
+                    const column = lastAAColumn + 1 + i;
+                    if (column >= expanded.length) break;
+                    expanded[column] = rightExtension[i];
+                    insertedRight++;
+                }
+                block.lines[sequenceIndex] = expanded.join('');
+                block.lines[coordinateIndex] = rebuildCoordinateLine(
+                    expanded.length,
+                    start - insertedLeft,
+                    end + insertedRight,
+                    firstAAColumn - insertedLeft,
+                    lastAAColumn + insertedRight
+                );
+                updateChainLine(blockIndex, sequenceIndex);
+            }
+        }
+    );
+
+    renderAlignments(alignmentBlocks);
+    initializeTooltips();
+    initializeChainPopovers();
+    alert("All sequences aligned were expanded.")
+}
+
+function rebuildCoordinateLine(lineLength, start, end, firstAAColumn, lastAAColumn) {
+    let line = Array(lineLength).fill(' ');
+    const startText = String(start);
+    const endText = String(end);
+
+    for (let i = 0; i < startText.length; i++) {
+        if (firstAAColumn + i < line.length) {
+            line[firstAAColumn + i] = startText[i];
+        }
+    }
+
+    const endStart = lastAAColumn - endText.length + 1;
+    for (let i = 0; i < endText.length; i++) {
+        if (endStart + i >= 0 && endStart + i < line.length) {
+            line[endStart + i] = endText[i];
+        }
+    }
+
+    return line.join('');
+}
+
+function moveSelectionLeft() {
+    const first = selection.residues[0];
+    const blockIndex = parseInt(first.dataset.block);
+    const lineIndex = parseInt(first.dataset.line);
+    const columns = selection.residues.map(r => parseInt(r.dataset.column));
+    
+    const start = Math.min(...columns);
+    const end = Math.max(...columns);
+    let chars = alignmentBlocks[blockIndex].lines[lineIndex].split('');
+
+    if (start === 0 || chars[start - 1] !== '-') return;
+
+    const fragment = chars.slice(start, end + 1);
+
+    chars.splice(start, fragment.length, ...Array(fragment.length).fill('-'));
+    chars.splice(start - 1, fragment.length, ...fragment);
+
+    alignmentBlocks[blockIndex].lines[lineIndex] = chars.join('');
+
+    updateCoordinatesAfterMove(blockIndex, lineIndex);
+    updateChainLine(blockIndex, lineIndex);
+
+    renderAlignments(alignmentBlocks);
+    initializeTooltips();
+    initializeChainPopovers();
+    clearSelection();
+}
+
+function moveSelectionRight() {
+    const first = selection.residues[0];
+    const blockIndex = parseInt(first.dataset.block);
+    const lineIndex = parseInt(first.dataset.line);
+    const columns = selection.residues.map(r => parseInt(r.dataset.column));
+    
+    const start = Math.min(...columns);
+    const end = Math.max(...columns);
+    let chars = alignmentBlocks[blockIndex].lines[lineIndex].split('');
+
+    if (end >= chars.length - 1 || chars[end + 1] !== '-') return;
+
+    const fragment = chars.slice(start, end + 1);
+
+    chars.splice(start, fragment.length, ...Array(fragment.length).fill('-'));
+    chars.splice(start + 1, fragment.length, ...fragment);
+
+    alignmentBlocks[blockIndex].lines[lineIndex] = chars.join('');
+
+    updateCoordinatesAfterMove(blockIndex, lineIndex);
+    updateChainLine(blockIndex, lineIndex);
+
+    renderAlignments(alignmentBlocks);
+    initializeTooltips();
+    initializeChainPopovers();
+    clearSelection();
+}
+
+function updateCoordinatesAfterMove(blockIndex, lineIndex) {
+    const coordinateIndex = lineIndex + 1;
+    const block = alignmentBlocks[blockIndex];
+    const coordinateLine = block.lines[coordinateIndex];
+    const sequence = block.lines[lineIndex];
+
+    const matches = coordinateLine.match(/-?\d+/g);
+    if (!matches || matches.length < 2) return;
+
+    const start = parseInt(matches[0]);
+    const end = parseInt(matches[1]);
+    const firstAA = sequence.search(/[A-Za-z]/);
+    const lastAA = sequence.split('').findLastIndex(c => /[A-Za-z]/.test(c));
+
+    block.lines[coordinateIndex] = rebuildCoordinateLine(sequence.length, start, end, firstAA, lastAA);
+}
+
+function addAlignment() {
+    const start = parseInt(document.getElementById('newAlignmentStart').value);
+    const chain = document.getElementById('newAlignmentChain').value;
+    const sequence = fastaSequences[chain];
+
+    if (!sequence || !start || !chain) {
+        alert('All fields are required.');
+        return;
+    }
+
+    const block = alignmentBlocks[selectedBlockForInsertion];
+
+    const fragmentsLine = block.lines.find(line => line.startsWith('fragments chains:'));
+    if (fragmentsLine) {
+        const existingChains = fragmentsLine.replace('fragments chains:', '').split(',').map(c => c.trim());
+        if (existingChains.includes(chain)) {
+            alert('This chain is already present in the alignment.');
+            return;
+        }
+    }
+
+    const alignmentLength = block.lines[2].length;
+    const insertionStart = start - 1;
+    let alignedSequence = Array(alignmentLength).fill('-');
+
+    for (let i = 0; i < sequence.length && (insertionStart + i) < alignmentLength; i++) {
+        alignedSequence[insertionStart + i] = sequence[i];
+    }
+
+    const alignedLine = alignedSequence.join('');
+    const end = start + sequence.length - 1;
+    const lastIndex = insertionStart + sequence.length - 1;
+
+    const coordinateLine = rebuildCoordinateLine(alignmentLength, 1, sequence.length, insertionStart, lastIndex);
+    const chainLine = buildChainLine(alignmentLength, chain, insertionStart, lastIndex);
+    const fragmentsIndex = block.lines.findIndex(line => line.startsWith('fragments chains:'));
+
+    block.lines.splice(fragmentsIndex, 0, '', alignedLine, coordinateLine, chainLine);
+
+    updateFragmentsChains(block);
+    renderAlignments(alignmentBlocks);
+    initializeTooltips();
+    initializeChainPopovers();
+
+    bootstrap.Modal.getInstance(document.getElementById('addAlignmentModal')).hide();
+}
+
+function buildChainLine(lineLength, chain, firstAAColumn, lastAAColumn) {
+    let line = Array(lineLength).fill(' ');
+    const leftText = `${chain}<-`;
+    const rightText = `->${chain}`;
+
+    for (let i = 0; i < leftText.length; i++) {
+        if (firstAAColumn + i < line.length) {
+            line[firstAAColumn + i] = leftText[i];
+        }
+    }
+
+    const rightStart = Math.max(lastAAColumn - rightText.length + 1, firstAAColumn + leftText.length + 1);
+    for (let i = 0; i < rightText.length; i++) {
+        if (rightStart + i < line.length) {
+            line[rightStart + i] = rightText[i];
+        }
+    }
+
+    return line.join('');
+}
+
+function updateFragmentsChains(block) {
+    const chains = [];
+
+    block.lines.forEach(line => {
+        if (!isChainLine(line)) return;
+        const match = line.match(/([A-Za-z0-9_]+)<-/);
+        if (match) chains.push(match[1]);
+    });
+
+    const fragmentsIndex = block.lines.findIndex(line => line.startsWith('fragments chains:'));
+
+    if (fragmentsIndex >= 0) {
+        block.lines[fragmentsIndex] = 'fragments chains: ' + chains.join(',');
+    }
+}
+
+function removeAlignment() {
+    const chainToRemove = document.getElementById('alignmentToRemove').value;
+    const block = alignmentBlocks[selectedBlockForRemoval];
+    const chainIndex = block.lines.findIndex(line => {
+        const match = isChainLine(line) && line.match(/([A-Za-z0-9_]+)<-/);
+        return match && match[1] === chainToRemove;
+    });
+    if (chainIndex < 0) {
+        alert('Alignment not found.'); return;
+    }
+    const sequenceIndex = chainIndex - 2;
+    const hasBlankLine = sequenceIndex > 0 && block.lines[sequenceIndex - 1].trim() === '';
+    const startRemove = hasBlankLine ? sequenceIndex - 1 : sequenceIndex;
+    const removeCount = hasBlankLine ? 4 : 3;
+
+    block.lines.splice(startRemove, removeCount);
+
+    updateFragmentsChains(block);
+    renderAlignments(alignmentBlocks);
+    initializeTooltips();
+    initializeChainPopovers();
+
+    bootstrap.Modal.getInstance(document.getElementById('removeAlignmentModal')).hide();
 }
