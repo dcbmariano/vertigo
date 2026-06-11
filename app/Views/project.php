@@ -126,7 +126,7 @@
     </table>
 
 
-    <h2 class="pt-4">Alignments</h2>
+    <h2 class="pt-4 pb-2"><strong>Alignments</strong></h2>
     <script>
         const projectId = "<?= esc($id) ?>";
         const base_url = "<?= base_url() ?>";
@@ -160,6 +160,8 @@
 
     <?= $this->include('modal/edit_sequence') ?>
     <?= $this->include('modal/view_hmm_fasta') ?>
+    <?= $this->include('modal/add_alignment') ?>
+    <?= $this->include('modal/remove_alignment') ?>
 
 <?php endif; ?>
 
