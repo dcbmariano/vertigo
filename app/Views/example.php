@@ -41,6 +41,12 @@
                         </ul>
                     </div>
                 </div>
+                <button
+                    id="expandSequencesBtn"
+                    class="btn btn-dark">
+                    <i class="bi bi-arrows-expand-vertical"></i>
+                    Expand Sequences
+                </button>
                 <button type="button" class="btn btn-primary" id="saveAlignmentsBtn" disabled title="You cannot save in the example page">
                     <i class="bi bi-floppy"></i> Save alignment
                 </button>
