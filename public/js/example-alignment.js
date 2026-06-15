@@ -31,6 +31,7 @@ document.getElementById('moveLeftBtn').addEventListener('click', moveSelectionLe
 document.getElementById('moveRightBtn').addEventListener('click', moveSelectionRight);
 document.getElementById('confirmAddAlignmentBtn').addEventListener('click', addAlignment);
 document.getElementById('confirmRemoveAlignmentBtn').addEventListener('click', removeAlignment);
+document.getElementById('newAlignmentChain').addEventListener('change', updateSelectedChainPreview);
 
 document.querySelectorAll('.sequence-link')
     .forEach(link => {
@@ -1036,4 +1037,15 @@ function removeAlignment() {
     initializeChainPopovers();
 
     bootstrap.Modal.getInstance(document.getElementById('removeAlignmentModal')).hide();
+}
+
+function updateSelectedChainPreview() {
+    const chain = document.getElementById('newAlignmentChain').value;
+    const preview = document.getElementById('selectedChainSequence');
+    if (!chain) {
+        preview.style.display = 'none';
+        return;
+    }
+    preview.style.display = 'block';
+    preview.innerHTML = formatSequenceForPopover(fastaSequences[chain]);
 }

@@ -22,6 +22,9 @@
                     </label>
                     <input id="newAlignmentStart" type="number" min="1" class="form-control" value="1">
                 </div>
+                <div class="mb-3">
+                    <pre id="selectedChainSequence" class="border rounded p-2 bg-light" style="display:none; font-family:monospace; white-space:pre-wrap; max-height:180px; overflow:auto;"></pre>
+                </div>
             </div>
             <div class="modal-footer">
                 <button class="btn btn-secondary" data-bs-dismiss="modal">
