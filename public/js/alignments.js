@@ -4,6 +4,7 @@ let isSelecting = false;
 let originalAlignmentText = '';
 let alignmentBlocks = [];
 let selectedBlockForRemoval = null;
+let selectedBlockForDeletion=null;
 
 const baaColors = {
     'A': '#9798FF', 'I': '#9798FF', 'L': '#9798FF', 'M': '#9798FF', 'V': '#9798FF', 'F': '#F79B20', 'W': '#F79B20', 'Y': '#F79B20', 'K': '#FF9799', 'R': '#FF9799', 'D': '#98CB99', 'E': '#98CB99', 'N': '#FEDA96', 'Q': '#FEDA96', 'S': '#FEDA96', 'T': '#FEDA96', 'C': '#FEDA96', 'G': '#9798FF', 'P': '#9798FF', 'H': '#FF9799', '-': '#ffffff'
@@ -32,7 +33,10 @@ document.getElementById('moveRightBtn').addEventListener('click', moveSelectionR
 document.getElementById('confirmAddAlignmentBtn').addEventListener('click', addAlignment);
 document.getElementById('confirmRemoveAlignmentBtn').addEventListener('click', removeAlignment);
 document.getElementById('newAlignmentChain').addEventListener('change', updateSelectedChainPreview);
-
+document.getElementById('createAlignmentBlockBtn').addEventListener('click', openCreateAlignmentBlockModal);
+document.getElementById('newBlockChain').addEventListener('change', updateCreateBlockPreview);
+document.getElementById('confirmCreateBlockBtn').addEventListener('click', createAlignmentBlock);
+document.getElementById('confirmDeleteBlockBtn').addEventListener('click',deleteAlignmentBlock);
 
 document.querySelectorAll('.sequence-link')
     .forEach(link => {
@@ -45,6 +49,13 @@ document.querySelectorAll('.sequence-link')
             modal.show();
         });
     });
+
+document.addEventListener('click',function(e){
+    const button=e.target.closest('.delete-block-btn');
+    if(!button){ return; }
+    selectedBlockForDeletion=parseInt(button.dataset.block);
+    new bootstrap.Modal(document.getElementById('deleteBlockModal')).show();
+});
 
 document.getElementById('deleteGapBtn').addEventListener('click', deleteGap);
 
@@ -63,7 +74,7 @@ document.addEventListener('click', event => {
     if (!button) return;
 
     selectedBlockForInsertion = parseInt(button.dataset.block);
-    
+
     const select = document.getElementById('newAlignmentChain');
     select.innerHTML = Object.keys(fastaSequences)
         .sort()
@@ -146,10 +157,14 @@ function createAlignmentCard(block, blockIndex) {
     card.className = 'card mb-5';
     card.innerHTML = `<div class="card-header small" id="${block.header.replace(/\|/g, '_')}">
         <div class="row small pt-2">
-            <div class="col-6"><h6 class="card-title"><strong class="pt-1 me-2">${block.header}</strong>
-            <button type="button" class="btn btn-outline-primary btn-sm btn-sm add-alignment-btn" data-block="${blockIndex}"><i class="bi bi-plus-circle-fill"></i> Add alignment</button>
-            <button type="button" class="btn btn-outline-danger btn-sm remove-alignment-btn" data-block="${blockIndex}"><i class="bi bi-dash-circle-fill"></i> Remove alignment</button>
-            </h6></span></div>
+            <div class="col-6">
+                <h6 class="card-title">
+                    <strong class="pt-1 me-2">${block.header}</strong>
+                    <button type="button" class="btn btn-outline-primary btn-sm btn-sm add-alignment-btn" data-block="${blockIndex}"><i class="bi bi-plus-circle-fill"></i> Add alignment</button>
+                    <button type="button" class="btn btn-outline-danger btn-sm remove-alignment-btn" data-block="${blockIndex}"><i class="bi bi-dash-circle-fill"></i> Remove alignment</button>
+                    <button type="button" class="btn btn-danger btn-sm delete-block-btn" data-block="${blockIndex}"><i class="bi bi-trash-fill"></i> Delete block</button>
+                </h6>
+            </div>
             <div class="col-2 text-end"><strong>Coverage:</strong> ${statistics.coverage.toFixed(1)}%
             <div class="progress" role="progressbar" aria-label="Example 1px high" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100" style="height: 5px">
                 <div class="progress-bar bg-${getColorBar(statistics.coverage.toFixed(1))}" style="width: ${statistics.coverage.toFixed(1)}%"></div>
@@ -341,10 +356,10 @@ function finishSelection(event) {
     moveLeftBtn.style.display = 'none';
     moveRightBtn.style.display = 'none';
 
-    if(isInsertionSelection()){
+    if (isInsertionSelection()) {
         insertBtn.style.display = 'block';
     }
-    else if(isGapDeletionSelection()){
+    else if (isGapDeletionSelection()) {
         deleteGapBtn.style.display = 'block';
         moveLeftBtn.style.display = 'block';
         moveRightBtn.style.display = 'block';
@@ -565,8 +580,7 @@ function deleteSelection() {
     });
 
     alignmentBlocks[blockIndex].lines[lineIndex] = chars.join('');
-    const deletedResidues =
-        selection.residues.filter(
+    const deletedResidues = selection.residues.filter(
             r => /[A-Za-z]/.test(
                 r.dataset.residue
             )
@@ -677,9 +691,38 @@ function computeAlignmentStatistics(block) {
 function updateChainLine(blockIndex, lineIndex) {
     const chainIndex = lineIndex + 2;
     const originalBlocks = parseAlignments(originalAlignmentText);
-    const originalChainLine = originalBlocks[blockIndex].lines[chainIndex];
+    let originalChainLine = null;
 
-    if (!originalChainLine) return;
+    if(originalBlocks[blockIndex]){
+        originalChainLine = originalBlocks[blockIndex].lines[chainIndex];
+    }
+
+    if(!originalChainLine){
+        const sequence = alignmentBlocks[blockIndex].lines[lineIndex];
+
+        const coordinateLine = alignmentBlocks[blockIndex].lines[lineIndex + 1];
+
+        const chain = alignmentBlocks[blockIndex]
+                .lines[lineIndex + 2]
+                .match(/([A-Za-z0-9_]+)<-/)[1];
+
+        const firstNumberPos = coordinateLine.search(/-?\d/);
+        let lastNumberPos = -1;
+        for(let i = coordinateLine.length - 1; i >= 0; i--){
+            if(/\d/.test(coordinateLine[i])){
+                lastNumberPos = i;
+                break;
+            }
+        }
+        alignmentBlocks[blockIndex].lines[lineIndex + 2] =
+            buildChainLine(
+                sequence.length,
+                chain,
+                firstNumberPos,
+                lastNumberPos
+            );
+        return;
+    }
 
     const leftMatch = originalChainLine.match(/([A-Za-z0-9_]+)<-/);
     const rightMatch = originalChainLine.match(/->([A-Za-z0-9_]+)/);
@@ -776,15 +819,15 @@ ${sequence}
 function expandAllSequences() {
     alignmentBlocks.forEach(
         (block, blockIndex) => {
-            for (let chainIndex = 0; chainIndex < block.lines.length; chainIndex++){
-                if (!isChainLine(block.lines[chainIndex])){
+            for (let chainIndex = 0; chainIndex < block.lines.length; chainIndex++) {
+                if (!isChainLine(block.lines[chainIndex])) {
                     continue;
                 }
-                
+
                 const coordinateIndex = chainIndex - 1;
                 const sequenceIndex = chainIndex - 2;
 
-                if (sequenceIndex < 0 || coordinateIndex < 0){
+                if (sequenceIndex < 0 || coordinateIndex < 0) {
                     continue;
                 }
                 const sequenceLine = block.lines[sequenceIndex];
@@ -863,7 +906,7 @@ function moveSelectionLeft() {
     const blockIndex = parseInt(first.dataset.block);
     const lineIndex = parseInt(first.dataset.line);
     const columns = selection.residues.map(r => parseInt(r.dataset.column));
-    
+
     const start = Math.min(...columns);
     const end = Math.max(...columns);
     let chars = alignmentBlocks[blockIndex].lines[lineIndex].split('');
@@ -891,7 +934,7 @@ function moveSelectionRight() {
     const blockIndex = parseInt(first.dataset.block);
     const lineIndex = parseInt(first.dataset.line);
     const columns = selection.residues.map(r => parseInt(r.dataset.column));
-    
+
     const start = Math.min(...columns);
     const end = Math.max(...columns);
     let chars = alignmentBlocks[blockIndex].lines[lineIndex].split('');
@@ -1041,12 +1084,175 @@ function removeAlignment() {
 }
 
 function updateSelectedChainPreview() {
-    const chain = document.getElementById('newAlignmentChain').value;
-    const preview = document.getElementById('selectedChainSequence');
-    if (!chain) {
+    const chain = document
+            .getElementById(
+                'newAlignmentChain'
+            )
+            .value;
+    const preview = document
+            .getElementById(
+                'selectedChainSequence'
+            );
+    if (
+        !chain
+    ) {
         preview.style.display = 'none';
         return;
     }
     preview.style.display = 'block';
-    preview.innerHTML = formatSequenceForPopover(fastaSequences[chain]);
+    preview.innerHTML = formatSequenceForPopover(
+            fastaSequences[
+            chain
+            ]
+        );
+}
+
+function openCreateAlignmentBlockModal() {
+    document.getElementById('newBlockHeader').value='';
+    document.getElementById('newBlockSequence').value='';
+    document.getElementById('newBlockStart').value='1';
+    
+    const message=document.getElementById('createBlockMessage');
+    message.className='alert alert-secondary mb-2';
+    message.innerHTML='Fill in the information below to create a new alignment block.';
+
+    const select = document.getElementById('newBlockChain');
+    select.innerHTML = '';
+    Object.keys(fastaSequences).sort()
+        .forEach(
+            chain => {
+                const option = document.createElement(
+                        'option'
+                    );
+                option.value = chain;
+                option.textContent = `${chain} (${fastaSequences[chain].length} aa)`;
+                select.appendChild(
+                    option
+                );
+            }
+        );
+    updateCreateBlockPreview();
+    new bootstrap.Modal(
+        document.getElementById(
+            'createAlignmentBlockModal'
+        )
+    ).show();
+}
+
+
+
+function updateCreateBlockPreview(){
+    const chain = document.getElementById('newBlockChain').value;
+    const preview = document
+            .getElementById(
+                'newBlockChainPreview'
+            );
+    preview.style.display = 'block';
+    preview.innerHTML = formatSequenceForPopover(
+            fastaSequences[chain]
+        );
+} 
+
+function createAlignmentBlock(){
+
+    const header=document.getElementById('newBlockHeader').value.trim();
+    const reference=document.getElementById('newBlockSequence').value.trim().replace(/\s+/g,'');
+    const chain=document.getElementById('newBlockChain').value;
+    const start=parseInt(document.getElementById('newBlockStart').value);
+    if(!header || !reference || !chain || !start){
+        alert('All fields are required.');
+        return;
+    }
+    const sequence=fastaSequences[chain];
+    if(!sequence){
+        alert('Chain not found.');
+        return;
+    }
+
+    const message=document.getElementById('createBlockMessage');
+    const button=document.getElementById('confirmCreateBlockBtn');
+    message.className='alert alert-info mb-2';
+    message.innerHTML='<div class="spinner-border spinner-border-sm me-2"></div>Wait... creating alignment block...';
+    button.disabled=true;
+
+    setTimeout(function(){
+        const block=buildAlignmentBlock(header,reference,sequence,chain,start);
+        alignmentBlocks.push(block);
+        renderAlignments(alignmentBlocks);
+        initializeTooltips();
+        initializeChainPopovers();
+        const card=document.getElementById(block.header.replace(/\|/g,'_'));
+        if(card){
+            card.scrollIntoView({
+                behavior:'smooth',
+                block:'start'
+            });
+        }
+        bootstrap.Modal.getInstance(document.getElementById('createAlignmentBlockModal')).hide();
+        message.className='alert alert-info mb-0';
+        message.innerHTML='Fill in the information below to create a new alignment block.';
+        button.disabled=false;
+        alert('Alignment block successfully created.');
+    },10);
+}
+
+function buildAlignmentBlock(header, reference, sequence, chain, start){
+    const length = reference.length;
+    const aligned = Array(length).fill('-');
+    const firstColumn = start - 1;
+    for(let i = 0; i < sequence.length; i++){
+        const column = firstColumn + i;
+        if(column >= length){ break; }
+        aligned[column] = sequence[i];
+    }
+    const lastColumn = Math.min(firstColumn + sequence.length - 1, length - 1);
+    return {
+        header:
+            '>' + header, lines:[
+                '>' + header,
+                buildRuler(length), 
+                reference, 
+                '', 
+                aligned.join(''), 
+                rebuildCoordinateLine(
+                    length, 1, Math.min(sequence.length, lastColumn - firstColumn + 1), firstColumn, lastColumn
+                ), 
+                buildChainLine(length, chain, firstColumn, lastColumn), 
+                '', 
+                `fragments chains: ${chain}`, 
+                '#'.repeat(length)
+            ]
+    };
+} 
+
+function buildRuler(length){
+    let numbers = Array(length).fill(' ');
+    numbers[0] = '1';
+    for(let pos = 10; pos <= length; pos += 10){
+        const text = String(pos);
+        const start = pos - text.length;
+        for(let i = 0; i < text.length; i++){
+            numbers[start + i] = text[i];
+        }
+    }
+    return numbers.join('');
+} 
+
+function deleteAlignmentBlock(){
+    const message=document.getElementById('deleteBlockMessage');
+    const button=document.getElementById('confirmDeleteBlockBtn');
+    message.className='alert alert-danger mb-0';
+    message.innerHTML='<div class="spinner-border spinner-border-sm me-2"></div>Wait... deleting alignment block.';
+    button.disabled=true;
+    setTimeout(function(){
+        alignmentBlocks.splice(selectedBlockForDeletion,1);
+        renderAlignments(alignmentBlocks);
+        initializeTooltips();
+        initializeChainPopovers();
+        bootstrap.Modal.getInstance(document.getElementById('deleteBlockModal')).hide();
+        selectedBlockForDeletion=null;
+        message.className='alert alert-danger mb-0';
+        message.innerHTML='<i class="bi bi-exclamation-triangle-fill"></i> This action cannot be undone.<br>Do you really want to delete this alignment block?';
+        button.disabled=false;
+    },10);
 }

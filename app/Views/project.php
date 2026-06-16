@@ -125,8 +125,11 @@
         </tbody>
     </table>
 
-
-    <h2 class="pt-4 pb-2"><strong>Alignments</strong></h2>
+    <div class="row">
+        <div class="col"><h2 class="pt-4 pb-1"><strong>Alignments</strong></h2></div>
+        <div class="col text-end mt-4 pb-2"><button class="btn btn-outline-primary" id="createAlignmentBlockBtn"><i class="bi bi-plus-circle-fill"></i> Add alignment block</button></div>
+    </div>
+    
     <script>
         const projectId = "<?= esc($id) ?>";
         const base_url = "<?= base_url() ?>";
@@ -162,6 +165,9 @@
     <?= $this->include('modal/view_hmm_fasta') ?>
     <?= $this->include('modal/add_alignment') ?>
     <?= $this->include('modal/remove_alignment') ?>
+    <?= $this->include('modal/create_block') ?>
+    <?= $this->include('modal/delete_block') ?>
+
 
 <?php endif; ?>
 
