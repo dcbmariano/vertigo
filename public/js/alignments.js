@@ -463,7 +463,7 @@ function getResidueColor(referenceAA, currentAA) {
     if (referenceAA === '-' || currentAA === '-') return '#FFFFFF';
     if (referenceAA === currentAA) return '#00BFFF';
     for (const group of Object.values(aaGroups)) {
-        if (group.includes(referenceAA) && group.includes(currentAA)) return '#87CEFA';
+        if (group.includes(referenceAA) && group.includes(currentAA)) return '#9fbad5';
     }
     return '#FF6347';
 }
@@ -481,11 +481,11 @@ function computeColumnColors(block) {
             if (!aa || aa === '-') continue;
             const color = getResidueColor(refAA, aa);
             if (color === '#00BFFF') identical++;
-            else if (color === '#87CEFA') similar++;
+            else if (color === '#9fbad5') similar++;
             else different++;
         }
         if (identical > 0) colors[col] = '#00BFFF';
-        else if (similar > 0) colors[col] = '#87CEFA';
+        else if (similar > 0) colors[col] = '#9fbad5';
         else if (different > 0) colors[col] = '#FF6347';
     }
     return colors;
@@ -674,7 +674,7 @@ function computeAlignmentStatistics(block) {
 
     columnColors.forEach(color => {
         if (color === '#00BFFF') matches++;
-        else if (color === '#87CEFA') positives++;
+        else if (color === '#9fbad5') positives++;
         else if (color === '#FF6347') mismatches++;
     });
 
@@ -1111,7 +1111,7 @@ function openCreateAlignmentBlockModal() {
     document.getElementById('newBlockHeader').value='';
     document.getElementById('newBlockSequence').value='';
     document.getElementById('newBlockStart').value='1';
-    
+
     const message=document.getElementById('createBlockMessage');
     message.className='alert alert-secondary mb-2';
     message.innerHTML='Fill in the information below to create a new alignment block.';
