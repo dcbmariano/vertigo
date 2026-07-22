@@ -8,12 +8,50 @@ class Project extends BaseController
     {
         $dados['id'] = $id;
         $dados['ready'] = false;
+        $dados['structure'] = null;
+        $dados['structureFormat'] = null;
 
         if (file_exists('./data/' . $id . '/alignments.txt')) {
             $dados['ready'] = true;
             $dados['results'] = Project::loadResults($id);
+
+            $structure = Project::findStructure(
+                './data/' . $id . '/structure',
+                '/data/' . $id . '/structure'
+            );
+            $dados['structure'] = $structure['path'];
+            $dados['structureFormat'] = $structure['format'];
         }
         return view('project', $dados);
+    }
+
+    /**
+     * Locate the uploaded structure file (PDB/CIF) inside $dir and return the
+     * web path fragment (relative to base_url) plus the 3Dmol format string.
+     */
+    private function findStructure($dir, $urlBase)
+    {
+        $result = ['path' => null, 'format' => null];
+
+        if (!is_dir($dir)) {
+            return $result;
+        }
+
+        foreach (glob($dir . '/*') as $path) {
+            $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+            if (in_array($ext, ['cif', 'mmcif'])) {
+                $format = 'cif';
+            } elseif (in_array($ext, ['pdb', 'ent'])) {
+                $format = 'pdb';
+            } else {
+                continue;
+            }
+            $result['path'] = $urlBase . '/' . rawurlencode(basename($path));
+            $result['format'] = $format;
+            return $result;
+        }
+
+        return $result;
     }
 
 
@@ -108,6 +146,10 @@ class Project extends BaseController
     {
         $dados['id'] = 'Example';
         $dados['ready'] = true;
+
+        $structure = Project::findStructure('./example/structure', '/example/structure');
+        $dados['structure'] = $structure['path'];
+        $dados['structureFormat'] = $structure['format'];
 
         if (file_exists('./example/alignments.txt')) {
 

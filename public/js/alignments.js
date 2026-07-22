@@ -1,6 +1,7 @@
 // alignments.js - variáveis
 let selection = { start: null, end: null, residues: [] };
 let isSelecting = false;
+let drag = null;
 let originalAlignmentText = '';
 let alignmentBlocks = [];
 let selectedBlockForRemoval = null;
@@ -30,8 +31,8 @@ document.getElementById('deleteSelectionBtn').addEventListener('click', deleteSe
 document.getElementById('expandSequencesBtn').addEventListener('click', expandAllSequences);
 document.getElementById('moveLeftBtn').addEventListener('click', moveSelectionLeft);
 document.getElementById('moveRightBtn').addEventListener('click', moveSelectionRight);
-document.getElementById('confirmAddAlignmentBtn').addEventListener('click', addAlignment);
-document.getElementById('confirmRemoveAlignmentBtn').addEventListener('click', removeAlignment);
+document.getElementById('confirmAddAlignmentBtn').addEventListener('click', addChain);
+document.getElementById('confirmRemoveAlignmentBtn').addEventListener('click', removeChain);
 document.getElementById('newAlignmentChain').addEventListener('change', updateSelectedChainPreview);
 document.getElementById('createAlignmentBlockBtn').addEventListener('click', openCreateAlignmentBlockModal);
 document.getElementById('newBlockChain').addEventListener('change', updateCreateBlockPreview);
@@ -92,7 +93,7 @@ document.addEventListener('click', event => {
     if (!fragmentsLine) return;
     const chains = fragmentsLine.replace('fragments chains:', '').split(',').map(c => c.trim()).filter(Boolean);
     if (chains.length <= 1) {
-        alert('The last alignment cannot be removed.');
+        alert('The last chain cannot be removed.');
         return;
     }
     const select = document.getElementById('alignmentToRemove');
@@ -133,6 +134,11 @@ function renderAlignments(blocks) {
     blocks.forEach((block, blockIndex) => {
         container.appendChild(createAlignmentCard(block, blockIndex));
     });
+    // Keep the hits table's Identity/Positives/Coverage in sync with the
+    // current alignment state (initial load, expand, add/remove chain, edits).
+    if (typeof updateHitsTable === 'function') {
+        updateHitsTable();
+    }
 }
 
 function shouldRemoveConsensusLine(index, totalLines) {
@@ -159,9 +165,11 @@ function createAlignmentCard(block, blockIndex) {
         <div class="row small pt-2">
             <div class="col-6">
                 <h6 class="card-title">
+                    <span class="badge bg-primary me-1">${blockIndex + 1}</span>
                     <strong class="pt-1 me-2">${block.header}</strong>
-                    <button type="button" class="btn btn-outline-primary btn-sm btn-sm add-alignment-btn" data-block="${blockIndex}"><i class="bi bi-plus-circle-fill"></i> Add alignment</button>
-                    <button type="button" class="btn btn-outline-danger btn-sm remove-alignment-btn" data-block="${blockIndex}"><i class="bi bi-dash-circle-fill"></i> Remove alignment</button>
+                    <br><br>
+                    <button type="button" class="btn btn-outline-primary btn-sm btn-sm add-alignment-btn" data-block="${blockIndex}"><i class="bi bi-plus-circle-fill"></i> Add chain</button>
+                    <button type="button" class="btn btn-outline-danger btn-sm remove-alignment-btn" data-block="${blockIndex}"><i class="bi bi-dash-circle-fill"></i> Remove chain</button>
                     <button type="button" class="btn btn-danger btn-sm delete-block-btn" data-block="${blockIndex}"><i class="bi bi-trash-fill"></i> Delete block</button>
                 </h6>
             </div>
@@ -300,11 +308,18 @@ function initializeSelection() {
     document.addEventListener('mousedown', startSelection);
     document.addEventListener('mouseover', updateSelection);
     document.addEventListener('mouseup', finishSelection);
+    document.addEventListener('mousemove', dragMove);
+    document.addEventListener('mouseup', dragEnd);
 }
 
 function startSelection(event) {
     /* Responsável por iniciar a seleção */
     if (!event.target.classList.contains('aa')) return;
+    // Clicking on an existing selection drags it instead of starting a new one.
+    if (event.target.classList.contains('selected') && selection.residues.length > 0) {
+        startDrag(event);
+        return;
+    }
     clearSelection();
     isSelecting = true;
     selection.start = event.target;
@@ -688,6 +703,79 @@ function computeAlignmentStatistics(block) {
     };
 }
 
+function computeChainStatistics(reference, fragmentSequence, chain) {
+    /**
+     * Per-chain (per-fragment) identity/positives/coverage, matching the hits
+     * table. Identity and positives are over the aligned columns; coverage is
+     * the share of the full fragment sequence that is aligned. Uses the same
+     * colour logic as the alignment display, so the numbers stay consistent
+     * with what the user sees (and update when the alignment is edited).
+     */
+    let matches = 0, positives = 0, mismatches = 0, alignedResidues = 0;
+
+    for (let col = 0; col < fragmentSequence.length; col++) {
+        const aa = fragmentSequence[col];
+        if (!aa || !/[A-Za-z]/.test(aa)) continue;
+        alignedResidues++;
+        const refAA = col < reference.length ? reference[col] : '-';
+        const color = getResidueColor(refAA, aa);
+        if (color === '#00BFFF') matches++;
+        else if (color === '#9fbad5') positives++;
+        else if (color === '#FF6347') mismatches++;
+    }
+
+    const alignedCols = matches + positives + mismatches;
+    const fullLength = (typeof fastaSequences !== 'undefined' && fastaSequences[chain])
+        ? fastaSequences[chain].length
+        : alignedResidues;
+
+    return {
+        identity: alignedCols > 0 ? (matches / alignedCols) * 100 : 0,
+        positives: alignedCols > 0 ? ((matches + positives) / alignedCols) * 100 : 0,
+        coverage: fullLength > 0 ? Math.min(100, (alignedResidues / fullLength) * 100) : 0
+    };
+}
+
+function computeAllChainStatistics() {
+    /** Map of chain -> {block, identity, positives, coverage} for every fragment.
+     *  `block` is the 1-based id of the alignment block that contains the chain. */
+    const stats = {};
+    alignmentBlocks.forEach((block, blockIndex) => {
+        const reference = block.lines[2];
+        if (!reference) return;
+        block.lines.forEach((line, idx) => {
+            if (!isChainLine(line)) return;
+            const match = line.match(/([A-Za-z0-9_]+)<-/);
+            const fragSeq = block.lines[idx - 2];
+            if (!match || fragSeq === undefined) return;
+            const s = computeChainStatistics(reference, fragSeq, match[1]);
+            s.block = blockIndex + 1;
+            stats[match[1]] = s;
+        });
+    });
+    return stats;
+}
+
+function updateHitsTable() {
+    /** Refresh the block-id (#) and Identity/Positives/Coverage columns. */
+    const dt = window.hitsDataTable;
+    if (!dt) return;
+
+    const stats = computeAllChainStatistics();
+    dt.rows().every(function () {
+        const node = this.node();
+        const chain = node && node.getAttribute('data-chain');
+        const s = chain && stats[chain];
+        if (!s) return;
+        const rowIdx = this.index();
+        dt.cell(rowIdx, 0).data(s.block);
+        dt.cell(rowIdx, 4).data(s.identity.toFixed(1));
+        dt.cell(rowIdx, 5).data(s.positives.toFixed(1));
+        dt.cell(rowIdx, 6).data(s.coverage.toFixed(1));
+    });
+    dt.draw(false);
+}
+
 function updateChainLine(blockIndex, lineIndex) {
     const chainIndex = lineIndex + 2;
     const originalBlocks = parseAlignments(originalAlignmentText);
@@ -817,67 +905,60 @@ ${sequence}
 }
 
 function expandAllSequences() {
-    alignmentBlocks.forEach(
-        (block, blockIndex) => {
-            for (let chainIndex = 0; chainIndex < block.lines.length; chainIndex++) {
-                if (!isChainLine(block.lines[chainIndex])) {
-                    continue;
-                }
+    /**
+     * Lays out every fragment's full sequence (first residue to last) as a
+     * single contiguous run, keeping its current anchor position. This rebuilds
+     * the sequence line from scratch, so it works even on sequences that were
+     * edited/moved (any internal gaps or edits are reset to the full sequence).
+     */
+    alignmentBlocks.forEach((block, blockIndex) => {
+        for (let chainIndex = 0; chainIndex < block.lines.length; chainIndex++) {
+            if (!isChainLine(block.lines[chainIndex])) continue;
 
-                const coordinateIndex = chainIndex - 1;
-                const sequenceIndex = chainIndex - 2;
+            const coordinateIndex = chainIndex - 1;
+            const sequenceIndex = chainIndex - 2;
+            if (sequenceIndex < 0 || coordinateIndex < 0) continue;
 
-                if (sequenceIndex < 0 || coordinateIndex < 0) {
-                    continue;
-                }
-                const sequenceLine = block.lines[sequenceIndex];
-                const coordinateLine = block.lines[coordinateIndex];
-                const chainLine = block.lines[chainIndex];
-                const chainMatch = chainLine.match(/([A-Za-z0-9_]+)<-/);
-                const fullSequence = chainMatch ? fastaSequences[chainMatch[1]] : null;
-                if (!fullSequence) return;
-                const matches = coordinateLine.match(/-?\d+/g);
-                if (!matches || matches.length < 2) return;
-                const start = parseInt(matches[0]);
-                const end = parseInt(matches[1]);
-                const leftExtension = fullSequence.substring(0, start - 1);
-                const rightExtension = fullSequence.substring(end);
+            const sequenceLine = block.lines[sequenceIndex];
+            const coordinateLine = block.lines[coordinateIndex];
+            const chainMatch = block.lines[chainIndex].match(/([A-Za-z0-9_]+)<-/);
+            const fullSequence = chainMatch ? fastaSequences[chainMatch[1]] : null;
+            if (!fullSequence) continue;
 
-                const firstAAColumn = sequenceLine.search(/[A-Za-z]/);
-                const lastAAColumn = sequenceLine.split('').findLastIndex(c => /[A-Za-z]/.test(c));
+            // Anchor: keep the first currently-shown residue where it is.
+            const firstAAColumn = sequenceLine.search(/[A-Za-z]/);
+            if (firstAAColumn < 0) continue; // no residue to anchor on
 
-                let expanded = sequenceLine.split('');
-                let insertedLeft = 0;
-                let insertedRight = 0;
-                for (let i = leftExtension.length - 1; i >= 0; i--) {
-                    const column = firstAAColumn - (leftExtension.length - i);
-                    if (column < 0) break;
-                    expanded[column] = leftExtension[i];
-                    insertedLeft++;
-                }
-                for (let i = 0; i < rightExtension.length; i++) {
-                    const column = lastAAColumn + 1 + i;
-                    if (column >= expanded.length) break;
-                    expanded[column] = rightExtension[i];
-                    insertedRight++;
-                }
-                block.lines[sequenceIndex] = expanded.join('');
-                block.lines[coordinateIndex] = rebuildCoordinateLine(
-                    expanded.length,
-                    start - insertedLeft,
-                    end + insertedRight,
-                    firstAAColumn - insertedLeft,
-                    lastAAColumn + insertedRight
-                );
-                updateChainLine(blockIndex, sequenceIndex);
+            const matches = coordinateLine.match(/-?\d+/g);
+            const start = (matches && matches.length >= 1) ? parseInt(matches[0]) : 1;
+
+            // Column where residue #1 would sit, then place the whole sequence.
+            const anchorCol = firstAAColumn - (start - 1);
+            const width = sequenceLine.length;
+            const expanded = Array(width).fill('-');
+            let newFirstCol = -1, newLastCol = -1, newStart = 1, newEnd = 1;
+
+            for (let r = 1; r <= fullSequence.length; r++) {
+                const col = anchorCol + (r - 1);
+                if (col < 0 || col >= width) continue; // outside the visible columns
+                expanded[col] = fullSequence[r - 1];
+                if (newFirstCol === -1) { newFirstCol = col; newStart = r; }
+                newLastCol = col; newEnd = r;
             }
+            if (newFirstCol === -1) continue; // nothing fit in the column range
+
+            block.lines[sequenceIndex] = expanded.join('');
+            block.lines[coordinateIndex] = rebuildCoordinateLine(
+                width, newStart, newEnd, newFirstCol, newLastCol
+            );
+            updateChainLine(blockIndex, sequenceIndex);
         }
-    );
+    });
 
     renderAlignments(alignmentBlocks);
     initializeTooltips();
     initializeChainPopovers();
-    alert("All sequences aligned were expanded.")
+    alert("All sequences aligned were expanded.");
 }
 
 function rebuildCoordinateLine(lineLength, start, end, firstAAColumn, lastAAColumn) {
@@ -957,6 +1038,94 @@ function moveSelectionRight() {
     clearSelection();
 }
 
+function startDrag(event) {
+    /* Inicia o arraste de uma seleção para reposicioná-la na mesma linha. */
+    event.preventDefault();
+    const first = selection.residues[0];
+    const blockIndex = parseInt(first.dataset.block);
+    const lineIndex = parseInt(first.dataset.line);
+    const columns = selection.residues.map(r => parseInt(r.dataset.column));
+    const start = Math.min(...columns);
+    const end = Math.max(...columns);
+    const chars = alignmentBlocks[blockIndex].lines[lineIndex].split('');
+
+    // How far the fragment can slide: consecutive gaps available on each side.
+    let maxLeft = 0;
+    for (let i = start - 1; i >= 0 && chars[i] === '-'; i--) maxLeft++;
+    let maxRight = 0;
+    for (let i = end + 1; i < chars.length && chars[i] === '-'; i++) maxRight++;
+
+    if (maxLeft === 0 && maxRight === 0) return; // nowhere to slide
+
+    const aaWidth = first.getBoundingClientRect().width || 9;
+
+    drag = {
+        blockIndex, lineIndex, start, end, maxLeft, maxRight, aaWidth,
+        startX: event.clientX, delta: 0,
+        spans: selection.residues.slice()
+    };
+
+    const menu = document.getElementById('selectionMenu');
+    if (menu) menu.style.display = 'none';
+    document.body.style.cursor = 'grabbing';
+    document.body.style.userSelect = 'none';
+}
+
+function dragMove(event) {
+    /* Move visualmente a seleção enquanto o usuário arrasta. */
+    if (!drag) return;
+    let delta = Math.round((event.clientX - drag.startX) / drag.aaWidth);
+    delta = Math.max(-drag.maxLeft, Math.min(drag.maxRight, delta));
+    drag.delta = delta;
+    const px = delta * drag.aaWidth;
+    drag.spans.forEach(function (span) {
+        span.style.position = 'relative';
+        span.style.left = px + 'px';
+        span.style.zIndex = '5';
+    });
+}
+
+function dragEnd() {
+    /* Confirma o arraste: reposiciona o fragmento e recalcula o alinhamento. */
+    if (!drag) return;
+    const d = drag;
+    drag = null;
+    document.body.style.cursor = '';
+    document.body.style.userSelect = '';
+    d.spans.forEach(function (span) {
+        span.style.position = '';
+        span.style.left = '';
+        span.style.zIndex = '';
+    });
+
+    if (d.delta === 0) {
+        clearSelection();
+        return;
+    }
+    moveSelectionBy(d.blockIndex, d.lineIndex, d.start, d.end, d.delta);
+}
+
+function moveSelectionBy(blockIndex, lineIndex, start, end, delta) {
+    /* Desloca o fragmento [start,end] em `delta` colunas (apenas sobre gaps) e
+       recalcula as métricas, do mesmo modo que as setas de mover. */
+    let chars = alignmentBlocks[blockIndex].lines[lineIndex].split('');
+    const fragment = chars.slice(start, end + 1);
+
+    for (let i = start; i <= end; i++) chars[i] = '-';
+    const dest = start + delta;
+    for (let i = 0; i < fragment.length; i++) chars[dest + i] = fragment[i];
+
+    alignmentBlocks[blockIndex].lines[lineIndex] = chars.join('');
+
+    updateCoordinatesAfterMove(blockIndex, lineIndex);
+    updateChainLine(blockIndex, lineIndex);
+
+    renderAlignments(alignmentBlocks);
+    initializeTooltips();
+    initializeChainPopovers();
+    clearSelection();
+}
+
 function updateCoordinatesAfterMove(blockIndex, lineIndex) {
     const coordinateIndex = lineIndex + 1;
     const block = alignmentBlocks[blockIndex];
@@ -974,7 +1143,7 @@ function updateCoordinatesAfterMove(blockIndex, lineIndex) {
     block.lines[coordinateIndex] = rebuildCoordinateLine(sequence.length, start, end, firstAA, lastAA);
 }
 
-function addAlignment() {
+function addChain() {
     const start = parseInt(document.getElementById('newAlignmentStart').value);
     const chain = document.getElementById('newAlignmentChain').value;
     const sequence = fastaSequences[chain];
@@ -1058,7 +1227,7 @@ function updateFragmentsChains(block) {
     }
 }
 
-function removeAlignment() {
+function removeChain() {
     const chainToRemove = document.getElementById('alignmentToRemove').value;
     const block = alignmentBlocks[selectedBlockForRemoval];
     const chainIndex = block.lines.findIndex(line => {
@@ -1066,7 +1235,7 @@ function removeAlignment() {
         return match && match[1] === chainToRemove;
     });
     if (chainIndex < 0) {
-        alert('Alignment not found.'); return;
+        alert('Chain not found.'); return;
     }
     const sequenceIndex = chainIndex - 2;
     const hasBlankLine = sequenceIndex > 0 && block.lines[sequenceIndex - 1].trim() === '';

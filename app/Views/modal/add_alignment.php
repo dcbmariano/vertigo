@@ -3,7 +3,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
-                    Add Alignment
+                    Add Chain
                 </h5>
             </div>
             <div class="modal-body">

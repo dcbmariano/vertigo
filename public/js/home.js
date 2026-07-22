@@ -140,15 +140,15 @@ document.getElementById('uploadForm')
     const rna =
         document.getElementById('rnaInput').files.length;
 
-    const hmm =
-        document.getElementById('hmmInput').files.length;
+    const structure =
+        document.getElementById('structureInput').files.length;
 
-    if(!protein || !hmm){
+    if(!protein || !structure){
 
         e.preventDefault();
 
         alert(
-            'Protein FASTA and HMM files are required.'
+            'Protein FASTA and a structure file (PDB/CIF) are required.'
         );
 
     }

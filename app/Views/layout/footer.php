@@ -24,7 +24,7 @@
     </div> -->
 
     <div class="px-4 d-flex flex-column flex-sm-row justify-content-between py-2 text-secondary ">
-      <p class="px-4 text-center w-100 small">© <?=date('Y')?> | Vertigo v26.608 - Developed by <a href="#" data-bs-toggle="modal" data-bs-target="#about" class="link-light">Hashem's Lab</a>.</p>
+      <p class="px-4 text-center w-100 small">© <?=date('Y')?> | Vertigo v0.26.722 - Developed by <a href="#" data-bs-toggle="modal" data-bs-target="#about" class="link-light">Hashem's Lab</a>.</p>
       <ul class="list-unstyled d-flex">
         <img src="<?= base_url('/img/hamburg.svg') ?>" width="300px">
       </ul>

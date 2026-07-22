@@ -6,3 +6,7 @@ writable/cache
 writable/debugbar
 app/.DS_Store
 public/data
+.DS_Store
+app/.DS_Store
+app/ThirdParty/.DS_Store
+app/Views/.DS_Store

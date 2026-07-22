@@ -25,8 +25,9 @@
         Vertigo assists the modeling and refinement
         of protein–RNA large complexes derived from
         cryo-electron microscopy. The platform
-        performs HMM-based searches against protein
-        and RNA sequence datasets, generating
+        matches the chain fragments of a modeled
+        structure against protein and RNA sequence
+        datasets, generating
         multiple sequence alignments that support
         structure correction and validation.
       </p>
@@ -62,8 +63,8 @@
   <div class="project-card">
     <h2>Run a New Project</h2>
     <p>
-      Upload one or more FASTA files for proteins, RNA sequences,
-      and HMM profiles.
+      Upload the FASTA files for proteins and (optionally) RNA sequences,
+      together with the modeled structure (PDB or CIF).
     </p>
 
     <form
@@ -127,24 +128,23 @@
           </div>
         </div>
 
-        <!-- HMM -->
-        <div class="dropzone" data-input="hmmInput">
-          <h3>HMM Profiles</h3>
-          <p>Drag & drop files or click below</p>
+        <!-- Structure -->
+        <div class="dropzone" data-input="structureInput">
+          <h3>Structure (PDB/CIF)</h3>
+          <p>Drag & drop file or click below</p>
 
           <button type="button" class="btn btn-primary">
-            Select Files
+            Select File
           </button>
 
           <input
             type="file"
-            name="hmm_files[]"
-            id="hmmInput"
-            accept=".hmm"
-            multiple
+            name="structure_files[]"
+            id="structureInput"
+            accept=".pdb,.cif,.mmcif"
             hidden>
 
-          <div class="file-list" id="hmmList"></div>
+          <div class="file-list" id="structureList"></div>
           <div class="upload-actions">
             <button
               type="button"
@@ -155,6 +155,14 @@
         </div>
 
       </div>
+
+      <div class="form-check d-flex justify-content-center align-items-center gap-2 mt-3">
+        <input class="form-check-input" type="checkbox" name="high_sensitivity" value="1" id="highSensitivity">
+        <label class="form-check-label" for="highSensitivity">
+          High sensitivity &mdash; recover more (weaker) matches; may include false positives you can filter by Identity/Coverage.
+        </label>
+      </div>
+
       <div class="submit-area">
         <button type="submit" class="submit-btn">
           Launch Project

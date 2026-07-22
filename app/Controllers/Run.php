@@ -31,14 +31,15 @@ class Run extends BaseController
         mkdir($baseDir);
         mkdir($baseDir . '/proteins');
         mkdir($baseDir . '/rna');
-        mkdir($baseDir . '/hmm');
+        mkdir($baseDir . '/structure');
 
         // recupera uploads
-        $proteinFiles = $this->request->getFiles()['protein_files'] ?? [];
-        $rnaFiles     = $this->request->getFiles()['rna_files'] ?? [];
-        $hmmFiles     = $this->request->getFiles()['hmm_files'] ?? [];
+        $proteinFiles   = $this->request->getFiles()['protein_files'] ?? [];
+        $rnaFiles       = $this->request->getFiles()['rna_files'] ?? [];
+        $structureFiles = $this->request->getFiles()['structure_files'] ?? [];
         $proteinArgs = [];
         $rnaArgs = [];
+        $structurePath = null;
  
         // salva proteínas
         foreach ($proteinFiles as $file) {
@@ -70,16 +71,19 @@ class Run extends BaseController
             }
         }
 
-        // salva HMM
-        foreach ($hmmFiles as $file) {
+        // salva estrutura (PDB/CIF) — usa o primeiro arquivo válido
+        foreach ($structureFiles as $file) {
             if ($file->isValid() && !$file->hasMoved()) {
+                $destino = $baseDir . '/structure/' . $file->getName();
                 $file->move(
-                    $baseDir . '/hmm',
+                    $baseDir . '/structure',
                     $file->getName()
                 );
+                $structurePath = $destino;
+                break;
             }
             else{
-                echo "Maximum File Limit: 1000. File size limit: 200MB. Formats allowed: .hmm";
+                echo "File size limit: 200MB. Formats allowed: .pdb, .cif or .mmcif";
             }
         }
 
@@ -87,7 +91,7 @@ class Run extends BaseController
         $rnaString = implode(' ', $rnaArgs);
 
         // executa pipeline
-        #python hs.py -p data/protein.fasta -r data/rna.fasta -d data/hmm_profiles -o output
+        #python hs.py -p data/protein.fasta -r data/rna.fasta -s data/complex.cif -o output
         $host = $_SERVER['HTTP_HOST'];
         if ($host === 'bioinfo.dcc.ufmg.br') {
             $python = '/home/liase/miniconda3/bin/python';
@@ -95,26 +99,23 @@ class Run extends BaseController
             $python = 'python';
         }
 
+        // RNA é opcional: só inclui -r quando há arquivos de RNA
+        $rnaOption = $rnaString !== '' ? '-r ' . $rnaString . ' ' : '';
+
+        // Alta sensibilidade (opcional): recupera fragmentos fracos/curtos
+        $sensitivityOption = !empty($dados['high_sensitivity']) ? '--high-sensitivity ' : '';
+
         $command =
             'nohup '.$python.' ../app/ThirdParty/hs.py ' .
             '-p ' . $proteinString . ' ' .
-            '-r ' . $rnaString . ' ' .
-            '-d ' . escapeshellarg($baseDir . '/hmm') . ' ' .
+            $rnaOption .
+            $sensitivityOption .
+            '-s ' . escapeshellarg($structurePath) . ' ' .
             '-o ' . escapeshellarg($baseDir) .
             ' > ' . escapeshellarg($baseDir . '/log.txt') .
             ' 2>&1 &';
 
         shell_exec($command);
-
-        // converter hmm para fasta
-        $command2 =
-            'nohup '.$python.' ../app/ThirdParty/hmm_to_fasta.py ' .
-            '-d ' . escapeshellarg($baseDir . '/hmm') . ' ' .
-            '-o ' . escapeshellarg($baseDir) .
-            ' >> ' . escapeshellarg($baseDir . '/log.txt') .
-            ' 2>&1 &';
-
-        shell_exec($command2);
 
         return view('running', $dados);
     }
